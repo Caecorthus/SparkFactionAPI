@@ -4,10 +4,16 @@
   "package": "dev.caecorthus.sparkfactionapi.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "FactionMixin",
     "GameFunctionsMixin",
     "GameSettingsCommandMixin",
     "GameRoundEndComponentMixin",
-    "MurderGameModeMixin"
+    "GunShootPayloadReceiverMixin",
+    "KillerShopBuilderMixin",
+    "MurderGameModeMixin",
+    "PlayerShopComponentMixin",
+    "RoleMixin",
+    "WorldBlackoutComponentMixin"
   ],
   "injectors": {
     "defaultRequire": 1

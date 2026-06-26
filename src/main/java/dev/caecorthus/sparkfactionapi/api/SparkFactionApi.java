@@ -37,6 +37,15 @@ public final class SparkFactionApi {
         return FactionRegistryImpl.resolveBaseFaction(role);
     }
 
+    public static boolean canTarget(
+            PlayerEntity viewer,
+            PlayerEntity target,
+            Identifier targetTag,
+            GameWorldComponent gameComponent
+    ) {
+        return FactionRegistryImpl.canTarget(viewer, target, targetTag, gameComponent);
+    }
+
     public static FactionCapabilities capabilities(Identifier factionId) {
         return FactionRegistryImpl.capabilities(factionId);
     }

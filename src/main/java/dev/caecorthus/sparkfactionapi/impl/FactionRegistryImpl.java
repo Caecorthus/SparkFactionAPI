@@ -100,9 +100,30 @@ public final class FactionRegistryImpl {
                 definition.canSeeTime(),
                 definition.appearanceCondition()
         );
-        WatheRoles.registerRole(role);
         ROLE_FACTIONS.put(role, definition.factionId());
+        try {
+            WatheRoles.registerRole(role);
+        } catch (RuntimeException exception) {
+            ROLE_FACTIONS.remove(role);
+            throw exception;
+        }
         return role;
+    }
+
+    public static boolean isSparkFactionRole(Role role) {
+        return ROLE_FACTIONS.containsKey(role);
+    }
+
+    /**
+     * Keeps SparkFactionAPI roles out of Wathe's built-in faction buckets.
+     * 防止 SparkFactionAPI 角色落入 wathe 原生阵营桶。
+     */
+    public static Optional<Faction> nativeFactionOverride(Role role) {
+        return isSparkFactionRole(role) ? Optional.of(Faction.NONE) : Optional.empty();
+    }
+
+    public static Optional<Boolean> nativeNeutralOverride(Role role) {
+        return isSparkFactionRole(role) ? Optional.of(false) : Optional.empty();
     }
 
     public static Identifier resolveBaseFaction(Role role) {
@@ -138,6 +159,16 @@ public final class FactionRegistryImpl {
         return current;
     }
 
+    public static boolean canTarget(
+            PlayerEntity viewer,
+            PlayerEntity target,
+            Identifier targetTag,
+            GameWorldComponent gameComponent
+    ) {
+        bootstrap();
+        return FactionCapabilityBridge.canTarget(viewer, target, targetTag, gameComponent);
+    }
+
     public static FactionCapabilities capabilities(Identifier factionId) {
         bootstrap();
         return Optional.ofNullable(FACTIONS.get(factionId))
@@ -155,6 +186,11 @@ public final class FactionRegistryImpl {
         return FACTIONS.values().stream()
                 .filter(faction -> !isLegacyFaction(faction.id()))
                 .toList();
+    }
+
+    public static boolean isCustomFaction(Identifier factionId) {
+        bootstrap();
+        return FACTIONS.containsKey(factionId) && !isLegacyFaction(factionId);
     }
 
     public static Collection<Role> getRolesForFaction(Identifier factionId) {

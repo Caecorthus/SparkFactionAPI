@@ -2,14 +2,17 @@ package dev.caecorthus.sparkfactionapi.mixin;
 
 import dev.caecorthus.sparkfactionapi.api.FactionAssignmentPhase;
 import dev.caecorthus.sparkfactionapi.impl.FactionAssignmentService;
+import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.cca.ScoreboardRoleSelectorComponent;
 import dev.doctor4t.wathe.game.gamemode.MurderGameMode;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -79,5 +82,16 @@ public abstract class MurderGameModeMixin {
     ) {
         FactionAssignmentService.assignPhase(world, gameComponent, players, FactionAssignmentPhase.AFTER_NEUTRALS);
         FactionAssignmentService.assignPhase(world, gameComponent, players, FactionAssignmentPhase.BEFORE_CIVILIANS);
+    }
+
+    @Redirect(
+            method = "tickServerGameLoop",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Ldev/doctor4t/wathe/cca/GameWorldComponent;canUseKillerFeatures(Lnet/minecraft/entity/player/PlayerEntity;)Z"
+            )
+    )
+    private boolean sparkfactionapi$usePassiveMoneyCapability(GameWorldComponent gameComponent, PlayerEntity player) {
+        return FactionCapabilityBridge.receivesKillerPassiveMoney(player, gameComponent);
     }
 }
