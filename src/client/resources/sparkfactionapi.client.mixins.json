@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.caecorthus.sparkfactionapi.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "RoundTextRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

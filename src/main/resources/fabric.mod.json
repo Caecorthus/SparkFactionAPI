@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "sparkfactionapi",
+  "version": "${version}",
+  "name": "SparkFactionAPI",
+  "description": "Faction registration and integration API for Spark-era Wathe add-ons.",
+  "authors": [
+    "Caecorthus"
+  ],
+  "license": "AGPL-3.0-only",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.caecorthus.sparkfactionapi.SparkFactionApiMod"
+    ],
+    "client": [
+      "dev.caecorthus.sparkfactionapi.client.SparkFactionApiClient"
+    ],
+    "cardinal-components": [
+      "dev.caecorthus.sparkfactionapi.component.SparkFactionComponents"
+    ]
+  },
+  "mixins": [
+    "sparkfactionapi.mixins.json",
+    {
+      "config": "sparkfactionapi.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "custom": {
+    "cardinal-components": [
+      "sparkfactionapi:round_end"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "~${minecraft_version}",
+    "java": ">=21",
+    "fabric-api": "*",
+    "wathe": ">=${wathe_version}",
+    "cardinal-components-base": ">=${cca_version}",
+    "cardinal-components-scoreboard": ">=${cca_version}"
+  }
+}

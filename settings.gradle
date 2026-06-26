@@ -1,0 +1,16 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = "Fabric"
+            url = "https://maven.fabricmc.net/"
+        }
+        mavenCentral()
+        maven {
+            name = "Mojang Libraries"
+            url = "https://libraries.minecraft.net/"
+        }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = "SparkFactionAPI"
