@@ -43,6 +43,7 @@ class FactionCapabilityBridgeTest {
         assertFalse(FactionCapabilityBridge.receivesKillReward(role));
         assertFalse(FactionCapabilityBridge.isPunishableInnocentGunVictim(role));
         assertFalse(FactionCapabilityBridge.isPunishableInnocentGunShooter(role));
+        assertFalse(FactionCapabilityBridge.consumesPunishableGunLikeKiller(role));
         assertFalse(FactionCapabilityBridge.sharesCohort(role, role));
         assertFalse(FactionCapabilityBridge.canUseInstinct(role));
         assertFalse(FactionCapabilityBridge.hasBlackoutImmunity(role));
@@ -77,6 +78,25 @@ class FactionCapabilityBridgeTest {
 
         assertTrue(FactionCapabilityBridge.hasBlackoutImmunity(role));
         assertTrue(SparkFactionApi.hasBlackoutImmunity(role));
+        assertFalse(FactionCapabilityBridge.canUseKillerFeatureAccess(role));
+    }
+
+    @Test
+    void customPunishableShooterConsumesGunLikeKillerWithoutKillerFeatureAccess() {
+        Identifier factionId = Identifier.of("sparkwitch", "gun_spend_safe");
+        SparkFactionApi.registerFaction(FactionDefinition.builder(factionId)
+                .capabilities(FactionCapabilities.builder()
+                        .isPunishableInnocentGunShooter(true)
+                        .build())
+                .build());
+        Role role = SparkFactionApi.registerRole(FactionRoleDefinition.builder(
+                        Identifier.of("sparkwitch", "gun_spend_witch"),
+                        factionId
+                )
+                .build());
+
+        assertTrue(FactionCapabilityBridge.isPunishableInnocentGunShooter(role));
+        assertTrue(FactionCapabilityBridge.consumesPunishableGunLikeKiller(role));
         assertFalse(FactionCapabilityBridge.canUseKillerFeatureAccess(role));
     }
 

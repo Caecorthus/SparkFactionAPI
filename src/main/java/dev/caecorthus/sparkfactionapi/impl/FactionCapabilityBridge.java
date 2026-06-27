@@ -143,6 +143,22 @@ public final class FactionCapabilityBridge {
     }
 
     /**
+     * Custom punishable shooters spend revolvers like Wathe killers without entering the native killer bucket.
+     * 自定义阵营的可惩罚开枪者像 wathe 杀手一样消耗左轮，但不进入原生杀手阵营桶。
+     */
+    public static boolean consumesPunishableGunLikeKiller(PlayerEntity player, GameWorldComponent gameComponent) {
+        return canUseKillerFeatureAccess(player, gameComponent)
+                || (hasCustomEffectiveFaction(player, gameComponent)
+                && isPunishableInnocentGunShooter(player, gameComponent));
+    }
+
+    public static boolean consumesPunishableGunLikeKiller(Role role) {
+        Identifier factionId = FactionRegistryImpl.resolveBaseFaction(role);
+        return canUseKillerFeatureAccess(role)
+                || (FactionRegistryImpl.isCustomFaction(factionId) && isPunishableInnocentGunShooter(role));
+    }
+
+    /**
      * Keeps blackout night vision compatible with older killer-feature capability users.
      * 让黑灯夜视兼容旧的杀手功能能力使用者。
      */

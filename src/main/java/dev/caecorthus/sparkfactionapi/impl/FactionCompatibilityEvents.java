@@ -128,7 +128,7 @@ public final class FactionCompatibilityEvents {
 
         Item revolver = WatheItems.REVOLVER;
         shooter.getInventory().remove(stack -> stack.isOf(revolver), 1, shooter.getInventory());
-        if (FactionCapabilityBridge.canUseKillerFeatureAccess(shooter, gameComponent)) {
+        if (FactionCapabilityBridge.consumesPunishableGunLikeKiller(shooter, gameComponent)) {
             return;
         }
 
