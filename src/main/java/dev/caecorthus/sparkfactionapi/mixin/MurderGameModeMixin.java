@@ -4,15 +4,16 @@ import dev.caecorthus.sparkfactionapi.api.FactionAssignmentPhase;
 import dev.caecorthus.sparkfactionapi.impl.FactionAssignmentService;
 import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
+import dev.doctor4t.wathe.cca.PlayerShopComponent;
 import dev.doctor4t.wathe.cca.ScoreboardRoleSelectorComponent;
+import dev.doctor4t.wathe.game.GameConstants;
 import dev.doctor4t.wathe.game.gamemode.MurderGameMode;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -84,14 +85,30 @@ public abstract class MurderGameModeMixin {
         FactionAssignmentService.assignPhase(world, gameComponent, players, FactionAssignmentPhase.BEFORE_CIVILIANS);
     }
 
-    @Redirect(
+    @Inject(
             method = "tickServerGameLoop",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Ldev/doctor4t/wathe/cca/GameWorldComponent;canUseKillerFeatures(Lnet/minecraft/entity/player/PlayerEntity;)Z"
-            )
+            at = @At("HEAD")
     )
-    private boolean sparkfactionapi$usePassiveMoneyCapability(GameWorldComponent gameComponent, PlayerEntity player) {
-        return FactionCapabilityBridge.receivesKillerPassiveMoney(player, gameComponent);
+    private void sparkfactionapi$applyCustomPassiveMoney(
+            ServerWorld serverWorld,
+            GameWorldComponent gameComponent,
+            CallbackInfo ci
+    ) {
+        if (gameComponent.getGameStatus() != GameWorldComponent.GameStatus.ACTIVE) {
+            return;
+        }
+        int balanceToAdd = GameConstants.PASSIVE_MONEY_TICKER.apply(serverWorld.getTime());
+        if (balanceToAdd <= 0) {
+            return;
+        }
+        for (ServerPlayerEntity player : serverWorld.getPlayers()) {
+            if (!FactionCapabilityBridge.receivesCustomKillerPassiveMoney(player, gameComponent)) {
+                continue;
+            }
+            PlayerShopComponent shopComponent = PlayerShopComponent.KEY.get(player);
+            if (shopComponent.getBalance() < GameConstants.KILLER_PASSIVE_MONEY_CAP) {
+                shopComponent.addToBalance(balanceToAdd);
+            }
+        }
     }
 }

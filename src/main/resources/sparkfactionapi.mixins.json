@@ -8,7 +8,6 @@
     "GameFunctionsMixin",
     "GameSettingsCommandMixin",
     "GameRoundEndComponentMixin",
-    "GunShootPayloadReceiverMixin",
     "KillerShopBuilderMixin",
     "MurderGameModeMixin",
     "PlayerShopComponentMixin",

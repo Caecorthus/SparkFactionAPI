@@ -1,6 +1,7 @@
 package dev.caecorthus.sparkfactionapi;
 
 import dev.caecorthus.sparkfactionapi.api.SparkFactionApi;
+import dev.caecorthus.sparkfactionapi.impl.FactionCompatibilityEvents;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 
@@ -14,5 +15,6 @@ public final class SparkFactionApiMod implements ModInitializer {
     @Override
     public void onInitialize() {
         SparkFactionApi.bootstrap();
+        FactionCompatibilityEvents.register();
     }
 }

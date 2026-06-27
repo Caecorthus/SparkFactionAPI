@@ -1,8 +1,10 @@
 package dev.caecorthus.sparkfactionapi.impl;
 
+import dev.caecorthus.sparkfactionapi.api.FactionBlackoutCooldownPolicy;
 import dev.caecorthus.sparkfactionapi.api.FactionCapabilities;
 import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionEconomyPolicy;
+import dev.caecorthus.sparkfactionapi.api.FactionGunPunishmentPolicy;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
 import dev.caecorthus.sparkfactionapi.api.FactionTargetEligibility;
 import dev.doctor4t.wathe.api.Role;
@@ -30,6 +32,16 @@ public final class FactionCapabilityBridge {
         return capabilities(player, gameComponent).canUseKillerFeatures();
     }
 
+    /**
+     * True only for custom-faction players that need an additive killer-feature bridge.
+     * 仅在自定义阵营玩家需要追加式杀手功能桥接、且原生 wathe 未处理时为真。
+     */
+    public static boolean hasCustomKillerFeatureAccess(PlayerEntity player, GameWorldComponent gameComponent) {
+        return hasCustomEffectiveFaction(player, gameComponent)
+                && !gameComponent.canUseKillerFeatures(player)
+                && canUseKillerFeatureAccess(player, gameComponent);
+    }
+
     public static boolean receivesKillerPassiveMoney(Role role) {
         return capabilities(role).receivesKillerPassiveMoney();
     }
@@ -41,6 +53,16 @@ public final class FactionCapabilityBridge {
                 gameComponent,
                 capabilities(player, gameComponent).receivesKillerPassiveMoney()
         );
+    }
+
+    /**
+     * Prevents passive-money add-ons from double-paying native or SparkTraits-adjusted killers.
+     * 防止追加被动金钱时重复支付原生杀手或 SparkTraits 已调整过的杀手。
+     */
+    public static boolean receivesCustomKillerPassiveMoney(PlayerEntity player, GameWorldComponent gameComponent) {
+        return hasCustomEffectiveFaction(player, gameComponent)
+                && !gameComponent.canUseKillerFeatures(player)
+                && receivesKillerPassiveMoney(player, gameComponent);
     }
 
     public static boolean receivesKillReward(Role role) {
@@ -56,12 +78,45 @@ public final class FactionCapabilityBridge {
         );
     }
 
+    /**
+     * Restricts direct kill reward compensation to custom factions skipped by Wathe's native path.
+     * 将直接击杀奖励补偿限制在 wathe 原生路径跳过的自定义阵营上。
+     */
+    public static boolean receivesCustomKillReward(PlayerEntity player, GameWorldComponent gameComponent) {
+        return hasCustomEffectiveFaction(player, gameComponent)
+                && !gameComponent.canUseKillerFeatures(player)
+                && receivesKillReward(player, gameComponent);
+    }
+
     public static boolean isPunishableInnocentGunVictim(Role role) {
         return capabilities(role).isPunishableInnocentGunVictim();
     }
 
     public static boolean isPunishableInnocentGunVictim(PlayerEntity player, GameWorldComponent gameComponent) {
-        return capabilities(player, gameComponent).isPunishableInnocentGunVictim();
+        return gunPunishmentDecision(
+                player,
+                FactionGunPunishmentPolicy.Subject.VICTIM,
+                gameComponent,
+                capabilities(player, gameComponent).isPunishableInnocentGunVictim()
+        );
+    }
+
+    /**
+     * Marks custom-faction victims that should trigger innocent-shot punishment additively.
+     * 标记需要追加触发射击无辜惩罚的自定义阵营受击者。
+     */
+    public static boolean isCustomPunishableInnocentGunVictim(PlayerEntity player, GameWorldComponent gameComponent) {
+        return hasCustomEffectiveFaction(player, gameComponent)
+                && !gameComponent.isInnocent(player)
+                && isPunishableInnocentGunVictim(player, gameComponent);
+    }
+
+    public static @Nullable Boolean gunPunishmentOverride(
+            PlayerEntity player,
+            FactionGunPunishmentPolicy.Subject subject,
+            GameWorldComponent gameComponent
+    ) {
+        return firstGunPunishmentPolicyResult(player, subject, gameComponent);
     }
 
     public static boolean isPunishableInnocentGunShooter(Role role) {
@@ -69,7 +124,22 @@ public final class FactionCapabilityBridge {
     }
 
     public static boolean isPunishableInnocentGunShooter(PlayerEntity player, GameWorldComponent gameComponent) {
-        return capabilities(player, gameComponent).isPunishableInnocentGunShooter();
+        return gunPunishmentDecision(
+                player,
+                FactionGunPunishmentPolicy.Subject.SHOOTER,
+                gameComponent,
+                capabilities(player, gameComponent).isPunishableInnocentGunShooter()
+        );
+    }
+
+    /**
+     * Marks custom-faction shooters whose gun punishment should be handled outside native checks.
+     * 标记需要在原生判断外处理枪罚的自定义阵营开枪者。
+     */
+    public static boolean isCustomPunishableInnocentGunShooter(PlayerEntity player, GameWorldComponent gameComponent) {
+        return hasCustomEffectiveFaction(player, gameComponent)
+                && !gameComponent.isInnocent(player)
+                && isPunishableInnocentGunShooter(player, gameComponent);
     }
 
     /**
@@ -91,6 +161,14 @@ public final class FactionCapabilityBridge {
         }
         FactionCapabilities capabilities = capabilities(player, gameComponent);
         return capabilities.hasBlackoutImmunity() || capabilities.canUseKillerFeatures();
+    }
+
+    public static @Nullable Boolean blackoutCooldownOverride(
+            PlayerEntity purchaser,
+            PlayerEntity target,
+            GameWorldComponent gameComponent
+    ) {
+        return firstBlackoutCooldownPolicyResult(purchaser, target, gameComponent);
     }
 
     public static boolean sharesCohort(Role viewerRole, Role targetRole) {
@@ -211,6 +289,16 @@ public final class FactionCapabilityBridge {
         return policyResult == null ? fallback : policyResult;
     }
 
+    private static boolean gunPunishmentDecision(
+            PlayerEntity player,
+            FactionGunPunishmentPolicy.Subject subject,
+            GameWorldComponent gameComponent,
+            boolean fallback
+    ) {
+        Boolean policyResult = firstGunPunishmentPolicyResult(player, subject, gameComponent);
+        return policyResult == null ? fallback : policyResult;
+    }
+
     private static @Nullable Boolean firstEconomyPolicyResult(
             PlayerEntity player,
             FactionEconomyPolicy.RewardKind rewardKind,
@@ -218,6 +306,34 @@ public final class FactionCapabilityBridge {
     ) {
         for (FactionEconomyPolicy policy : FactionRegistryImpl.economyPolicies()) {
             Boolean result = policy.shouldReceiveReward(player, rewardKind, gameComponent);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    private static @Nullable Boolean firstGunPunishmentPolicyResult(
+            PlayerEntity player,
+            FactionGunPunishmentPolicy.Subject subject,
+            GameWorldComponent gameComponent
+    ) {
+        for (FactionGunPunishmentPolicy policy : FactionRegistryImpl.gunPunishmentPolicies()) {
+            Boolean result = policy.isPunishable(player, subject, gameComponent);
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    private static @Nullable Boolean firstBlackoutCooldownPolicyResult(
+            PlayerEntity purchaser,
+            PlayerEntity target,
+            GameWorldComponent gameComponent
+    ) {
+        for (FactionBlackoutCooldownPolicy policy : FactionRegistryImpl.blackoutCooldownPolicies()) {
+            Boolean result = policy.shouldShareCooldown(purchaser, target, gameComponent);
             if (result != null) {
                 return result;
             }

@@ -83,6 +83,14 @@ public final class SparkFactionApi {
         FactionRegistryImpl.registerEconomyPolicy(policy);
     }
 
+    public static void registerGunPunishmentPolicy(FactionGunPunishmentPolicy policy) {
+        FactionRegistryImpl.registerGunPunishmentPolicy(policy);
+    }
+
+    public static void registerBlackoutCooldownPolicy(FactionBlackoutCooldownPolicy policy) {
+        FactionRegistryImpl.registerBlackoutCooldownPolicy(policy);
+    }
+
     public static void registerInstinctPolicy(FactionInstinctPolicy policy) {
         FactionRegistryImpl.registerInstinctPolicy(policy);
     }
