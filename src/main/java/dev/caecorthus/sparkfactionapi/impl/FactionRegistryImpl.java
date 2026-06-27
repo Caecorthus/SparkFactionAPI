@@ -57,6 +57,7 @@ public final class FactionRegistryImpl {
                     .canUseKillerFeatures(true)
                     .receivesKillerPassiveMoney(true)
                     .receivesKillRewards(true)
+                    .hasBlackoutImmunity(true)
                     .sharesCohort(true)
                     .canUseInstinct(true)
                     .instinctColor(0x990000)

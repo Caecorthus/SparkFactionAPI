@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkfactionapi.impl;
 
+import dev.caecorthus.sparkfactionapi.api.FactionCapabilities;
 import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionRoleDefinition;
 import dev.caecorthus.sparkfactionapi.api.SparkFactionApi;
@@ -43,6 +44,7 @@ class FactionCapabilityBridgeTest {
         assertFalse(FactionCapabilityBridge.isPunishableInnocentGunShooter(role));
         assertFalse(FactionCapabilityBridge.sharesCohort(role, role));
         assertFalse(FactionCapabilityBridge.canUseInstinct(role));
+        assertFalse(FactionCapabilityBridge.hasBlackoutImmunity(role));
     }
 
     @Test
@@ -52,9 +54,53 @@ class FactionCapabilityBridgeTest {
         assertTrue(FactionCapabilityBridge.receivesKillReward(WatheRoles.KILLER));
         assertTrue(FactionCapabilityBridge.sharesCohort(WatheRoles.KILLER, WatheRoles.KILLER));
         assertTrue(FactionCapabilityBridge.canUseInstinct(WatheRoles.KILLER));
+        assertTrue(FactionCapabilityBridge.hasBlackoutImmunity(WatheRoles.KILLER));
 
         assertTrue(FactionCapabilityBridge.isPunishableInnocentGunVictim(WatheRoles.CIVILIAN));
         assertTrue(FactionCapabilityBridge.isPunishableInnocentGunShooter(WatheRoles.CIVILIAN));
+    }
+
+    @Test
+    void customFactionCanGrantBlackoutImmunityWithoutKillerFeatures() {
+        Identifier factionId = Identifier.of("sparkwitch", "blackout_safe");
+        SparkFactionApi.registerFaction(FactionDefinition.builder(factionId)
+                .capabilities(FactionCapabilities.builder()
+                        .hasBlackoutImmunity(true)
+                        .build())
+                .build());
+        Role role = SparkFactionApi.registerRole(FactionRoleDefinition.builder(
+                        Identifier.of("sparkwitch", "blackout_safe_witch"),
+                        factionId
+                )
+                .build());
+
+        assertTrue(FactionCapabilityBridge.hasBlackoutImmunity(role));
+        assertTrue(SparkFactionApi.hasBlackoutImmunity(role));
+        assertFalse(FactionCapabilityBridge.canUseKillerFeatureAccess(role));
+    }
+
+    @Test
+    void killerFeatureAccessStillGrantsBlackoutImmunityForCompatibility() {
+        Identifier factionId = Identifier.of("sparkwitch", "legacy_shadow");
+        SparkFactionApi.registerFaction(FactionDefinition.builder(factionId)
+                .capabilities(FactionCapabilities.builder()
+                        .canUseKillerFeatures(true)
+                        .build())
+                .build());
+        Role role = SparkFactionApi.registerRole(FactionRoleDefinition.builder(
+                        Identifier.of("sparkwitch", "legacy_shadow_witch"),
+                        factionId
+                )
+                .build());
+
+        assertTrue(FactionCapabilityBridge.hasBlackoutImmunity(role));
+        assertTrue(SparkFactionApi.hasBlackoutImmunity(role));
+    }
+
+    @Test
+    void playerBlackoutImmunityQueryDefaultsFalseWithoutContext() {
+        assertFalse(FactionCapabilityBridge.hasBlackoutImmunity(null, null));
+        assertFalse(SparkFactionApi.hasBlackoutImmunity(null, null));
     }
 
     @Test
@@ -64,7 +110,7 @@ class FactionCapabilityBridgeTest {
         Identifier targetFaction = Identifier.of("sparkwitch", "hex_target_pool");
         SparkFactionApi.registerFaction(FactionDefinition.builder(viewerFaction).build());
         SparkFactionApi.registerFaction(FactionDefinition.builder(targetFaction)
-                .capabilities(dev.caecorthus.sparkfactionapi.api.FactionCapabilities.builder()
+                .capabilities(FactionCapabilities.builder()
                         .targetTag(targetTag)
                         .build())
                 .build());
@@ -88,7 +134,7 @@ class FactionCapabilityBridgeTest {
         Identifier factionId = Identifier.of("sparkwitch", "purple_sight");
         SparkFactionApi.registerFaction(FactionDefinition.builder(factionId)
                 .color(0x663399)
-                .capabilities(dev.caecorthus.sparkfactionapi.api.FactionCapabilities.builder()
+                .capabilities(FactionCapabilities.builder()
                         .canUseInstinct(true)
                         .build())
                 .build());

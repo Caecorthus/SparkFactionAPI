@@ -72,6 +72,27 @@ public final class FactionCapabilityBridge {
         return capabilities(player, gameComponent).isPunishableInnocentGunShooter();
     }
 
+    /**
+     * Keeps blackout night vision compatible with older killer-feature capability users.
+     * 让黑灯夜视兼容旧的杀手功能能力使用者。
+     */
+    public static boolean hasBlackoutImmunity(Role role) {
+        FactionCapabilities capabilities = capabilities(role);
+        return capabilities.hasBlackoutImmunity() || capabilities.canUseKillerFeatures();
+    }
+
+    /**
+     * Resolves per-player blackout night vision without granting shop, economy, cohort, or instinct access.
+     * 按玩家解析黑灯夜视，不额外授予商店、经济、同伙或直觉能力。
+     */
+    public static boolean hasBlackoutImmunity(PlayerEntity player, GameWorldComponent gameComponent) {
+        if (player == null || gameComponent == null) {
+            return false;
+        }
+        FactionCapabilities capabilities = capabilities(player, gameComponent);
+        return capabilities.hasBlackoutImmunity() || capabilities.canUseKillerFeatures();
+    }
+
     public static boolean sharesCohort(Role viewerRole, Role targetRole) {
         Identifier viewerFaction = FactionRegistryImpl.resolveBaseFaction(viewerRole);
         Identifier targetFaction = FactionRegistryImpl.resolveBaseFaction(targetRole);

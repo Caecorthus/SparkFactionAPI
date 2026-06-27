@@ -15,6 +15,7 @@ public record FactionCapabilities(
         boolean receivesKillRewards,
         boolean isPunishableInnocentGunVictim,
         boolean isPunishableInnocentGunShooter,
+        boolean hasBlackoutImmunity,
         boolean sharesCohort,
         boolean canUseInstinct,
         int instinctColor,
@@ -39,6 +40,7 @@ public record FactionCapabilities(
                 .receivesKillRewards(receivesKillRewards)
                 .isPunishableInnocentGunVictim(isPunishableInnocentGunVictim)
                 .isPunishableInnocentGunShooter(isPunishableInnocentGunShooter)
+                .hasBlackoutImmunity(hasBlackoutImmunity)
                 .sharesCohort(sharesCohort)
                 .canUseInstinct(canUseInstinct)
                 .instinctColor(instinctColor)
@@ -51,6 +53,7 @@ public record FactionCapabilities(
         private boolean receivesKillRewards;
         private boolean isPunishableInnocentGunVictim;
         private boolean isPunishableInnocentGunShooter;
+        private boolean hasBlackoutImmunity;
         private boolean sharesCohort;
         private boolean canUseInstinct;
         private int instinctColor = -1;
@@ -81,6 +84,11 @@ public record FactionCapabilities(
 
         public Builder isPunishableInnocentGunShooter(boolean isPunishableInnocentGunShooter) {
             this.isPunishableInnocentGunShooter = isPunishableInnocentGunShooter;
+            return this;
+        }
+
+        public Builder hasBlackoutImmunity(boolean hasBlackoutImmunity) {
+            this.hasBlackoutImmunity = hasBlackoutImmunity;
             return this;
         }
 
@@ -117,6 +125,7 @@ public record FactionCapabilities(
                     receivesKillRewards,
                     isPunishableInnocentGunVictim,
                     isPunishableInnocentGunShooter,
+                    hasBlackoutImmunity,
                     sharesCohort,
                     canUseInstinct,
                     instinctColor,

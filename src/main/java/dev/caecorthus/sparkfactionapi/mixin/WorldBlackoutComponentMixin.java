@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * Routes blackout immunity/night vision through killer-feature access.
- * 将黑灯免疫/夜视改为显式杀手功能访问能力。
+ * Routes blackout night vision through the explicit blackout immunity capability.
+ * 将黑灯夜视改为显式熄灯免疫能力。
  */
 @Mixin(WorldBlackoutComponent.class)
 public abstract class WorldBlackoutComponentMixin {
@@ -21,10 +21,10 @@ public abstract class WorldBlackoutComponentMixin {
                     target = "Ldev/doctor4t/wathe/cca/GameWorldComponent;canUseKillerFeatures(Lnet/minecraft/entity/player/PlayerEntity;)Z"
             )
     )
-    private boolean sparkfactionapi$useKillerFeatureAccessCapability(
+    private boolean sparkfactionapi$useBlackoutImmunityCapability(
             GameWorldComponent gameComponent,
             PlayerEntity player
     ) {
-        return FactionCapabilityBridge.canUseKillerFeatureAccess(player, gameComponent);
+        return FactionCapabilityBridge.hasBlackoutImmunity(player, gameComponent);
     }
 }

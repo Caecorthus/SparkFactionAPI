@@ -104,9 +104,19 @@ class FactionRegistryImplTest {
         assertFalse(capabilities.receivesKillRewards());
         assertFalse(capabilities.isPunishableInnocentGunVictim());
         assertFalse(capabilities.isPunishableInnocentGunShooter());
+        assertFalse(capabilities.hasBlackoutImmunity());
         assertFalse(capabilities.sharesCohort());
         assertFalse(capabilities.canUseInstinct());
         assertTrue(capabilities.targetTags().isEmpty());
+    }
+
+    @Test
+    void blackoutImmunityCapabilitySurvivesBuilderCopy() {
+        FactionCapabilities capabilities = FactionCapabilities.builder()
+                .hasBlackoutImmunity(true)
+                .build();
+
+        assertTrue(capabilities.toBuilder().build().hasBlackoutImmunity());
     }
 
     @Test
