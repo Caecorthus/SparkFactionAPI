@@ -22,6 +22,12 @@ public final class SparkFactionApiClient implements ClientModInitializer {
             }
 
             GameWorldComponent gameComponent = GameWorldComponent.KEY.get(viewer.getWorld());
+            if (!FactionCapabilityBridge.shouldUseCustomInstinctHighlight(
+                    GameFunctions.isPlayerPlayingAndAlive(viewer),
+                    GameFunctions.isPlayerSpectatingOrCreative(viewer)
+            )) {
+                return null;
+            }
             return FactionCapabilityBridge.instinctPolicyResult(viewer, target, gameComponent)
                     .map(SparkFactionApiClient::toWatheHighlight)
                     .orElseGet(() -> fallbackInstinctHighlight(viewer, target, gameComponent));

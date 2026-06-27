@@ -183,4 +183,11 @@ class FactionCapabilityBridgeTest {
 
         assertEquals(0x663399, FactionCapabilityBridge.instinctDisplayColor(role));
     }
+
+    @Test
+    void customInstinctHighlightFallsThroughForDeadSpectators() {
+        assertFalse(FactionCapabilityBridge.shouldUseCustomInstinctHighlight(false, true));
+        assertTrue(FactionCapabilityBridge.shouldUseCustomInstinctHighlight(true, false));
+        assertTrue(FactionCapabilityBridge.shouldUseCustomInstinctHighlight(false, false));
+    }
 }
