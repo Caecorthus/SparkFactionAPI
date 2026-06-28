@@ -25,6 +25,13 @@ class MixinCompatibilityTest {
         );
     }
 
+    @Test
+    void clientMixinsDoNotOverlayRoundEndWinText() throws IOException {
+        String clientMixinConfig = readProjectFile("src/client/resources/sparkfactionapi.client.mixins.json");
+
+        assertFalse(clientMixinConfig.contains("RoundTextRendererMixin"));
+    }
+
     private static void assertNoWathePredicateRedirect(String file) throws IOException {
         String source = readProjectFile(file);
         assertFalse(source.contains("@Redirect") && source.contains("canUseKillerFeatures"));
