@@ -28,6 +28,7 @@ import java.util.Optional;
 public final class FactionRegistryImpl {
     private static final Map<Identifier, FactionDefinition> FACTIONS = new LinkedHashMap<>();
     private static final Map<Role, Identifier> ROLE_FACTIONS = new LinkedHashMap<>();
+    private static final Map<Role, Faction> ROLE_NATIVE_FACTIONS = new LinkedHashMap<>();
     private static final List<EffectiveFactionResolver> EFFECTIVE_RESOLVERS = new ArrayList<>();
     private static final List<FactionTargetEligibility> TARGET_ELIGIBILITY = new ArrayList<>();
     private static final List<FactionEconomyPolicy> ECONOMY_POLICIES = new ArrayList<>();
@@ -93,23 +94,26 @@ public final class FactionRegistryImpl {
             throw new IllegalArgumentException("Faction must be registered before roles: " + definition.factionId());
         }
 
-        // Custom faction roles deliberately use neutral-safe wathe booleans.
-        // 自定义阵营角色底层故意使用安全的 wathe 布尔值，真实阵营由本 API 解析。
+        Faction nativeWatheFaction = definition.nativeWatheFaction();
+        // Roles opt into native Wathe buckets only when explicitly requested by the registering mod.
+        // 只有注册方显式声明时，角色才进入 wathe 原生阵营桶。
         Role role = new Role(
                 definition.roleId(),
                 definition.color(),
-                false,
-                false,
+                nativeWatheFaction == Faction.CIVILIAN,
+                nativeWatheFaction == Faction.KILLER,
                 definition.moodType(),
                 definition.maxSprintTime(),
                 definition.canSeeTime(),
                 definition.appearanceCondition()
         );
         ROLE_FACTIONS.put(role, definition.factionId());
+        ROLE_NATIVE_FACTIONS.put(role, nativeWatheFaction);
         try {
             WatheRoles.registerRole(role);
         } catch (RuntimeException exception) {
             ROLE_FACTIONS.remove(role);
+            ROLE_NATIVE_FACTIONS.remove(role);
             throw exception;
         }
         return role;
@@ -124,11 +128,18 @@ public final class FactionRegistryImpl {
      * 防止 SparkFactionAPI 角色落入 wathe 原生阵营桶。
      */
     public static Optional<Faction> nativeFactionOverride(Role role) {
-        return isSparkFactionRole(role) ? Optional.of(Faction.NONE) : Optional.empty();
+        return nativeWatheFaction(role)
+                .filter(faction -> faction == Faction.NONE);
     }
 
     public static Optional<Boolean> nativeNeutralOverride(Role role) {
-        return isSparkFactionRole(role) ? Optional.of(false) : Optional.empty();
+        return nativeWatheFaction(role)
+                .filter(faction -> faction == Faction.NONE)
+                .map(faction -> false);
+    }
+
+    private static Optional<Faction> nativeWatheFaction(Role role) {
+        return Optional.ofNullable(ROLE_NATIVE_FACTIONS.get(role));
     }
 
     public static Identifier resolveBaseFaction(Role role) {
@@ -256,6 +267,7 @@ public final class FactionRegistryImpl {
     static void clearForTests() {
         FACTIONS.clear();
         ROLE_FACTIONS.clear();
+        ROLE_NATIVE_FACTIONS.clear();
         EFFECTIVE_RESOLVERS.clear();
         TARGET_ELIGIBILITY.clear();
         ECONOMY_POLICIES.clear();

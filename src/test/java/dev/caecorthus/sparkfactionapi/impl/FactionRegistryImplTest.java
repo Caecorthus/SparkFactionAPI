@@ -93,6 +93,26 @@ class FactionRegistryImplTest {
     }
 
     @Test
+    void customRolesCanOptIntoNativeWatheCivilianPool() {
+        Identifier factionId = FactionIds.CIVILIAN;
+
+        Role passengerSpecialist = SparkFactionApi.registerRole(FactionRoleDefinition.builder(
+                        Identifier.of("sparkwitch", "passenger_specialist"),
+                        factionId
+                )
+                .nativeWatheFaction(Faction.CIVILIAN)
+                .build());
+        List<Role> roles = List.of(WatheRoles.CIVILIAN, passengerSpecialist);
+
+        assertEquals(factionId, SparkFactionApi.resolveBaseFaction(passengerSpecialist));
+        assertTrue(passengerSpecialist.isInnocent());
+        assertFalse(passengerSpecialist.canUseKiller());
+        assertTrue(FactionRegistryImpl.nativeFactionOverride(passengerSpecialist).isEmpty());
+        assertTrue(FactionRegistryImpl.nativeNeutralOverride(passengerSpecialist).isEmpty());
+        assertTrue(containsNativePoolRole(roles, passengerSpecialist, Faction.CIVILIAN));
+    }
+
+    @Test
     void customFactionCapabilitiesDefaultOff() {
         Identifier witchFaction = Identifier.of("sparkwitch", "silent_witch");
         SparkFactionApi.registerFaction(FactionDefinition.builder(witchFaction).build());

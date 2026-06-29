@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkfactionapi.api;
 
+import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.api.RoleAppearanceCondition;
 import net.minecraft.util.Identifier;
@@ -13,13 +14,15 @@ public record FactionRoleDefinition(
         Role.MoodType moodType,
         int maxSprintTime,
         boolean canSeeTime,
-        RoleAppearanceCondition appearanceCondition
+        RoleAppearanceCondition appearanceCondition,
+        Faction nativeWatheFaction
 ) {
     public FactionRoleDefinition {
         Objects.requireNonNull(roleId, "roleId");
         Objects.requireNonNull(factionId, "factionId");
         moodType = moodType == null ? Role.MoodType.NONE : moodType;
         appearanceCondition = appearanceCondition == null ? RoleAppearanceCondition.ALWAYS : appearanceCondition;
+        nativeWatheFaction = nativeWatheFaction == null ? Faction.NONE : nativeWatheFaction;
     }
 
     public static Builder builder(Identifier roleId, Identifier factionId) {
@@ -34,6 +37,7 @@ public record FactionRoleDefinition(
         private int maxSprintTime = -1;
         private boolean canSeeTime;
         private RoleAppearanceCondition appearanceCondition = RoleAppearanceCondition.ALWAYS;
+        private Faction nativeWatheFaction = Faction.NONE;
 
         private Builder(Identifier roleId, Identifier factionId) {
             this.roleId = roleId;
@@ -65,6 +69,11 @@ public record FactionRoleDefinition(
             return this;
         }
 
+        public Builder nativeWatheFaction(Faction nativeWatheFaction) {
+            this.nativeWatheFaction = nativeWatheFaction;
+            return this;
+        }
+
         public FactionRoleDefinition build() {
             return new FactionRoleDefinition(
                     roleId,
@@ -73,7 +82,8 @@ public record FactionRoleDefinition(
                     moodType,
                     maxSprintTime,
                     canSeeTime,
-                    appearanceCondition
+                    appearanceCondition,
+                    nativeWatheFaction
             );
         }
     }
