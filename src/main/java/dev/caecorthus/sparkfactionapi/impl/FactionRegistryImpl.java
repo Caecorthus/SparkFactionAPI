@@ -95,8 +95,8 @@ public final class FactionRegistryImpl {
         }
 
         Faction nativeWatheFaction = definition.nativeWatheFaction();
-        // Roles opt into native Wathe buckets only when explicitly requested by the registering mod.
-        // 只有注册方显式声明时，角色才进入 wathe 原生阵营桶。
+        // Custom factions keep their real Identifier in SparkFactionAPI while Wathe sees their native bucket.
+        // 自定义阵营的真实 Identifier 由 SparkFactionAPI 保存，wathe 只读取它们的原生阵营桶。
         Role role = new Role(
                 definition.roleId(),
                 definition.color(),
@@ -124,18 +124,19 @@ public final class FactionRegistryImpl {
     }
 
     /**
-     * Keeps SparkFactionAPI roles out of Wathe's built-in faction buckets.
-     * 防止 SparkFactionAPI 角色落入 wathe 原生阵营桶。
+     * Makes default SparkFactionAPI roles visible to Wathe as neutral instead of NONE.
+     * 让默认 SparkFactionAPI 角色在 wathe 侧显示为中立阵营，而不是 NONE。
      */
     public static Optional<Faction> nativeFactionOverride(Role role) {
         return nativeWatheFaction(role)
-                .filter(faction -> faction == Faction.NONE);
+                .filter(faction -> faction == Faction.NONE)
+                .map(faction -> Faction.NEUTRAL);
     }
 
     public static Optional<Boolean> nativeNeutralOverride(Role role) {
         return nativeWatheFaction(role)
                 .filter(faction -> faction == Faction.NONE)
-                .map(faction -> false);
+                .map(faction -> true);
     }
 
     private static Optional<Faction> nativeWatheFaction(Role role) {

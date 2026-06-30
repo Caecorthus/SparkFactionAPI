@@ -59,29 +59,29 @@ class FactionRegistryImplTest {
     }
 
     @Test
-    void customRolesOverrideTheirNativeWatheFactionToNone() {
-        Identifier witchFaction = Identifier.of("sparkwitch", "native_none");
+    void customRolesExposeNeutralNativeWatheFaction() {
+        Identifier witchFaction = Identifier.of("sparkwitch", "native_neutral");
         SparkFactionApi.registerFaction(FactionDefinition.builder(witchFaction).build());
 
         Role witch = SparkFactionApi.registerRole(FactionRoleDefinition.builder(
-                        Identifier.of("sparkwitch", "native_none_witch"),
+                        Identifier.of("sparkwitch", "native_neutral_witch"),
                         witchFaction
                 )
                 .build());
 
         assertEquals(witchFaction, SparkFactionApi.resolveBaseFaction(witch));
-        assertEquals(Faction.NONE, FactionRegistryImpl.nativeFactionOverride(witch).orElseThrow());
-        assertFalse(FactionRegistryImpl.nativeNeutralOverride(witch).orElseThrow());
+        assertEquals(Faction.NEUTRAL, FactionRegistryImpl.nativeFactionOverride(witch).orElseThrow());
+        assertTrue(FactionRegistryImpl.nativeNeutralOverride(witch).orElseThrow());
         assertTrue(FactionRegistryImpl.nativeFactionOverride(WatheRoles.LOOSE_END).isEmpty());
     }
 
     @Test
-    void customRolesAreExcludedFromSimulatedNativeWatheRolePools() {
-        Identifier witchFaction = Identifier.of("sparkwitch", "pool_safe");
+    void customRolesParticipateInSimulatedNativeNeutralRolePool() {
+        Identifier witchFaction = Identifier.of("sparkwitch", "pool_visible");
         SparkFactionApi.registerFaction(FactionDefinition.builder(witchFaction).build());
 
         Role witch = SparkFactionApi.registerRole(FactionRoleDefinition.builder(
-                        Identifier.of("sparkwitch", "pool_safe_witch"),
+                        Identifier.of("sparkwitch", "pool_visible_witch"),
                         witchFaction
                 )
                 .build());
@@ -89,7 +89,7 @@ class FactionRegistryImplTest {
 
         assertFalse(containsNativePoolRole(roles, witch, Faction.CIVILIAN));
         assertFalse(containsNativePoolRole(roles, witch, Faction.KILLER));
-        assertFalse(containsNativePoolRole(roles, witch, Faction.NEUTRAL));
+        assertTrue(containsNativePoolRole(roles, witch, Faction.NEUTRAL));
     }
 
     @Test
