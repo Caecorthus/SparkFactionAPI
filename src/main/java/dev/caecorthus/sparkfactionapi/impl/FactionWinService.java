@@ -9,7 +9,6 @@ import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.game.GameFunctions;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 
@@ -19,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 public final class FactionWinService {
     private static boolean registered;
@@ -67,7 +67,7 @@ public final class FactionWinService {
         }
         if (result.type() == FactionWinResult.Type.FACTION_WIN && result.winningFaction() != null) {
             Identifier winningFaction = result.winningFaction();
-            roundEnd.setCustomWin(winningFaction, collectLivingFactionMembers(world, gameComponent, winningFaction));
+            roundEnd.setCustomWin(winningFaction, collectFactionWinners(world, gameComponent, winningFaction));
             return CheckWinCondition.WinResult.allow(GameFunctions.WinStatus.NEUTRAL);
         }
 
@@ -97,31 +97,29 @@ public final class FactionWinService {
                 : FactionWinResult.factionWin(firstWinningFaction);
     }
 
-    public static Set<UUID> collectLivingFactionMembers(
+    public static Set<UUID> collectFactionWinners(
             ServerWorld world,
             GameWorldComponent gameComponent,
             Identifier factionId
     ) {
-        LinkedHashSet<UUID> winners = new LinkedHashSet<>();
-        for (ServerPlayerEntity player : world.getPlayers()) {
-            if (!GameFunctions.isPlayerPlayingAndAlive(player) || !gameComponent.hasAnyRole(player)) {
-                continue;
+        return collectFactionWinners(gameComponent.getAllPlayers(), uuid -> {
+            PlayerEntity player = world.getPlayerByUuid(uuid);
+            if (player != null && gameComponent.hasAnyRole(player)) {
+                return FactionRegistryImpl.resolveEffectiveFaction(player, gameComponent);
             }
-            if (FactionRegistryImpl.resolveEffectiveFaction(player, gameComponent).equals(factionId)) {
-                winners.add(player.getUuid());
-            }
-        }
+            return FactionRegistryImpl.resolveBaseFaction(gameComponent.getRole(uuid));
+        }, factionId);
+    }
 
-        // If every member died at win resolution time, still mark same-faction registered players.
-        // 如果胜利结算时成员已死亡，仍按本局角色记录标记同阵营成员，避免团队胜利丢失。
-        if (winners.isEmpty()) {
-            for (UUID uuid : gameComponent.getAllPlayers()) {
-                PlayerEntity player = world.getPlayerByUuid(uuid);
-                if (player != null && FactionRegistryImpl.resolveEffectiveFaction(player, gameComponent).equals(factionId)) {
-                    winners.add(uuid);
-                } else if (FactionRegistryImpl.resolveBaseFaction(gameComponent.getRole(uuid)).equals(factionId)) {
-                    winners.add(uuid);
-                }
+    static Set<UUID> collectFactionWinners(
+            Iterable<UUID> roundPlayers,
+            Function<UUID, Identifier> factionResolver,
+            Identifier factionId
+    ) {
+        LinkedHashSet<UUID> winners = new LinkedHashSet<>();
+        for (UUID uuid : roundPlayers) {
+            if (factionId.equals(factionResolver.apply(uuid))) {
+                winners.add(uuid);
             }
         }
         return winners;

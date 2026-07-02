@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MixinCompatibilityTest {
     @Test
@@ -26,10 +27,10 @@ class MixinCompatibilityTest {
     }
 
     @Test
-    void clientMixinsDoNotOverlayRoundEndWinText() throws IOException {
+    void clientMixinsRegisterCustomFactionRoundEndTextOverlay() throws IOException {
         String clientMixinConfig = readProjectFile("src/client/resources/sparkfactionapi.client.mixins.json");
 
-        assertFalse(clientMixinConfig.contains("RoundTextRendererMixin"));
+        assertTrue(clientMixinConfig.contains("RoundTextRendererMixin"));
     }
 
     private static void assertNoWathePredicateRedirect(String file) throws IOException {
