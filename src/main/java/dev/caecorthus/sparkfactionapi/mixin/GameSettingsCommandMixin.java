@@ -65,7 +65,7 @@ public abstract class GameSettingsCommandMixin {
 
     private static Text roleText(Role role, boolean enabled) {
         String rolePath = role.identifier().getPath().replace('/', '.').toLowerCase();
-        String command = "/game settings roles " + role.identifier().getPath() + " " + !enabled;
+        String command = roleToggleCommand(role.identifier().getPath(), enabled);
         String hoverKey = enabled
                 ? "commands.wathe.listroles.click_to_disable"
                 : "commands.wathe.listroles.click_to_enable";
@@ -75,6 +75,10 @@ public abstract class GameSettingsCommandMixin {
                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable(hoverKey)))
                         .withUnderline(true));
+    }
+
+    static String roleToggleCommand(String rolePath, boolean enabled) {
+        return "/wathe:gameSettings set enableRole " + rolePath + " " + !enabled;
     }
 
     private static Text enabledText(boolean enabled) {
