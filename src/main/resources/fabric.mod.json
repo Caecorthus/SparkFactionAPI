@@ -37,6 +37,7 @@
     "minecraft": "~${minecraft_version}",
     "java": ">=21",
     "fabric-api": "*",
+    "fabric-permissions-api-v0": "*",
     "wathe": ">=${wathe_version}",
     "cardinal-components-base": ">=${cca_version}",
     "cardinal-components-scoreboard": ">=${cca_version}"

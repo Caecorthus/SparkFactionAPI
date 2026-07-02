@@ -1,8 +1,10 @@
 package dev.caecorthus.sparkfactionapi;
 
 import dev.caecorthus.sparkfactionapi.api.SparkFactionApi;
+import dev.caecorthus.sparkfactionapi.command.SparkFactionAdminCommands;
 import dev.caecorthus.sparkfactionapi.impl.FactionCompatibilityEvents;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.util.Identifier;
 
 public final class SparkFactionApiMod implements ModInitializer {
@@ -16,5 +18,7 @@ public final class SparkFactionApiMod implements ModInitializer {
     public void onInitialize() {
         SparkFactionApi.bootstrap();
         FactionCompatibilityEvents.register();
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+                SparkFactionAdminCommands.register(dispatcher));
     }
 }
