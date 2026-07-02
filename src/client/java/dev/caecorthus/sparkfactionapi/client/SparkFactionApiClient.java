@@ -1,6 +1,7 @@
 package dev.caecorthus.sparkfactionapi.client;
 
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
+import dev.caecorthus.sparkfactionapi.client.net.SparkFactionClientVersionHandshake;
 import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
 import dev.doctor4t.wathe.api.event.GetInstinctHighlight;
 import dev.doctor4t.wathe.api.event.ShouldShowCohort;
@@ -13,6 +14,8 @@ import net.minecraft.entity.player.PlayerEntity;
 public final class SparkFactionApiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        SparkFactionClientVersionHandshake.registerClient();
+
         // Bridge through Wathe's event so other add-ons can still win by priority.
         // 通过 wathe 事件桥接，保留下游模组按优先级覆盖的空间。
         GetInstinctHighlight.EVENT.register(target -> {
