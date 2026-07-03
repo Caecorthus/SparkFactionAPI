@@ -47,6 +47,16 @@ class MixinCompatibilityTest {
         ));
     }
 
+    @Test
+    void packagedJarGuardRequiresClientVersionHandshakeClasses() throws IOException {
+        String buildScript = readProjectFile("build.gradle");
+
+        assertTrue(buildScript.contains("dev/caecorthus/sparkfactionapi/client/SparkFactionApiClient.class"));
+        assertTrue(buildScript.contains(
+                "dev/caecorthus/sparkfactionapi/client/net/SparkFactionClientVersionHandshake.class"
+        ));
+    }
+
     private static void assertNoWathePredicateRedirect(String file) throws IOException {
         String source = readProjectFile(file);
         assertFalse(source.contains("@Redirect") && source.contains("canUseKillerFeatures"));

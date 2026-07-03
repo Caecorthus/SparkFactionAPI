@@ -23,9 +23,19 @@ public final class SparkFactionVersionHandshake {
             return;
         }
         serverRegistered = true;
+        SparkFactionApiMod.LOGGER.info(
+                "Registering SparkFactionAPI login version check on channel {}.",
+                VERSION_CHECK_ID
+        );
 
         ServerLoginConnectionEvents.QUERY_START.register((handler, server, sender, synchronizer) -> {
             String serverVersion = localVersion();
+            SparkFactionApiMod.LOGGER.info(
+                    "Sending SparkFactionAPI login version query {} to {} with server version {}.",
+                    VERSION_CHECK_ID,
+                    handler.getConnectionInfo(),
+                    serverVersion
+            );
             ServerLoginNetworking.registerReceiver(handler, VERSION_CHECK_ID,
                     (minecraftServer, networkHandler, understood, buf, loginSynchronizer, responseSender) ->
                             handleResponse(networkHandler, understood, buf, serverVersion));
@@ -61,12 +71,30 @@ public final class SparkFactionVersionHandshake {
         // Reject before gameplay packets or faction sync can observe mixed jar versions.
         // 在玩法封包或阵营同步前拒绝不一致的 jar 版本。
         if (!understood) {
+            SparkFactionApiMod.LOGGER.warn(
+                    "SparkFactionAPI login version query {} was not understood by {}. Expected client version {}.",
+                    VERSION_CHECK_ID,
+                    handler.getConnectionInfo(),
+                    serverVersion
+            );
             handler.disconnect(Text.literal(SparkFactionVersionCheck.missingClientMessage(serverVersion)));
             return;
         }
 
         String clientVersion = readVersion(buf);
+        SparkFactionApiMod.LOGGER.info(
+                "Received SparkFactionAPI login version response from {}: client={}, server={}.",
+                handler.getConnectionInfo(),
+                clientVersion,
+                serverVersion
+        );
         if (!SparkFactionVersionCheck.isCompatible(serverVersion, clientVersion)) {
+            SparkFactionApiMod.LOGGER.warn(
+                    "Rejecting SparkFactionAPI version mismatch for {}: client={}, server={}.",
+                    handler.getConnectionInfo(),
+                    clientVersion,
+                    serverVersion
+            );
             handler.disconnect(Text.literal(SparkFactionVersionCheck.mismatchMessage(serverVersion, clientVersion)));
         }
     }

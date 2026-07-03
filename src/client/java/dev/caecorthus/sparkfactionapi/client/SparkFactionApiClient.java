@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkfactionapi.client;
 
+import dev.caecorthus.sparkfactionapi.SparkFactionApiMod;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
 import dev.caecorthus.sparkfactionapi.client.net.SparkFactionClientVersionHandshake;
 import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
@@ -14,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 public final class SparkFactionApiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        SparkFactionApiMod.LOGGER.info("Initializing SparkFactionAPI client hooks.");
         SparkFactionClientVersionHandshake.registerClient();
 
         // Bridge through Wathe's event so other add-ons can still win by priority.
