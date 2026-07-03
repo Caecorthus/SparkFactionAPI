@@ -33,6 +33,20 @@ class MixinCompatibilityTest {
         assertTrue(clientMixinConfig.contains("RoundTextRendererMixin"));
     }
 
+    @Test
+    void gameSettingsCommandHelpersStayOutsideOwnedMixinPackage() throws IOException {
+        String gameSettingsMixin = readProjectFile(
+                "src/main/java/dev/caecorthus/sparkfactionapi/mixin/GameSettingsCommandMixin.java"
+        );
+
+        assertFalse(Files.exists(Path.of(
+                "src/main/java/dev/caecorthus/sparkfactionapi/mixin/GameSettingsCommandRules.java"
+        )));
+        assertTrue(gameSettingsMixin.contains(
+                "import dev.caecorthus.sparkfactionapi.impl.GameSettingsCommandRules;"
+        ));
+    }
+
     private static void assertNoWathePredicateRedirect(String file) throws IOException {
         String source = readProjectFile(file);
         assertFalse(source.contains("@Redirect") && source.contains("canUseKillerFeatures"));
