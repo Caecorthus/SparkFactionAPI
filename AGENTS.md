@@ -15,6 +15,11 @@
 
 ## Coding
 
+### Architecture
+- Before changing code, read [ARCHITECTURE.md](ARCHITECTURE.md) and follow its Mandatory Rules.
+- The architecture document is binding for future agents. If a change touches a Legacy / Pending Refactor / Deletion Candidate area, explain the reason, scope, impact, and verification plan before editing, then wait for explicit owner approval.
+- Do not treat target architecture notes as automatic permission to delete, move, rename, split, merge, or rewrite existing modules.
+
 ### Check
 - Please read the code for all three mods (usually you don't need to read SparkWitch), and you need to consider how to ensure your changes do not affect other characters or talents that are outside the scope of the modifications.
 
