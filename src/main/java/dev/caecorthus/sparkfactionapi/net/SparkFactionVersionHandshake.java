@@ -68,8 +68,8 @@ public final class SparkFactionVersionHandshake {
             PacketByteBuf buf,
             String serverVersion
     ) {
-        // Reject before gameplay packets or faction sync can observe mixed jar versions.
-        // 在玩法封包或阵营同步前拒绝不一致的 jar 版本。
+        // Reject answered mismatches early, but tolerate unanswered login queries behind proxies.
+        // 已回应但版本不一致时尽早拒绝；代理后的未回应登录查询则允许继续。
         if (!understood) {
             SparkFactionApiMod.LOGGER.warn(
                     "SparkFactionAPI login version query {} was not understood by {}. Expected client version {}.",
@@ -77,7 +77,14 @@ public final class SparkFactionVersionHandshake {
                     handler.getConnectionInfo(),
                     serverVersion
             );
-            handler.disconnect(Text.literal(SparkFactionVersionCheck.missingClientMessage(serverVersion)));
+            if (SparkFactionVersionCheck.shouldRejectUnansweredLoginQuery()) {
+                handler.disconnect(Text.literal(SparkFactionVersionCheck.missingClientMessage(serverVersion)));
+            } else {
+                SparkFactionApiMod.LOGGER.warn(
+                        "Allowing {} to continue because proxies can drop Fabric login-query responses.",
+                        handler.getConnectionInfo()
+                );
+            }
             return;
         }
 

@@ -20,6 +20,11 @@ class SparkFactionVersionCheckTest {
     }
 
     @Test
+    void unansweredLoginQueriesAreAllowedForProxyTransfers() {
+        assertFalse(SparkFactionVersionCheck.shouldRejectUnansweredLoginQuery());
+    }
+
+    @Test
     void disconnectMessagesNameExpectedAndActualVersions() {
         assertEquals(
                 "SparkFactionAPI is required on the client with version 0.1.6.1.",
