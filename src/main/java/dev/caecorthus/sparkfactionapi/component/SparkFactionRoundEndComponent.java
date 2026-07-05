@@ -28,6 +28,9 @@ public final class SparkFactionRoundEndComponent implements AutoSyncedComponent 
 
     private final Scoreboard scoreboard;
     private @Nullable Identifier winningFaction;
+    // Server-only handoff guard between FactionWinService and Wathe's next round-end write.
+    // 服务端临时交接标记，用于连接 FactionWinService 与 Wathe 随后的结算写入，不持久化。
+    private boolean pendingCustomWinWrite;
     private final LinkedHashSet<UUID> winners = new LinkedHashSet<>();
 
     public SparkFactionRoundEndComponent(Scoreboard scoreboard) {
@@ -40,12 +43,14 @@ public final class SparkFactionRoundEndComponent implements AutoSyncedComponent 
 
     public void clearCustomWin() {
         this.winningFaction = null;
+        this.pendingCustomWinWrite = false;
         this.winners.clear();
         sync();
     }
 
     public void setCustomWin(Identifier winningFaction, Set<UUID> winners) {
         this.winningFaction = winningFaction;
+        this.pendingCustomWinWrite = true;
         this.winners.clear();
         this.winners.addAll(winners);
         sync();
@@ -53,6 +58,14 @@ public final class SparkFactionRoundEndComponent implements AutoSyncedComponent 
 
     public boolean hasCustomWin() {
         return winningFaction != null;
+    }
+
+    public boolean hasPendingCustomWinWrite() {
+        return pendingCustomWinWrite;
+    }
+
+    public void markCustomWinWritten() {
+        this.pendingCustomWinWrite = false;
     }
 
     public @Nullable Identifier getWinningFaction() {
@@ -78,6 +91,7 @@ public final class SparkFactionRoundEndComponent implements AutoSyncedComponent 
         } else {
             this.winningFaction = null;
         }
+        this.pendingCustomWinWrite = false;
 
         this.winners.clear();
         if (tag.contains("Winners", NbtElement.LIST_TYPE)) {

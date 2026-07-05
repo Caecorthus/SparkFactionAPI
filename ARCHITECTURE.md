@@ -31,6 +31,31 @@ existing modules. It is not a blanket authorization to refactor old code.
 
    Wait for explicit owner approval before making that change.
 
+   The approval request must be specific enough to protect the old architecture.
+   A module-level label is not enough by itself. For each proposed board of
+   work, include:
+
+   - Board: the named architecture area being changed.
+   - Reason: the friction that makes the old module shape unsafe or costly to
+     keep.
+   - Old code scope: exact packages, files, and existing methods/helpers that
+     will be moved, deleted, renamed, or rewritten.
+   - New Module shape: the proposed package/module name and its intended
+     Interface, including allowed responsibilities.
+   - Forbidden scope: files, methods, policies, public Interface semantics,
+     ordering, fallback behavior, and downstream contracts that must not
+     change.
+   - Behavior invariants: null behavior, fallback behavior, ordering, priority,
+     role/faction isolation, and other semantics that must be preserved.
+   - Downstream impact: whether downstream mods must change imports,
+     registrations, capabilities, tests, or release expectations.
+   - Verification plan: exact local tests, build commands, static checks, and
+     downstream searches/checks.
+
+   If any of these items are unknown, say so and perform a read-only review
+   before requesting approval. Do not fill gaps by making assumptions during
+   implementation.
+
 4. `Legacy`, `Pending Refactor`, and `Deletion Candidate` labels are direction
    markers only. They are not automatic permission to edit or delete.
 
@@ -109,8 +134,8 @@ src/main/java/dev/caecorthus/sparkfactionapi/
     economy/
     gun/
     blackout/
-    instinct/
-    targeting/
+    vision/
+    target/
     roundend/
     text/
 
@@ -122,6 +147,7 @@ src/main/java/dev/caecorthus/sparkfactionapi/
 
   command/
     admin/
+    settings/
 
   net/
     version/
@@ -162,9 +188,9 @@ New or migrated internal code must live in a domain subpackage:
   consumption.
 - `impl/blackout/`: blackout immunity, blackout cooldown sharing, and blackout
   policy evaluation.
-- `impl/instinct/`: instinct highlight decisions, cohort display decisions, and
+- `impl/vision/`: instinct highlight decisions, cohort display decisions, and
   client highlight priority conversion rules.
-- `impl/targeting/`: target tags and `canTarget` decisions.
+- `impl/target/`: target tags and `canTarget` decisions.
 - `impl/roundend/`: custom faction win resolution, winner collection, round-end
   state semantics, and server/client round-end display coordination.
 - `impl/text/`: translation key and display text rules that are not tied to
@@ -194,11 +220,17 @@ command/admin/
   TaskCommand.java
   SanityCommand.java
   SparkFactionPermissions.java
+command/settings/
+  GameSettingsCommandRules.java
 ```
 
 The aggregate command module registers command trees. Testable parsing,
-selection, conversion, and feedback rules should live in small package-private
-rule modules.
+selection, conversion, and feedback rules should live in small internal rule
+Modules.
+
+Wathe game-settings list-role text, click-command generation, enabled-state
+labels, and faction tag display rules live in `command/settings/`. The mixin
+Adapter may delegate there, but must not own those text rules.
 
 ### `net/`
 
@@ -217,80 +249,36 @@ Protocol constants, packet read/write behavior, compatibility checks, and
 disconnect messages must be shared. Server and client Adapters must not each
 invent their own channel or message semantics.
 
-## Legacy Register
+## Architecture Closure
 
-This register records known non-target modules. It does not authorize edits.
+There is no active architecture-refactor backlog. The current target shape is
+good enough to protect Locality without turning the project into an endless
+Module-splitting exercise.
 
-### `impl/FactionCapabilityBridge.java`
+### Stop Line
 
-Status: Deletion Candidate.
+Do not split, move, rename, or delete Modules just because a finer shape is
+possible. Future architecture work requires an owner-approved board and at
+least one of these concrete triggers:
 
-Target direction: remove this module after approved migration.
+- A bug, crash, or compatibility issue proves the current Module shape caused
+  drift.
+- A new feature needs behavior at an existing Seam and would otherwise add logic
+  to the wrong Module.
+- Tests, build output, or this document show the implementation has diverged
+  from the rules below.
 
-Reason: it combines capability, economy, gun, blackout, cohort, instinct,
-targeting, policy iteration, and effective-faction helpers. That creates poor
-Locality and makes future behavior changes hard to audit.
+Absent one of those triggers, keep the architecture stable and make local,
+task-scoped changes only.
 
-Rule: do not add new behavior to this module. When a task is approved to touch
-one of its responsibilities, move that responsibility into the owning domain
-Module and delete the bridge method once no local caller remains.
+### Legacy And Migration Logs
 
-### `impl/FactionRegistryImpl.java`
+Closed-board history and migrated, retired, or watch-only module details now
+live in [ARCHITECTURE LOGS.md](<ARCHITECTURE LOGS.md>).
 
-Status: Pending Refactor.
-
-Target direction: split registry state, legacy faction bootstrapping, role
-registration, resolver registration, and policy list ownership into
-`impl/registry/` plus the relevant domain Modules.
-
-### `impl/FactionCompatibilityEvents.java`
-
-Status: Pending Refactor.
-
-Target direction: keep only event registration aggregation, or move event
-Adapter registration into the owning domain Modules when that improves
-Locality.
-
-### `impl/FactionAssignmentService.java` and `impl/FactionSlotAllocator.java`
-
-Status: Pending Move.
-
-Target direction: `impl/assignment/`.
-
-### `impl/FactionWinService.java`, `impl/FactionRoundEndTextRules.java`, and
-`component/SparkFactionRoundEndComponent.java`
-
-Status: Pending Refactor.
-
-Target direction: round-end semantics move to `impl/roundend/`; CCA technical
-registration remains in `component/`.
-
-### `command/SparkFactionAdminCommands.java` and `util/SparkFactionPermissions.java`
-
-Status: Pending Refactor.
-
-Target direction: `command/admin/`, with registration separated from cooldown,
-task, sanity, and permission rules.
-
-### `net/SparkFactionVersionHandshake.java` and `net/SparkFactionVersionCheck.java`
-
-Status: Pending Refactor.
-
-Target direction: shared `net/version/VersionProtocol` plus server/client
-Handshake Adapters.
-
-### Mixed-responsibility mixins
-
-Status: Pending Refactor.
-
-Known examples:
-
-- `mixin/GameFunctionsMixin.java`
-- `mixin/MurderGameModeMixin.java`
-- `mixin/GameSettingsCommandMixin.java`
-
-Target direction: make mixins thin Adapters and move behavior into domain
-Modules.
+Read that file before touching retired, migrated, watch-only, or former legacy
+modules. It records constraints for old seams only; all approval and
+verification gates remain in this file.
 
 ## Approval Template For Legacy Changes
 

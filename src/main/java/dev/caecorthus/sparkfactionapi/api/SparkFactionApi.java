@@ -1,7 +1,7 @@
 package dev.caecorthus.sparkfactionapi.api;
 
-import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
 import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
+import dev.caecorthus.sparkfactionapi.impl.blackout.FactionBlackoutRules;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
@@ -48,11 +48,11 @@ public final class SparkFactionApi {
     }
 
     public static boolean hasBlackoutImmunity(Role role) {
-        return FactionCapabilityBridge.hasBlackoutImmunity(role);
+        return FactionBlackoutRules.hasBlackoutImmunity(role);
     }
 
     public static boolean hasBlackoutImmunity(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityBridge.hasBlackoutImmunity(player, gameComponent);
+        return FactionBlackoutRules.hasBlackoutImmunity(player, gameComponent);
     }
 
     public static FactionCapabilities capabilities(Identifier factionId) {

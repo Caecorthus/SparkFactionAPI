@@ -10,6 +10,7 @@
     "GameRoundEndComponentMixin",
     "KillerShopBuilderMixin",
     "MurderGameModeMixin",
+    "MurderGameModePassiveMoneyMixin",
     "PlayerShopComponentMixin",
     "RoleMixin",
     "WorldBlackoutComponentMixin"

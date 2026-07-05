@@ -130,6 +130,12 @@ tasks.register("verifyModJarVersion") {
                 throw new GradleException("Jar version mismatch: ${jarFile.name} says ${jarVersion}, but fabric.mod.json says ${metadataVersion}")
             }
 
+            def mainEntrypoint = "dev.caecorthus.sparkfactionapi.SparkFactionApiMod"
+            def mainEntrypoints = metadata.entrypoints?.main ?: []
+            if (!mainEntrypoints.contains(mainEntrypoint)) {
+                throw new GradleException("Missing main entrypoint ${mainEntrypoint} in ${jarFile.name}")
+            }
+
             def clientEntrypoint = "dev.caecorthus.sparkfactionapi.client.SparkFactionApiClient"
             def clientEntrypoints = metadata.entrypoints?.client ?: []
             if (!clientEntrypoints.contains(clientEntrypoint)) {
@@ -138,12 +144,62 @@ tasks.register("verifyModJarVersion") {
 
             [
                     "dev/caecorthus/sparkfactionapi/client/SparkFactionApiClient.class",
-                    "dev/caecorthus/sparkfactionapi/client/net/SparkFactionClientVersionHandshake.class"
+                    "dev/caecorthus/sparkfactionapi/client/net/version/ClientVersionHandshake.class",
+                    "dev/caecorthus/sparkfactionapi/net/version/ServerVersionHandshake.class",
+                    "dev/caecorthus/sparkfactionapi/net/version/VersionProtocol.class",
+                    "dev/caecorthus/sparkfactionapi/impl/gun/FactionGunPunishmentAdapter.class",
+                    "dev/caecorthus/sparkfactionapi/impl/economy/FactionPassiveMoneyAdapter.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/MurderGameModeMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/MurderGameModePassiveMoneyMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/GameRoundEndComponentMixin.class",
+                    "dev/caecorthus/sparkfactionapi/client/mixin/RoundTextRendererMixin.class"
             ].each { requiredEntry ->
-                // The login version gate only works if the shipped client jar can answer the server query.
-                // 登录版本门禁必须依赖发布给客户端的 jar 能应答服务端查询。
+                // Runtime compatibility depends on these shipped adapter classes, not just successful compilation.
+                // 运行时兼容依赖这些随 jar 发布的适配类，而不只是编译成功。
                 if (zipFile.getEntry(requiredEntry) == null) {
-                    throw new GradleException("Missing required client login class ${requiredEntry} in ${jarFile.name}")
+                    throw new GradleException("Missing required runtime class ${requiredEntry} in ${jarFile.name}")
+                }
+            }
+
+            [
+                    "dev/caecorthus/sparkfactionapi/client/net/SparkFactionClientVersionHandshake.class",
+                    "dev/caecorthus/sparkfactionapi/net/SparkFactionVersionHandshake.class",
+                    "dev/caecorthus/sparkfactionapi/net/SparkFactionVersionCheck.class",
+                    "dev/caecorthus/sparkfactionapi/impl/FactionCapabilityBridge.class",
+                    "dev/caecorthus/sparkfactionapi/impl/FactionAssignmentService.class",
+                    "dev/caecorthus/sparkfactionapi/impl/FactionSlotAllocator.class",
+                    "dev/caecorthus/sparkfactionapi/impl/FactionRoundEndTextRules.class",
+                    "dev/caecorthus/sparkfactionapi/impl/GameSettingsCommandRules.class",
+                    "dev/caecorthus/sparkfactionapi/command/SparkFactionAdminCommands.class",
+                    "dev/caecorthus/sparkfactionapi/util/SparkFactionPermissions.class"
+            ].each { forbiddenEntry ->
+                // Stale incremental class outputs must not resurrect retired internal seams in release jars.
+                // 旧的增量编译 class 不允许把已退役的内部接缝重新带进发布 jar。
+                if (zipFile.getEntry(forbiddenEntry) != null) {
+                    throw new GradleException("Forbidden retired class ${forbiddenEntry} is still packaged in ${jarFile.name}")
+                }
+            }
+
+            [
+                    "sparkfactionapi.mixins.json": [
+                            "MurderGameModeMixin",
+                            "MurderGameModePassiveMoneyMixin",
+                            "GameRoundEndComponentMixin"
+                    ],
+                    "sparkfactionapi.client.mixins.json": [
+                            "RoundTextRendererMixin"
+                    ]
+            ].each { mixinConfigEntry, requiredMixins ->
+                def mixinEntry = zipFile.getEntry(mixinConfigEntry)
+                if (mixinEntry == null) {
+                    throw new GradleException("Missing mixin config ${mixinConfigEntry} in ${jarFile.name}")
+                }
+                def mixinConfig = new groovy.json.JsonSlurper().parse(zipFile.getInputStream(mixinEntry))
+                def configuredMixins = (mixinConfig.mixins ?: []) + (mixinConfig.client ?: []) + (mixinConfig.server ?: [])
+                requiredMixins.each { requiredMixin ->
+                    if (!configuredMixins.contains(requiredMixin)) {
+                        throw new GradleException("Missing mixin ${requiredMixin} in ${mixinConfigEntry} inside ${jarFile.name}")
+                    }
                 }
             }
         } finally {

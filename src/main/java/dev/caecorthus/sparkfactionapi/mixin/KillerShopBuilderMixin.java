@@ -1,6 +1,6 @@
 package dev.caecorthus.sparkfactionapi.mixin;
 
-import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
+import dev.caecorthus.sparkfactionapi.impl.shop.FactionShopAccessRules;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.game.KillerShopBuilder;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,6 +25,6 @@ public abstract class KillerShopBuilderMixin {
             GameWorldComponent gameComponent,
             PlayerEntity player
     ) {
-        return FactionCapabilityBridge.canUseKillerFeatureAccess(player, gameComponent);
+        return FactionShopAccessRules.canUseKillerShop(player, gameComponent);
     }
 }

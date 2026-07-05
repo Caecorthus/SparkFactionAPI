@@ -1,6 +1,6 @@
 package dev.caecorthus.sparkfactionapi.mixin;
 
-import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
+import dev.caecorthus.sparkfactionapi.impl.blackout.FactionBlackoutRules;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.cca.WorldBlackoutComponent;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,6 +25,6 @@ public abstract class WorldBlackoutComponentMixin {
             GameWorldComponent gameComponent,
             PlayerEntity player
     ) {
-        return FactionCapabilityBridge.hasBlackoutImmunity(player, gameComponent);
+        return FactionBlackoutRules.hasBlackoutImmunity(player, gameComponent);
     }
 }

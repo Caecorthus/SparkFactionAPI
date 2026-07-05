@@ -6,174 +6,63 @@ import dev.caecorthus.sparkfactionapi.api.FactionCapabilities;
 import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionEconomyPolicy;
 import dev.caecorthus.sparkfactionapi.api.FactionGunPunishmentPolicy;
-import dev.caecorthus.sparkfactionapi.api.FactionIds;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
 import dev.caecorthus.sparkfactionapi.api.FactionRoleDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionTargetEligibility;
+import dev.caecorthus.sparkfactionapi.impl.blackout.FactionBlackoutCooldownPolicies;
+import dev.caecorthus.sparkfactionapi.impl.economy.FactionEconomyPolicies;
+import dev.caecorthus.sparkfactionapi.impl.gun.FactionGunPunishmentPolicies;
+import dev.caecorthus.sparkfactionapi.impl.registry.EffectiveFactionResolvers;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionCatalog;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionRegistryBootstrap;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionRoleCatalog;
+import dev.caecorthus.sparkfactionapi.impl.target.FactionTargetPolicies;
+import dev.caecorthus.sparkfactionapi.impl.target.FactionTargetRules;
+import dev.caecorthus.sparkfactionapi.impl.vision.FactionInstinctPolicies;
 import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
-import dev.doctor4t.wathe.api.WatheRoles;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public final class FactionRegistryImpl {
-    private static final Map<Identifier, FactionDefinition> FACTIONS = new LinkedHashMap<>();
-    private static final Map<Role, Identifier> ROLE_FACTIONS = new LinkedHashMap<>();
-    private static final Map<Role, Faction> ROLE_NATIVE_FACTIONS = new LinkedHashMap<>();
-    private static final List<EffectiveFactionResolver> EFFECTIVE_RESOLVERS = new ArrayList<>();
-    private static final List<FactionTargetEligibility> TARGET_ELIGIBILITY = new ArrayList<>();
-    private static final List<FactionEconomyPolicy> ECONOMY_POLICIES = new ArrayList<>();
-    private static final List<FactionGunPunishmentPolicy> GUN_PUNISHMENT_POLICIES = new ArrayList<>();
-    private static final List<FactionBlackoutCooldownPolicy> BLACKOUT_COOLDOWN_POLICIES = new ArrayList<>();
-    private static final List<FactionInstinctPolicy> INSTINCT_POLICIES = new ArrayList<>();
-    private static boolean bootstrapped;
-
     private FactionRegistryImpl() {
     }
 
     public static void bootstrap() {
-        if (bootstrapped) {
-            return;
-        }
-        bootstrapped = true;
-        registerLegacyFaction(FactionIds.NONE, 0xFFFFFF);
-        registerLegacyFaction(FactionIds.CIVILIAN, 0x36E51B);
-        registerLegacyFaction(FactionIds.KILLER, 0xC13838);
-        registerLegacyFaction(FactionIds.NEUTRAL, 0xB567FF);
-        FactionWinService.register();
-    }
-
-    private static void registerLegacyFaction(Identifier id, int color) {
-        FactionCapabilities capabilities = switch (id.getPath()) {
-            case "civilian" -> FactionCapabilities.builder()
-                    .isPunishableInnocentGunVictim(true)
-                    .isPunishableInnocentGunShooter(true)
-                    .build();
-            case "killer" -> FactionCapabilities.builder()
-                    .canUseKillerFeatures(true)
-                    .receivesKillerPassiveMoney(true)
-                    .receivesKillRewards(true)
-                    .hasBlackoutImmunity(true)
-                    .sharesCohort(true)
-                    .canUseInstinct(true)
-                    .instinctColor(0x990000)
-                    .build();
-            default -> FactionCapabilities.none();
-        };
-        FACTIONS.put(id, FactionDefinition.builder(id)
-                .color(color)
-                .translationKeyPrefix("faction." + id.getNamespace() + "." + id.getPath())
-                .capabilities(capabilities)
-                .build());
+        FactionRegistryBootstrap.bootstrap();
     }
 
     public static FactionDefinition registerFaction(FactionDefinition definition) {
-        bootstrap();
-        if (isLegacyFaction(definition.id())) {
-            throw new IllegalArgumentException("Legacy wathe factions cannot be replaced: " + definition.id());
-        }
-        if (FACTIONS.containsKey(definition.id())) {
-            throw new IllegalArgumentException("Faction already registered: " + definition.id());
-        }
-        FACTIONS.put(definition.id(), definition);
-        return definition;
+        return FactionCatalog.registerFaction(definition);
     }
 
     public static Role registerRole(FactionRoleDefinition definition) {
-        bootstrap();
-        if (!FACTIONS.containsKey(definition.factionId())) {
-            throw new IllegalArgumentException("Faction must be registered before roles: " + definition.factionId());
-        }
-
-        Faction nativeWatheFaction = definition.nativeWatheFaction();
-        // Custom factions keep their real Identifier in SparkFactionAPI while Wathe sees their native bucket.
-        // 自定义阵营的真实 Identifier 由 SparkFactionAPI 保存，wathe 只读取它们的原生阵营桶。
-        Role role = new Role(
-                definition.roleId(),
-                definition.color(),
-                nativeWatheFaction == Faction.CIVILIAN,
-                nativeWatheFaction == Faction.KILLER,
-                definition.moodType(),
-                definition.maxSprintTime(),
-                definition.canSeeTime(),
-                definition.appearanceCondition()
-        );
-        ROLE_FACTIONS.put(role, definition.factionId());
-        ROLE_NATIVE_FACTIONS.put(role, nativeWatheFaction);
-        try {
-            WatheRoles.registerRole(role);
-        } catch (RuntimeException exception) {
-            ROLE_FACTIONS.remove(role);
-            ROLE_NATIVE_FACTIONS.remove(role);
-            throw exception;
-        }
-        return role;
+        return FactionRoleCatalog.registerRole(definition);
     }
 
     public static boolean isSparkFactionRole(Role role) {
-        return ROLE_FACTIONS.containsKey(role);
+        return FactionRoleCatalog.isSparkFactionRole(role);
     }
 
-    /**
-     * Makes default SparkFactionAPI roles visible to Wathe as neutral instead of NONE.
-     * 让默认 SparkFactionAPI 角色在 wathe 侧显示为中立阵营，而不是 NONE。
-     */
     public static Optional<Faction> nativeFactionOverride(Role role) {
-        return nativeWatheFaction(role)
-                .filter(faction -> faction == Faction.NONE)
-                .map(faction -> Faction.NEUTRAL);
+        return FactionRoleCatalog.nativeFactionOverride(role);
     }
 
     public static Optional<Boolean> nativeNeutralOverride(Role role) {
-        return nativeWatheFaction(role)
-                .filter(faction -> faction == Faction.NONE)
-                .map(faction -> true);
-    }
-
-    private static Optional<Faction> nativeWatheFaction(Role role) {
-        return Optional.ofNullable(ROLE_NATIVE_FACTIONS.get(role));
+        return FactionRoleCatalog.nativeNeutralOverride(role);
     }
 
     public static Identifier resolveBaseFaction(Role role) {
-        bootstrap();
-        if (role == null || role == WatheRoles.NO_ROLE) {
-            return FactionIds.NONE;
-        }
-        Identifier customFaction = ROLE_FACTIONS.get(role);
-        if (customFaction != null) {
-            return customFaction;
-        }
-        Faction faction = role.getFaction();
-        return switch (faction) {
-            case NONE -> FactionIds.NONE;
-            case CIVILIAN -> FactionIds.CIVILIAN;
-            case KILLER -> FactionIds.KILLER;
-            case NEUTRAL -> FactionIds.NEUTRAL;
-        };
+        return FactionRoleCatalog.resolveBaseFaction(role);
     }
 
     public static Identifier resolveEffectiveFaction(PlayerEntity player, GameWorldComponent gameComponent) {
-        bootstrap();
-        if (player == null || gameComponent == null) {
-            return FactionIds.NONE;
-        }
-        Identifier current = resolveBaseFaction(gameComponent.getRole(player));
-        for (EffectiveFactionResolver resolver : EFFECTIVE_RESOLVERS) {
-            Identifier resolved = resolver.resolve(player, gameComponent, current);
-            if (resolved != null) {
-                current = resolved;
-            }
-        }
-        return current;
+        return EffectiveFactionResolvers.resolve(player, gameComponent);
     }
 
     public static boolean canTarget(
@@ -183,105 +72,82 @@ public final class FactionRegistryImpl {
             GameWorldComponent gameComponent
     ) {
         bootstrap();
-        return FactionCapabilityBridge.canTarget(viewer, target, targetTag, gameComponent);
+        return FactionTargetRules.canTarget(viewer, target, targetTag, gameComponent);
     }
 
     public static FactionCapabilities capabilities(Identifier factionId) {
-        bootstrap();
-        return Optional.ofNullable(FACTIONS.get(factionId))
-                .map(FactionDefinition::capabilities)
-                .orElseGet(FactionCapabilities::none);
+        return FactionCatalog.capabilities(factionId);
     }
 
     public static Optional<FactionDefinition> getFaction(Identifier factionId) {
-        bootstrap();
-        return Optional.ofNullable(FACTIONS.get(factionId));
+        return FactionCatalog.getFaction(factionId);
     }
 
     public static Collection<FactionDefinition> getCustomFactions() {
-        bootstrap();
-        return FACTIONS.values().stream()
-                .filter(faction -> !isLegacyFaction(faction.id()))
-                .toList();
+        return FactionCatalog.getCustomFactions();
     }
 
     public static boolean isCustomFaction(Identifier factionId) {
-        bootstrap();
-        return FACTIONS.containsKey(factionId) && !isLegacyFaction(factionId);
+        return FactionCatalog.isCustomFaction(factionId);
     }
 
     public static Collection<Role> getRolesForFaction(Identifier factionId) {
-        bootstrap();
-        List<Role> roles = new ArrayList<>();
-        for (Map.Entry<Role, Identifier> entry : ROLE_FACTIONS.entrySet()) {
-            if (entry.getValue().equals(factionId)) {
-                roles.add(entry.getKey());
-            }
-        }
-        return Collections.unmodifiableList(roles);
+        return FactionRoleCatalog.getRolesForFaction(factionId);
     }
 
     public static List<FactionTargetEligibility> targetEligibility() {
-        return TARGET_ELIGIBILITY;
+        return FactionTargetPolicies.targetEligibility();
     }
 
     public static List<FactionEconomyPolicy> economyPolicies() {
-        return ECONOMY_POLICIES;
+        return FactionEconomyPolicies.economyPolicies();
     }
 
     public static List<FactionGunPunishmentPolicy> gunPunishmentPolicies() {
-        return GUN_PUNISHMENT_POLICIES;
+        return FactionGunPunishmentPolicies.gunPunishmentPolicies();
     }
 
     public static List<FactionBlackoutCooldownPolicy> blackoutCooldownPolicies() {
-        return BLACKOUT_COOLDOWN_POLICIES;
+        return FactionBlackoutCooldownPolicies.blackoutCooldownPolicies();
     }
 
     public static List<FactionInstinctPolicy> instinctPolicies() {
-        return INSTINCT_POLICIES;
+        return FactionInstinctPolicies.instinctPolicies();
     }
 
     public static void registerEffectiveFactionResolver(EffectiveFactionResolver resolver) {
-        EFFECTIVE_RESOLVERS.add(resolver);
+        EffectiveFactionResolvers.register(resolver);
     }
 
     public static void registerTargetEligibility(FactionTargetEligibility eligibility) {
-        TARGET_ELIGIBILITY.add(eligibility);
+        FactionTargetPolicies.register(eligibility);
     }
 
     public static void registerEconomyPolicy(FactionEconomyPolicy policy) {
-        ECONOMY_POLICIES.add(policy);
+        FactionEconomyPolicies.register(policy);
     }
 
     public static void registerGunPunishmentPolicy(FactionGunPunishmentPolicy policy) {
-        GUN_PUNISHMENT_POLICIES.add(policy);
+        FactionGunPunishmentPolicies.register(policy);
     }
 
     public static void registerBlackoutCooldownPolicy(FactionBlackoutCooldownPolicy policy) {
-        BLACKOUT_COOLDOWN_POLICIES.add(policy);
+        FactionBlackoutCooldownPolicies.register(policy);
     }
 
     public static void registerInstinctPolicy(FactionInstinctPolicy policy) {
-        INSTINCT_POLICIES.add(policy);
+        FactionInstinctPolicies.register(policy);
     }
 
     static void clearForTests() {
-        FACTIONS.clear();
-        ROLE_FACTIONS.clear();
-        ROLE_NATIVE_FACTIONS.clear();
-        EFFECTIVE_RESOLVERS.clear();
-        TARGET_ELIGIBILITY.clear();
-        ECONOMY_POLICIES.clear();
-        GUN_PUNISHMENT_POLICIES.clear();
-        BLACKOUT_COOLDOWN_POLICIES.clear();
-        INSTINCT_POLICIES.clear();
-        bootstrapped = false;
-    }
-
-    private static boolean isLegacyFaction(Identifier id) {
-        return FactionIds.NONE.equals(id)
-                || FactionIds.CIVILIAN.equals(id)
-                || FactionIds.KILLER.equals(id)
-                || FactionIds.NEUTRAL.equals(id);
+        FactionCatalog.clearForTests();
+        FactionRoleCatalog.clearForTests();
+        EffectiveFactionResolvers.clearForTests();
+        FactionTargetPolicies.clearForTests();
+        FactionEconomyPolicies.clearForTests();
+        FactionGunPunishmentPolicies.clearForTests();
+        FactionBlackoutCooldownPolicies.clearForTests();
+        FactionInstinctPolicies.clearForTests();
+        FactionRegistryBootstrap.clearForTests();
     }
 }

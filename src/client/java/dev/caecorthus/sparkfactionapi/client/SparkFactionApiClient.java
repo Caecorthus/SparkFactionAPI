@@ -2,8 +2,9 @@ package dev.caecorthus.sparkfactionapi.client;
 
 import dev.caecorthus.sparkfactionapi.SparkFactionApiMod;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
-import dev.caecorthus.sparkfactionapi.client.net.SparkFactionClientVersionHandshake;
-import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
+import dev.caecorthus.sparkfactionapi.client.net.version.ClientVersionHandshake;
+import dev.caecorthus.sparkfactionapi.impl.vision.FactionCohortRules;
+import dev.caecorthus.sparkfactionapi.impl.vision.FactionInstinctRules;
 import dev.doctor4t.wathe.api.event.GetInstinctHighlight;
 import dev.doctor4t.wathe.api.event.ShouldShowCohort;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
@@ -16,7 +17,7 @@ public final class SparkFactionApiClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         SparkFactionApiMod.LOGGER.info("Initializing SparkFactionAPI client hooks.");
-        SparkFactionClientVersionHandshake.registerClient();
+        ClientVersionHandshake.registerClient();
 
         // Bridge through Wathe's event so other add-ons can still win by priority.
         // 通过 wathe 事件桥接，保留下游模组按优先级覆盖的空间。
@@ -27,13 +28,13 @@ public final class SparkFactionApiClient implements ClientModInitializer {
             }
 
             GameWorldComponent gameComponent = GameWorldComponent.KEY.get(viewer.getWorld());
-            if (!FactionCapabilityBridge.shouldUseCustomInstinctHighlight(
+            if (!FactionInstinctRules.shouldUseCustomHighlight(
                     GameFunctions.isPlayerPlayingAndAlive(viewer),
                     GameFunctions.isPlayerSpectatingOrCreative(viewer)
             )) {
                 return null;
             }
-            return FactionCapabilityBridge.instinctPolicyResult(viewer, target, gameComponent)
+            return FactionInstinctRules.policyResult(viewer, target, gameComponent)
                     .map(SparkFactionApiClient::toWatheHighlight)
                     .orElseGet(() -> fallbackInstinctHighlight(viewer, target, gameComponent));
         });
@@ -42,7 +43,7 @@ public final class SparkFactionApiClient implements ClientModInitializer {
         // 同伙显示只影响视觉提示，不能把自定义阵营塞进原生杀手队伍。
         ShouldShowCohort.EVENT.register((viewer, target) -> {
             GameWorldComponent gameComponent = GameWorldComponent.KEY.get(viewer.getWorld());
-            if (FactionCapabilityBridge.sharesCohort(viewer, target, gameComponent)) {
+            if (FactionCohortRules.sharesCohort(viewer, target, gameComponent)) {
                 return ShouldShowCohort.CohortResult.show();
             }
             return null;
@@ -69,16 +70,13 @@ public final class SparkFactionApiClient implements ClientModInitializer {
         if (!(target instanceof PlayerEntity targetPlayer)) {
             return null;
         }
-        if (!FactionCapabilityBridge.hasCustomEffectiveFaction(viewer, gameComponent)) {
-            return null;
-        }
-        if (!FactionCapabilityBridge.canUseInstinct(viewer, gameComponent)) {
+        if (!FactionInstinctRules.hasCustomInstinctViewer(viewer, gameComponent)) {
             return null;
         }
         if (GameFunctions.isPlayerSpectatingOrCreative(targetPlayer)) {
             return GetInstinctHighlight.HighlightResult.skip();
         }
-        int color = FactionCapabilityBridge.instinctDisplayColor(targetPlayer, gameComponent);
+        int color = FactionInstinctRules.displayColor(targetPlayer, gameComponent);
         if (color == -1) {
             return null;
         }

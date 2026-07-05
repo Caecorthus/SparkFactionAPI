@@ -3,7 +3,7 @@ package dev.caecorthus.sparkfactionapi.client.mixin;
 import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.api.SparkFactionApi;
 import dev.caecorthus.sparkfactionapi.component.SparkFactionRoundEndComponent;
-import dev.caecorthus.sparkfactionapi.impl.FactionRoundEndTextRules;
+import dev.caecorthus.sparkfactionapi.impl.text.FactionRoundEndTextRules;
 import dev.doctor4t.wathe.client.gui.RoleAnnouncementTexts;
 import dev.doctor4t.wathe.client.gui.RoundTextRenderer;
 import net.minecraft.client.font.TextRenderer;

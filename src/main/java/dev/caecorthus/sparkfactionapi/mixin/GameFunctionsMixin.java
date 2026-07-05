@@ -1,16 +1,10 @@
 package dev.caecorthus.sparkfactionapi.mixin;
 
-import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
-import dev.caecorthus.sparkfactionapi.api.SparkFactionApi;
-import dev.caecorthus.sparkfactionapi.impl.FactionCapabilityBridge;
+import dev.caecorthus.sparkfactionapi.impl.economy.FactionKillRewardAdapter;
+import dev.caecorthus.sparkfactionapi.impl.text.FactionLetterTextRules;
 import dev.doctor4t.wathe.api.Role;
-import dev.doctor4t.wathe.cca.GameWorldComponent;
-import dev.doctor4t.wathe.cca.PlayerPoisonComponent;
-import dev.doctor4t.wathe.cca.PlayerShopComponent;
-import dev.doctor4t.wathe.game.GameConstants;
 import dev.doctor4t.wathe.game.GameFunctions;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Lets Wathe's letter fallback see custom faction suffixes.
- * 让 wathe 信件 fallback 能识别自定义阵营后缀。
+ * Adapts Wathe game-function hooks to custom faction text and economy Modules.
+ * 将 Wathe 游戏函数钩子适配到自定义阵营文本与经济模块。
  */
 @Mixin(GameFunctions.class)
 public abstract class GameFunctionsMixin {
@@ -55,7 +49,15 @@ public abstract class GameFunctionsMixin {
             int letterColor,
             int roleColor
     ) {
-        applyLetterLore(letter, player, role, roleName, letterFactionName(role, factionName), letterColor, roleColor);
+        applyLetterLore(
+                letter,
+                player,
+                role,
+                roleName,
+                FactionLetterTextRules.letterFactionName(role, factionName),
+                letterColor,
+                roleColor
+        );
     }
 
     @Inject(
@@ -73,30 +75,6 @@ public abstract class GameFunctionsMixin {
             boolean force,
             CallbackInfo ci
     ) {
-        ServerPlayerEntity moneyRecipient = killer;
-        if (moneyRecipient == null) {
-            PlayerPoisonComponent poisonComponent = PlayerPoisonComponent.KEY.get(victim);
-            MinecraftServer server = victim.getServer();
-            if (poisonComponent.poisoner != null && server != null) {
-                moneyRecipient = server.getPlayerManager().getPlayer(poisonComponent.poisoner);
-            }
-        }
-        if (moneyRecipient == null) {
-            return;
-        }
-
-        GameWorldComponent gameComponent = GameWorldComponent.KEY.get(moneyRecipient.getWorld());
-        if (FactionCapabilityBridge.receivesCustomKillReward(moneyRecipient, gameComponent)) {
-            PlayerShopComponent.KEY.get(moneyRecipient).addToBalance(GameConstants.MONEY_PER_KILL);
-        }
-    }
-
-    private static String letterFactionName(Role role, String fallback) {
-        Identifier factionId = SparkFactionApi.resolveBaseFaction(role);
-        FactionDefinition definition = SparkFactionApi.getFaction(factionId).orElse(null);
-        if (definition == null || factionId.getNamespace().equals("wathe")) {
-            return fallback;
-        }
-        return factionId.getNamespace() + "." + factionId.getPath().replace('/', '.');
+        FactionKillRewardAdapter.applyCustomKillReward(victim, killer);
     }
 }

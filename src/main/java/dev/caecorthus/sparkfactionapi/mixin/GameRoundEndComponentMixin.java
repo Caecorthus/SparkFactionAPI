@@ -1,10 +1,8 @@
 package dev.caecorthus.sparkfactionapi.mixin;
 
-import com.mojang.authlib.GameProfile;
 import dev.caecorthus.sparkfactionapi.component.SparkFactionRoundEndComponent;
-import dev.doctor4t.wathe.api.Role;
-import dev.doctor4t.wathe.api.WatheGameModes;
-import dev.doctor4t.wathe.api.WatheRoles;
+import dev.caecorthus.sparkfactionapi.impl.roundend.FactionRoundEndRows;
+import dev.caecorthus.sparkfactionapi.impl.roundend.FactionRoundEndStateRules;
 import dev.doctor4t.wathe.cca.GameRoundEndComponent;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.game.GameFunctions;
@@ -20,8 +18,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Mixin(value = GameRoundEndComponent.class, remap = false)
@@ -54,32 +52,44 @@ public abstract class GameRoundEndComponentMixin {
             CallbackInfo ci
     ) {
         SparkFactionRoundEndComponent customRoundEnd = SparkFactionRoundEndComponent.KEY.get(serverWorld.getScoreboard());
-        if (!customRoundEnd.hasCustomWin()) {
+        boolean hasCustomWin = customRoundEnd.hasCustomWin();
+        boolean pendingCustomWinWrite = customRoundEnd.hasPendingCustomWinWrite();
+        if (FactionRoundEndStateRules.shouldClearBeforeWatheStatusWrite(
+                hasCustomWin,
+                pendingCustomWinWrite,
+                winStatus
+        )) {
+            customRoundEnd.clearCustomWin();
             return;
         }
+        if (!FactionRoundEndStateRules.shouldWriteCustomRows(hasCustomWin, pendingCustomWinWrite, winStatus)) {
+            return;
+        }
+        customRoundEnd.markCustomWinWritten();
 
         this.players.clear();
         GameWorldComponent game = GameWorldComponent.KEY.get(serverWorld);
-        this.gameMode = game.getGameMode() != null ? game.getGameMode().identifier : null;
-
-        for (Map.Entry<UUID, Role> entry : game.getRoles().entrySet()) {
-            UUID uuid = entry.getKey();
-            Role role = entry.getValue();
-            GameProfile profile = game.getGameProfiles().get(uuid);
-            if (profile == null || role == WatheRoles.NO_ROLE) {
-                continue;
-            }
-
-            boolean wasDead = game.isPlayerDead(uuid);
-            boolean isOnline = serverWorld.getPlayerByUuid(uuid) != null;
-            GameRoundEndComponent.PlayerEndStatus endStatus = sparkfactionapi$endStatus(wasDead, isOnline);
-            boolean isWinner = customRoundEnd.didWin(uuid);
-            this.players.add(new GameRoundEndComponent.RoundEndData(profile, role.identifier(), endStatus, isWinner));
-        }
+        this.gameMode = FactionRoundEndRows.gameModeId(game);
+        this.players.addAll(FactionRoundEndRows.rows(serverWorld, game, customRoundEnd));
 
         this.winStatus = winStatus;
         this.sync();
         ci.cancel();
+    }
+
+    @Inject(
+            method = "setRoundEndData(Lnet/minecraft/server/world/ServerWorld;Ljava/util/Collection;)V",
+            at = @At("HEAD")
+    )
+    private void sparkfactionapi$clearCustomFactionRoundEndDataForExplicitWinners(
+            ServerWorld serverWorld,
+            Collection<UUID> winnerUuids,
+            CallbackInfo ci
+    ) {
+        SparkFactionRoundEndComponent customRoundEnd = SparkFactionRoundEndComponent.KEY.get(serverWorld.getScoreboard());
+        if (FactionRoundEndStateRules.shouldClearBeforeWatheExplicitWinnerWrite(customRoundEnd.hasCustomWin())) {
+            customRoundEnd.clearCustomWin();
+        }
     }
 
     @Inject(method = "didWin", at = @At("HEAD"), cancellable = true)
@@ -88,16 +98,5 @@ public abstract class GameRoundEndComponentMixin {
         if (customRoundEnd.hasCustomWin()) {
             cir.setReturnValue(customRoundEnd.didWin(uuid));
         }
-    }
-
-    private static GameRoundEndComponent.PlayerEndStatus sparkfactionapi$endStatus(boolean wasDead, boolean isOnline) {
-        if (wasDead) {
-            return isOnline
-                    ? GameRoundEndComponent.PlayerEndStatus.DEAD
-                    : GameRoundEndComponent.PlayerEndStatus.LEFT_DEAD;
-        }
-        return isOnline
-                ? GameRoundEndComponent.PlayerEndStatus.ALIVE
-                : GameRoundEndComponent.PlayerEndStatus.LEFT;
     }
 }
