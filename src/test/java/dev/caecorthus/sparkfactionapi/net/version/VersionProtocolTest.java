@@ -16,9 +16,9 @@ class VersionProtocolTest {
 
     @Test
     void versionPacketRoundTripsExactFriendlyVersion() {
-        PacketByteBuf packet = VersionProtocol.writeVersion("0.1.5.3");
+        PacketByteBuf packet = VersionProtocol.writeVersion("0.1.5.4");
 
-        assertEquals("0.1.5.3", VersionProtocol.readVersion(packet));
+        assertEquals("0.1.5.4", VersionProtocol.readVersion(packet));
         assertEquals(0, packet.readableBytes());
     }
 
