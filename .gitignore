@@ -1,8 +1,10 @@
 .gradle/
+.idea/
 build/
 run/
 out/
 bin/
 .worktrees/
+*.iml
 .DS_Store
 *.log
