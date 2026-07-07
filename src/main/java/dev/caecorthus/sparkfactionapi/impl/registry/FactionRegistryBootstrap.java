@@ -25,7 +25,4 @@ public final class FactionRegistryBootstrap {
         FactionWinService.register();
     }
 
-    public static void clearForTests() {
-        bootstrapped = false;
-    }
 }

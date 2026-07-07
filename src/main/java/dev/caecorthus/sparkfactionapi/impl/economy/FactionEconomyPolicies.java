@@ -24,7 +24,4 @@ public final class FactionEconomyPolicies {
         ECONOMY_POLICIES.add(policy);
     }
 
-    public static void clearForTests() {
-        ECONOMY_POLICIES.clear();
-    }
 }

@@ -24,7 +24,4 @@ public final class FactionInstinctPolicies {
         INSTINCT_POLICIES.add(policy);
     }
 
-    public static void clearForTests() {
-        INSTINCT_POLICIES.clear();
-    }
 }

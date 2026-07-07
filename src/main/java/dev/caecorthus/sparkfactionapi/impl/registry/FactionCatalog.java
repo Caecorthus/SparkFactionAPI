@@ -84,10 +84,6 @@ public final class FactionCatalog {
         return FACTIONS.containsKey(factionId);
     }
 
-    public static void clearForTests() {
-        FACTIONS.clear();
-    }
-
     private static boolean isLegacyFaction(Identifier id) {
         return FactionIds.NONE.equals(id)
                 || FactionIds.CIVILIAN.equals(id)

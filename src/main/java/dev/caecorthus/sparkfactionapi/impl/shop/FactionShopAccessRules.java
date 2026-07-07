@@ -6,8 +6,8 @@ import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 
 /**
- * Resolves Wathe killer-shop access through SparkFactionAPI faction capabilities.
- * 通过 SparkFactionAPI 阵营能力解析 wathe 杀手商店访问权限。
+ * Resolves Wathe killer-shop inventory from original role capabilities, not effective alignment.
+ * 通过原始角色能力解析 wathe 杀手商店库存，不使用有效阵营翻转结果。
  */
 public final class FactionShopAccessRules {
     private FactionShopAccessRules() {
@@ -18,6 +18,9 @@ public final class FactionShopAccessRules {
     }
 
     public static boolean canUseKillerShop(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.capabilities(player, gameComponent).canUseKillerFeatures();
+        if (player == null || gameComponent == null) {
+            return false;
+        }
+        return canUseKillerShop(gameComponent.getRole(player));
     }
 }

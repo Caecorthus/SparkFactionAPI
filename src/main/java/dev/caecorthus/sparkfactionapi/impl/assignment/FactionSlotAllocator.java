@@ -8,7 +8,7 @@ import java.util.Random;
 
 /**
  * Pure custom-faction slot allocation helper.
- * 自定义阵营名额分配的纯逻辑辅助类，便于用普通 JUnit 覆盖。
+ * 自定义阵营名额分配的纯逻辑辅助类，便于独立审查和诊断验证。
  */
 final class FactionSlotAllocator {
     private FactionSlotAllocator() {

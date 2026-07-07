@@ -24,7 +24,4 @@ public final class FactionGunPunishmentPolicies {
         GUN_PUNISHMENT_POLICIES.add(policy);
     }
 
-    public static void clearForTests() {
-        GUN_PUNISHMENT_POLICIES.clear();
-    }
 }

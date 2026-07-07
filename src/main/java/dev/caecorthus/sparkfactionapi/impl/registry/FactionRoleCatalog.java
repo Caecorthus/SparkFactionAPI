@@ -106,11 +106,6 @@ public final class FactionRoleCatalog {
         return Collections.unmodifiableList(roles);
     }
 
-    public static void clearForTests() {
-        ROLE_FACTIONS.clear();
-        ROLE_NATIVE_FACTIONS.clear();
-    }
-
     private static Optional<Faction> nativeWatheFaction(Role role) {
         return Optional.ofNullable(ROLE_NATIVE_FACTIONS.get(role));
     }

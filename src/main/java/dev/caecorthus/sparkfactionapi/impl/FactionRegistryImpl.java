@@ -139,15 +139,4 @@ public final class FactionRegistryImpl {
         FactionInstinctPolicies.register(policy);
     }
 
-    static void clearForTests() {
-        FactionCatalog.clearForTests();
-        FactionRoleCatalog.clearForTests();
-        EffectiveFactionResolvers.clearForTests();
-        FactionTargetPolicies.clearForTests();
-        FactionEconomyPolicies.clearForTests();
-        FactionGunPunishmentPolicies.clearForTests();
-        FactionBlackoutCooldownPolicies.clearForTests();
-        FactionInstinctPolicies.clearForTests();
-        FactionRegistryBootstrap.clearForTests();
-    }
 }

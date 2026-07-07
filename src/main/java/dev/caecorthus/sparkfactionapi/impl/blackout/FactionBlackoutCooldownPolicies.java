@@ -24,7 +24,4 @@ public final class FactionBlackoutCooldownPolicies {
         BLACKOUT_COOLDOWN_POLICIES.add(policy);
     }
 
-    public static void clearForTests() {
-        BLACKOUT_COOLDOWN_POLICIES.clear();
-    }
 }

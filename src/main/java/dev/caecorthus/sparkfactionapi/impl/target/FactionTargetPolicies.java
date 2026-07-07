@@ -24,7 +24,4 @@ public final class FactionTargetPolicies {
         TARGET_ELIGIBILITY.add(eligibility);
     }
 
-    public static void clearForTests() {
-        TARGET_ELIGIBILITY.clear();
-    }
 }

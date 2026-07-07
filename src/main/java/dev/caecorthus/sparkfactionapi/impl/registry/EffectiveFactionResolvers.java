@@ -46,7 +46,4 @@ public final class EffectiveFactionResolvers {
         return current;
     }
 
-    public static void clearForTests() {
-        EFFECTIVE_RESOLVERS.clear();
-    }
 }
