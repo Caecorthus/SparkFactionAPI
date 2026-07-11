@@ -16,9 +16,9 @@
 ## Coding
 
 ### Architecture
-- Before changing code, read [ARCHITECTURE.md](ARCHITECTURE.md) and follow its Mandatory Rules.
-- The architecture document is binding for future agents. If a change touches a Legacy / Pending Refactor / Deletion Candidate area, explain the reason, scope, impact, and verification plan before editing, then wait for explicit owner approval.
-- Do not treat target architecture notes as automatic permission to delete, move, rename, split, merge, or rewrite existing modules.
+- Root architecture notes are local-only and must not be committed.
+- Do not delete, move, rename, split, merge, or substantially rewrite existing
+  modules without explicit owner approval.
 
 ### Cross-Repository Check
 - Inspect the owning repository and every direct consumer of the contract being
@@ -29,9 +29,8 @@
   are checked only when code or metadata shows a relevant dependency.
 - Prove that unrelated roles, factions, and traits remain outside the changed
   predicate and behavior path.
-- Use Java 21 for focused tests, `verifyArchitecture`, and builds. Follow the
-  risk-based test rules in `ARCHITECTURE.md`; never add production-only test
-  hooks.
+- Use Java 21 for focused tests, `verifyArchitecture`, and builds. Never add
+  production-only test hooks.
 
 ### Subagents
 - You're the coordinator/leader between the subagents.

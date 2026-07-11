@@ -222,10 +222,8 @@ tasks.test {
     useJUnitPlatform()
 }
 
-def architectureFiles = [
+def contractFiles = [
         "AGENTS.md",
-        "ARCHITECTURE.md",
-        "ARCHITECTURE LOGS.md",
         "CONTEXT.md",
         "DOWNSTREAM_MIGRATION_NOTES.md",
         "docs/adr/0001-risk-based-tests.md"
@@ -241,26 +239,14 @@ def architectureContractFiles = [
 
 tasks.register("verifyArchitecture") {
     group = "verification"
-    description = "Verifies governance, public compatibility, and representative contract tests."
-    inputs.files(architectureFiles.collect { file(it) })
+    description = "Verifies public compatibility and representative contract tests."
+    inputs.files(contractFiles.collect { file(it) })
     inputs.files(architectureContractFiles.collect { file(it) })
 
     doLast {
-        (architectureFiles + architectureContractFiles).each { requiredPath ->
+        (contractFiles + architectureContractFiles).each { requiredPath ->
             if (!file(requiredPath).isFile()) {
                 throw new GradleException("Missing architecture contract file: ${requiredPath}")
-            }
-        }
-
-        def architecture = file("ARCHITECTURE.md").getText("UTF-8")
-        [
-                "impl/shop/",
-                "Public Policy Evaluation Contracts",
-                "wathe ${project.wathe_version}",
-                "Tests are selected by risk"
-        ].each { requiredText ->
-            if (!architecture.contains(requiredText)) {
-                throw new GradleException("ARCHITECTURE.md is missing required contract text: ${requiredText}")
             }
         }
     }

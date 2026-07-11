@@ -1,5 +1,8 @@
 .gradle/
 .idea/
+/ARCHITECTURE.md
+/ARCHITECTURE_LOGS.md
+/ARCHITECTURE LOGS.md
 build/
 run/
 out/
