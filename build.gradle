@@ -77,6 +77,9 @@ dependencies {
     }
     modRuntimeOnly "dev.upcraft.datasync:datasync-minecraft-1.21.1-fabric:0.10.2"
     modImplementation "me.lucko:fabric-permissions-api:0.3.1"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:5.10.3"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 processResources {
@@ -215,8 +218,58 @@ tasks.withType(JavaCompile).configureEach {
     it.options.release.set(targetJavaVersion)
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
+def architectureFiles = [
+        "AGENTS.md",
+        "ARCHITECTURE.md",
+        "ARCHITECTURE LOGS.md",
+        "CONTEXT.md",
+        "DOWNSTREAM_MIGRATION_NOTES.md",
+        "docs/adr/0001-risk-based-tests.md"
+]
+def architectureContractFiles = [
+        "src/main/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApi.java",
+        "src/main/java/dev/caecorthus/sparkfactionapi/impl/shop/FactionShopAccessRules.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApiCompatibilityTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/assignment/FactionSlotAllocatorTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/roundend/FactionWinRulesTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/net/version/VersionProtocolTest.java"
+]
+
+tasks.register("verifyArchitecture") {
+    group = "verification"
+    description = "Verifies governance, public compatibility, and representative contract tests."
+    inputs.files(architectureFiles.collect { file(it) })
+    inputs.files(architectureContractFiles.collect { file(it) })
+
+    doLast {
+        (architectureFiles + architectureContractFiles).each { requiredPath ->
+            if (!file(requiredPath).isFile()) {
+                throw new GradleException("Missing architecture contract file: ${requiredPath}")
+            }
+        }
+
+        def architecture = file("ARCHITECTURE.md").getText("UTF-8")
+        [
+                "impl/shop/",
+                "Public Policy Evaluation Contracts",
+                "wathe ${project.wathe_version}",
+                "Tests are selected by risk"
+        ].each { requiredText ->
+            if (!architecture.contains(requiredText)) {
+                throw new GradleException("ARCHITECTURE.md is missing required contract text: ${requiredText}")
+            }
+        }
+    }
+}
+
 tasks.named("check") {
     setDependsOn([])
+    dependsOn tasks.named("test")
+    dependsOn tasks.named("verifyArchitecture")
     dependsOn tasks.matching { it.name == "validateAccessWidener" }
 }
 

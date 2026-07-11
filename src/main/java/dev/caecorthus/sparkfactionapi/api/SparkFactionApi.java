@@ -34,6 +34,12 @@ public final class SparkFactionApi {
         return FactionRegistryImpl.resolveEffectiveFaction(player, gameComponent);
     }
 
+    /**
+     * @deprecated A role alone has no player context for registered effective-faction resolvers.
+     *             Use {@link #resolveBaseFaction(Role)} or the player overload instead.
+     *             单独的角色没有玩家上下文，无法执行有效阵营解析链；请改用基础阵营方法或玩家重载。
+     */
+    @Deprecated(forRemoval = false)
     public static Identifier resolveEffectiveFaction(Role role) {
         return FactionRegistryImpl.resolveBaseFaction(role);
     }
