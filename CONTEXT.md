@@ -17,6 +17,9 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   external lifecycle seam and delegates decisions to an owning internal rule.
 - **Downstream consumer**: a mod that compiles against classes in `api/`.
   Identifier references or optional metadata alone do not make a Java consumer.
+- **Hidden equipment registration**: an item-identity registration through
+  `api/compat/NoellesHiddenEquipment`. When NoellesRoles is present, the
+  optional Adapter adds registered items to its existing held-item hiding path.
 
 ## Stable Runtime Contracts
 
@@ -26,10 +29,14 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   FactionAPI round-end state path.
 - Version protocol channel, payload order, rejection behavior, policy ordering,
   and capability fallbacks are compatibility-sensitive.
+- Hidden-equipment registration is idempotent and monotonic: registrations may
+  add hidden items but never unhide an item selected by NoellesRoles. With
+  NoellesRoles absent, registration remains inert and does not fail loading.
 
 ## Current Dependency Picture
 
 - Wathe is the hard host dependency and exact mixin target.
+- NoellesRoles is an optional compatibility target, never a hard dependency.
 - SparkWitch is the direct public-API consumer.
 - SparkTraits may integrate through optional public seams.
 - SparkStrength and SparkAssist are not current Java API consumers.

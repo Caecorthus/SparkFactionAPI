@@ -4,6 +4,7 @@
   "package": "dev.caecorthus.sparkfactionapi.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "compat.noellesroles.NoellesHiddenEquipmentHelperMixin",
     "FactionMixin",
     "GameFunctionsMixin",
     "GameSettingsCommandMixin",

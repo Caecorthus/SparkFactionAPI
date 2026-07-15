@@ -149,6 +149,9 @@ tasks.register("verifyModJarVersion") {
                     "dev/caecorthus/sparkfactionapi/net/version/VersionProtocol.class",
                     "dev/caecorthus/sparkfactionapi/impl/gun/FactionGunPunishmentAdapter.class",
                     "dev/caecorthus/sparkfactionapi/impl/economy/FactionPassiveMoneyAdapter.class",
+                    "dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipment.class",
+                    "dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesHiddenEquipmentRegistry.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/noellesroles/NoellesHiddenEquipmentHelperMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/MurderGameModeMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/MurderGameModePassiveMoneyMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/GameRoundEndComponentMixin.class",
@@ -182,6 +185,7 @@ tasks.register("verifyModJarVersion") {
 
             [
                     "sparkfactionapi.mixins.json": [
+                            "compat.noellesroles.NoellesHiddenEquipmentHelperMixin",
                             "MurderGameModeMixin",
                             "MurderGameModePassiveMoneyMixin",
                             "GameRoundEndComponentMixin"
@@ -230,8 +234,10 @@ def contractFiles = [
 ]
 def architectureContractFiles = [
         "src/main/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApi.java",
+        "src/main/java/dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipment.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/impl/shop/FactionShopAccessRules.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApiCompatibilityTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipmentTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/assignment/FactionSlotAllocatorTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/roundend/FactionWinRulesTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/net/version/VersionProtocolTest.java"
