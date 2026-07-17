@@ -18,7 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Pseudo
 @Mixin(targets = "org.agmas.noellesroles.demonhunter.DemonHunterShootC2SPacket$Receiver", remap = false)
 public abstract class NoellesRolesDemonHunterAffectMixin {
-    @Inject(method = "receive", at = @At("HEAD"), cancellable = true, require = 0, remap = false)
+    @Inject(
+            method = "receive(Lorg/agmas/noellesroles/demonhunter/DemonHunterShootC2SPacket;Lnet/fabricmc/fabric/api/networking/v1/ServerPlayNetworking$Context;)V",
+            at = @At("HEAD"),
+            cancellable = true,
+            require = 0,
+            remap = false
+    )
     private void sparkfactionapi$guardDemonHunterShot(
             @Coerce Object payload,
             ServerPlayNetworking.Context context,
