@@ -53,6 +53,15 @@ public final class SparkFactionApi {
         return FactionRegistryImpl.canTarget(viewer, target, targetTag, gameComponent);
     }
 
+    public static boolean canAffectPlayer(
+            PlayerEntity actor,
+            PlayerEntity target,
+            Identifier actionId,
+            GameWorldComponent gameComponent
+    ) {
+        return FactionRegistryImpl.canAffectPlayer(actor, target, actionId, gameComponent);
+    }
+
     public static boolean hasBlackoutImmunity(Role role) {
         return FactionBlackoutRules.hasBlackoutImmunity(role);
     }
@@ -83,6 +92,10 @@ public final class SparkFactionApi {
 
     public static void registerTargetEligibility(FactionTargetEligibility eligibility) {
         FactionRegistryImpl.registerTargetEligibility(eligibility);
+    }
+
+    public static void registerPlayerAffectPolicy(PlayerAffectPolicy policy) {
+        FactionRegistryImpl.registerPlayerAffectPolicy(policy);
     }
 
     public static void registerEconomyPolicy(FactionEconomyPolicy policy) {
