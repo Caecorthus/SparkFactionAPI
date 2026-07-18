@@ -147,13 +147,33 @@ tasks.register("verifyModJarVersion") {
                     "dev/caecorthus/sparkfactionapi/client/net/version/ClientVersionHandshake.class",
                     "dev/caecorthus/sparkfactionapi/net/version/ServerVersionHandshake.class",
                     "dev/caecorthus/sparkfactionapi/net/version/VersionProtocol.class",
+                    "dev/caecorthus/sparkfactionapi/api/PlayerAffectPolicy.class",
                     "dev/caecorthus/sparkfactionapi/impl/gun/FactionGunPunishmentAdapter.class",
                     "dev/caecorthus/sparkfactionapi/impl/economy/FactionPassiveMoneyAdapter.class",
+                    "dev/caecorthus/sparkfactionapi/impl/target/PlayerAffectPolicies.class",
+                    "dev/caecorthus/sparkfactionapi/impl/target/PlayerAffectRules.class",
+                    "dev/caecorthus/sparkfactionapi/impl/target/PlayerAffectMixinGuard.class",
                     "dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipment.class",
                     "dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesHiddenEquipmentRegistry.class",
                     "dev/caecorthus/sparkfactionapi/mixin/compat/noellesroles/NoellesHiddenEquipmentHelperMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/noellesroles/NoellesRolesDemonHunterAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/noellesroles/NoellesRolesPacketAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/noellesroles/NoellesRolesPoisonGasAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/sparkstrength/CriminologistAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/sparkstrength/NoisemakerAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/sparkstrength/ProfessorSerumAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/sparkstrength/VeteranKnifeAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/sparkwitch/SparkWitchCombatAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/sparkwitch/WitchSkillUseAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/EntityAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/GameFunctionsPlayerAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/GunShootPayloadReceiverMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/KnifeStabPayloadReceiverMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/MurderGameModeMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/MurderGameModePassiveMoneyMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/PlayerEntityAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/ServerPlayerEntityAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/WorldProjectileAffectMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/GameRoundEndComponentMixin.class",
                     "dev/caecorthus/sparkfactionapi/client/mixin/RoundTextRendererMixin.class"
             ].each { requiredEntry ->
@@ -165,6 +185,7 @@ tasks.register("verifyModJarVersion") {
             }
 
             [
+                    "dev/caecorthus/sparkfactionapi/mixin/compat/PlayerAffectMixinGuard.class",
                     "dev/caecorthus/sparkfactionapi/client/net/SparkFactionClientVersionHandshake.class",
                     "dev/caecorthus/sparkfactionapi/net/SparkFactionVersionHandshake.class",
                     "dev/caecorthus/sparkfactionapi/net/SparkFactionVersionCheck.class",
@@ -186,8 +207,24 @@ tasks.register("verifyModJarVersion") {
             [
                     "sparkfactionapi.mixins.json": [
                             "compat.noellesroles.NoellesHiddenEquipmentHelperMixin",
+                            "compat.noellesroles.NoellesRolesDemonHunterAffectMixin",
+                            "compat.noellesroles.NoellesRolesPacketAffectMixin",
+                            "compat.noellesroles.NoellesRolesPoisonGasAffectMixin",
+                            "compat.sparkstrength.CriminologistAffectMixin",
+                            "compat.sparkstrength.NoisemakerAffectMixin",
+                            "compat.sparkstrength.ProfessorSerumAffectMixin",
+                            "compat.sparkstrength.VeteranKnifeAffectMixin",
+                            "compat.sparkwitch.SparkWitchCombatAffectMixin",
+                            "compat.sparkwitch.WitchSkillUseAffectMixin",
+                            "EntityAffectMixin",
+                            "GameFunctionsPlayerAffectMixin",
+                            "GunShootPayloadReceiverMixin",
+                            "KnifeStabPayloadReceiverMixin",
                             "MurderGameModeMixin",
                             "MurderGameModePassiveMoneyMixin",
+                            "PlayerEntityAffectMixin",
+                            "ServerPlayerEntityAffectMixin",
+                            "WorldProjectileAffectMixin",
                             "GameRoundEndComponentMixin"
                     ],
                     "sparkfactionapi.client.mixins.json": [
@@ -234,10 +271,14 @@ def contractFiles = [
 ]
 def architectureContractFiles = [
         "src/main/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApi.java",
+        "src/main/java/dev/caecorthus/sparkfactionapi/api/PlayerAffectPolicy.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipment.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/impl/shop/FactionShopAccessRules.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/api/PlayerAffectPolicyTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApiCompatibilityTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipmentTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/target/PlayerAffectAdapterContractTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/target/OptionalModPlayerAffectAdapterContractTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/assignment/FactionSlotAllocatorTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/roundend/FactionWinRulesTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/net/version/VersionProtocolTest.java"

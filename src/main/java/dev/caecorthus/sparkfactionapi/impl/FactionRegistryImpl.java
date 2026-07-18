@@ -9,6 +9,7 @@ import dev.caecorthus.sparkfactionapi.api.FactionGunPunishmentPolicy;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
 import dev.caecorthus.sparkfactionapi.api.FactionRoleDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionTargetEligibility;
+import dev.caecorthus.sparkfactionapi.api.PlayerAffectPolicy;
 import dev.caecorthus.sparkfactionapi.impl.blackout.FactionBlackoutCooldownPolicies;
 import dev.caecorthus.sparkfactionapi.impl.economy.FactionEconomyPolicies;
 import dev.caecorthus.sparkfactionapi.impl.gun.FactionGunPunishmentPolicies;
@@ -18,6 +19,8 @@ import dev.caecorthus.sparkfactionapi.impl.registry.FactionRegistryBootstrap;
 import dev.caecorthus.sparkfactionapi.impl.registry.FactionRoleCatalog;
 import dev.caecorthus.sparkfactionapi.impl.target.FactionTargetPolicies;
 import dev.caecorthus.sparkfactionapi.impl.target.FactionTargetRules;
+import dev.caecorthus.sparkfactionapi.impl.target.PlayerAffectPolicies;
+import dev.caecorthus.sparkfactionapi.impl.target.PlayerAffectRules;
 import dev.caecorthus.sparkfactionapi.impl.vision.FactionInstinctPolicies;
 import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
@@ -75,6 +78,16 @@ public final class FactionRegistryImpl {
         return FactionTargetRules.canTarget(viewer, target, targetTag, gameComponent);
     }
 
+    public static boolean canAffectPlayer(
+            PlayerEntity actor,
+            PlayerEntity target,
+            Identifier actionId,
+            GameWorldComponent gameComponent
+    ) {
+        bootstrap();
+        return PlayerAffectRules.canAffectPlayer(actor, target, actionId, gameComponent);
+    }
+
     public static FactionCapabilities capabilities(Identifier factionId) {
         return FactionCatalog.capabilities(factionId);
     }
@@ -121,6 +134,10 @@ public final class FactionRegistryImpl {
 
     public static void registerTargetEligibility(FactionTargetEligibility eligibility) {
         FactionTargetPolicies.register(eligibility);
+    }
+
+    public static void registerPlayerAffectPolicy(PlayerAffectPolicy policy) {
+        PlayerAffectPolicies.register(policy);
     }
 
     public static void registerEconomyPolicy(FactionEconomyPolicy policy) {

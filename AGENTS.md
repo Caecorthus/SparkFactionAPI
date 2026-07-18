@@ -9,10 +9,6 @@
 - https://github.com/Caecorthus/SparkStrength (Spark-ver roles buff)
 - https://github.com/Caecorthus/SparkAssist (Client-side assist mod)
 
-## Skills
-- Use this skill in your and your subagents' workflow
-	- [$using-superpowers](/Users/kricy/.codex/skills/using-superpowers/SKILL.md)
-
 ## Coding
 
 ### Architecture
