@@ -21,7 +21,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(value = GunShootPayload.Receiver.class, remap = false)
 public abstract class GunShootPayloadReceiverMixin {
-    @Inject(method = "receive", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "receive(Ldev/doctor4t/wathe/util/GunShootPayload;Lnet/fabricmc/fabric/api/networking/v1/ServerPlayNetworking$Context;)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
     private void sparkfactionapi$guardGunShot(
             GunShootPayload payload,
             ServerPlayNetworking.Context context,

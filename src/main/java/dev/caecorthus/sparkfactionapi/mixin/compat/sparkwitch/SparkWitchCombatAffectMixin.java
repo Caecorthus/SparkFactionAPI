@@ -15,13 +15,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Guards Fire Poker and Ceremonial Sword effects before their custom attack paths run.
- * 在火钳与仪式剑的自定义攻击路径运行前拦截其效果。
+ * Guards SparkWitch custom melee effects before their attack paths run.
+ * 在 SparkWitch 自定义近战攻击路径运行前拦截其效果。
  */
 @Pseudo
 @Mixin(targets = {
         "dev.caecorthus.sparkwitch.item.firepoker.FirePokerCombatService",
-        "dev.caecorthus.sparkwitch.item.ceremonialsword.CeremonialSwordCombatService"
+        "dev.caecorthus.sparkwitch.item.ceremonialsword.CeremonialSwordCombatService",
+        "dev.caecorthus.sparkwitch.roles.civilian.apprentice.abilities.MightyForce.MightyForceCombatService"
 }, remap = false)
 public abstract class SparkWitchCombatAffectMixin {
     @Inject(method = "tryHandleAttack", at = @At("HEAD"), cancellable = true, require = 0, remap = false)

@@ -38,7 +38,8 @@ class OptionalModPlayerAffectAdapterContractTest {
             assertTrue(source.contains("@Pseudo"), file);
             assertTrue(source.contains("targets ="), file);
             assertTrue(source.contains("PlayerAffectMixinGuard"), file);
-            assertTrue(source.contains("require = 0, remap = false"), file);
+            assertTrue(source.contains("require = 0"), file);
+            assertTrue(source.contains("remap = false"), file);
             assertFalse(source.contains("import org.agmas.noellesroles"), file);
             assertFalse(source.contains("import dev.caecorthus.sparkwitch"), file);
             assertFalse(source.contains("import annina.sparkstrength"), file);
@@ -48,8 +49,20 @@ class OptionalModPlayerAffectAdapterContractTest {
     @Test
     void noellesAdaptersCoverPacketsAndGasWhileGenericProjectileGuardCoversAxes() throws IOException {
         assertContains("compat/noellesroles/NoellesRolesPacketAffectMixin.java",
-                "lambda$registerPackets$0", "lambda$registerPackets$4");
-        assertContains("compat/noellesroles/NoellesRolesDemonHunterAffectMixin.java", "receive");
+                "lambda$registerPackets$31",
+                "lambda$registerPackets$35",
+                "lambda$registerPackets$37",
+                "lambda$registerPackets$38",
+                "lambda$registerPackets$39",
+                "lambda$registerPackets$40",
+                "lambda$registerPackets$42",
+                "lambda$registerPackets$43",
+                "lambda$registerPackets$44");
+        assertContains(
+                "compat/noellesroles/NoellesRolesDemonHunterAffectMixin.java",
+                "receive(Lorg/agmas/noellesroles/demonhunter/DemonHunterShootC2SPacket;"
+                        + "Lnet/fabricmc/fabric/api/networking/v1/ServerPlayNetworking$Context;)V"
+        );
         assertContains("compat/noellesroles/NoellesRolesPoisonGasAffectMixin.java", "isInGas");
 
         String projectileGuard = source("WorldProjectileAffectMixin.java");
@@ -62,10 +75,28 @@ class OptionalModPlayerAffectAdapterContractTest {
     @Test
     void witchAndStrengthAdaptersGuardBeforeTheirPublicMutationEntrypoints() throws IOException {
         assertContains("compat/sparkwitch/WitchSkillUseAffectMixin.java", "method = \"use\"");
-        assertContains("compat/sparkwitch/SparkWitchCombatAffectMixin.java", "tryHandleAttack");
+        assertContains(
+                "compat/sparkwitch/SparkWitchCombatAffectMixin.java",
+                "dev.caecorthus.sparkwitch.item.firepoker.FirePokerCombatService",
+                "dev.caecorthus.sparkwitch.item.ceremonialsword.CeremonialSwordCombatService",
+                "dev.caecorthus.sparkwitch.roles.civilian.apprentice.abilities.MightyForce.MightyForceCombatService",
+                "method = \"tryHandleAttack\"",
+                "cir.setReturnValue(ActionResult.SUCCESS)"
+        );
         assertContains("compat/sparkstrength/NoisemakerAffectMixin.java", "tryUseBackpackGlow");
-        assertContains("compat/sparkstrength/ProfessorSerumAffectMixin.java",
-                "useHeldSerumOnTarget", "tryRemoteFeed");
+        String professor = source("compat/sparkstrength/ProfessorSerumAffectMixin.java");
+        assertTrue(professor.contains("@Shadow(remap = false)"));
+        assertTrue(professor.contains(
+                "private static @Nullable ServerPlayerEntity findLookedAtTarget(ServerPlayerEntity actor)"
+        ));
+        assertTrue(professor.contains("method = \"useHeldSerum\""));
+        assertTrue(professor.contains("method = \"useHeldSerumOnTarget\""));
+        assertTrue(professor.contains("method = \"tryRemoteFeed\""));
+        assertTrue(professor.contains("CallbackInfoReturnable<Boolean>"));
+        assertTrue(professor.contains("cir.setReturnValue(false)"));
+        assertFalse(professor.contains("method = \"consumeHeldSerumAndApply\""));
+        assertFalse(professor.contains("ProjectileUtil"));
+        assertFalse(professor.contains("FEED_RANGE"));
         assertContains("compat/sparkstrength/CriminologistAffectMixin.java", "handleSelection");
         assertContains("compat/sparkstrength/VeteranKnifeAffectMixin.java", "handleKnifeStab");
     }

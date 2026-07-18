@@ -17,7 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(value = KnifeStabPayload.Receiver.class, remap = false)
 public abstract class KnifeStabPayloadReceiverMixin {
-    @Inject(method = "receive", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "receive(Ldev/doctor4t/wathe/util/KnifeStabPayload;Lnet/fabricmc/fabric/api/networking/v1/ServerPlayNetworking$Context;)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
     private void sparkfactionapi$guardKnifeStab(
             KnifeStabPayload payload,
             ServerPlayNetworking.Context context,
