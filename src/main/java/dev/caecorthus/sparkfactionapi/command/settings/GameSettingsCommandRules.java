@@ -12,7 +12,9 @@ import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -24,23 +26,36 @@ public final class GameSettingsCommandRules {
     private static final int CIVILIAN_COLOR = 0x36E51B;
     private static final int KILLER_COLOR = 0xC13838;
     private static final int NEUTRAL_COLOR = 0x9F9F9F;
+    private static final int SPECIAL_ROLE_COLOR = 0x79C7D4;
     private static final int ENABLED_COLOR = 0x55FF55;
     private static final int DISABLED_COLOR = 0xFF5555;
+    private static final String SPECIAL_ROLE_HEADER_KEY = "commands.sparkfactionapi.listroles.special";
 
     private GameSettingsCommandRules() {
     }
 
     public record RoleListEntry(
             Role role,
-            int factionColor,
-            String factionTranslationKey,
             String roleTranslationKey,
             String clickCommand,
             String hoverTranslationKey,
             String enabledTranslationKey,
             int enabledColor,
-            boolean enabled
+            boolean enabled,
+            boolean toggleable
     ) {
+    }
+
+    public record RoleListSection(
+            Identifier factionId,
+            int headerColor,
+            String headerTranslationKey,
+            List<RoleListEntry> entries,
+            boolean toggleable
+    ) {
+        public RoleListSection {
+            entries = List.copyOf(entries);
+        }
     }
 
     public static MutableText listRolesMessage(
@@ -49,80 +64,132 @@ public final class GameSettingsCommandRules {
             Predicate<Role> roleEnabled
     ) {
         MutableText message = Text.translatable("commands.wathe.listroles.header").withColor(HEADER_COLOR);
+        List<RoleListSection> sections = roleListSections(roles, specialRoles, roleEnabled);
 
-        for (RoleListEntry entry : roleListEntries(roles, specialRoles, roleEnabled)) {
-            appendRoleLine(message, entry);
+        for (int sectionIndex = 0; sectionIndex < sections.size(); sectionIndex++) {
+            RoleListSection section = sections.get(sectionIndex);
+            message.append(sectionIndex == 0 ? "\n" : "\n\n");
+            message.append(sectionHeader(section));
+            for (RoleListEntry entry : section.entries()) {
+                appendRoleLine(message, entry);
+            }
         }
 
         return message;
     }
 
-    public static List<RoleListEntry> roleListEntries(
+    /**
+     * Groups ordinary roles by their resolved base faction in first-seen order, then appends special
+     * roles as a distinct non-toggleable section. SPECIAL_ROLES itself remains owned by Wathe.
+     */
+    public static List<RoleListSection> roleListSections(
             Collection<Role> roles,
             Collection<Role> specialRoles,
             Predicate<Role> roleEnabled
     ) {
-        List<RoleListEntry> entries = new ArrayList<>();
+        Map<Identifier, List<RoleListEntry>> groupedEntries = new LinkedHashMap<>();
+        Map<Identifier, FactionHeader> factionHeaders = new LinkedHashMap<>();
+
         for (Role role : roles) {
             if (specialRoles.contains(role)) {
                 continue;
             }
-            entries.add(roleListEntry(role, roleEnabled.test(role)));
+            Identifier factionId = SparkFactionApi.resolveBaseFaction(role);
+            groupedEntries.computeIfAbsent(factionId, ignored -> new ArrayList<>())
+                    .add(toggleableRoleEntry(role, roleEnabled.test(role)));
+            factionHeaders.computeIfAbsent(factionId, GameSettingsCommandRules::factionHeader);
         }
-        return List.copyOf(entries);
+
+        List<RoleListSection> sections = new ArrayList<>();
+        groupedEntries.forEach((factionId, entries) -> {
+            FactionHeader header = factionHeaders.get(factionId);
+            sections.add(new RoleListSection(
+                    factionId,
+                    header.color(),
+                    header.translationKey(),
+                    entries,
+                    true
+            ));
+        });
+
+        List<RoleListEntry> specialEntries = specialRoles.stream()
+                .map(GameSettingsCommandRules::specialRoleEntry)
+                .toList();
+        if (!specialEntries.isEmpty()) {
+            sections.add(new RoleListSection(
+                    null,
+                    SPECIAL_ROLE_COLOR,
+                    SPECIAL_ROLE_HEADER_KEY,
+                    specialEntries,
+                    false
+            ));
+        }
+
+        return List.copyOf(sections);
     }
 
     public static String roleToggleCommand(String rolePath, boolean enabled) {
         return "/wathe:gameSettings set enableRole " + rolePath + " " + !enabled;
     }
 
-    private static RoleListEntry roleListEntry(Role role, boolean enabled) {
-        Identifier factionId = SparkFactionApi.resolveBaseFaction(role);
-        FactionDefinition faction = SparkFactionApi.getFaction(factionId).orElse(null);
-        int factionColor = faction == null ? legacyColor(factionId) : faction.color();
-        String factionKey = faction == null ? legacyFactionKey(factionId) : faction.translationKeyPrefix();
+    private static RoleListEntry toggleableRoleEntry(Role role, boolean enabled) {
         String rolePath = role.identifier().getPath();
-        String hoverKey = enabled
-                ? "commands.wathe.listroles.click_to_disable"
-                : "commands.wathe.listroles.click_to_enable";
-
         return new RoleListEntry(
                 role,
-                factionColor,
-                factionKey,
-                "announcement.role." + rolePath.replace('/', '.').toLowerCase(),
+                roleTranslationKey(rolePath),
                 roleToggleCommand(rolePath, enabled),
-                hoverKey,
+                enabled ? "commands.wathe.listroles.click_to_disable" : "commands.wathe.listroles.click_to_enable",
                 enabled ? "commands.wathe.listroles.enabled" : "commands.wathe.listroles.disabled",
                 enabled ? ENABLED_COLOR : DISABLED_COLOR,
-                enabled
+                enabled,
+                true
         );
+    }
+
+    private static RoleListEntry specialRoleEntry(Role role) {
+        return new RoleListEntry(
+                role,
+                roleTranslationKey(role.identifier().getPath()),
+                null,
+                null,
+                null,
+                0,
+                false,
+                false
+        );
+    }
+
+    private static String roleTranslationKey(String rolePath) {
+        return "announcement.role." + rolePath.replace('/', '.').toLowerCase();
     }
 
     private static void appendRoleLine(MutableText message, RoleListEntry entry) {
         message.append("\n");
-        message.append(factionTag(entry.factionColor(), entry.factionTranslationKey()));
         message.append(roleText(entry));
-        message.append(enabledText(entry.enabledTranslationKey(), entry.enabledColor()));
+        if (entry.toggleable()) {
+            message.append(enabledText(entry.enabledTranslationKey(), entry.enabledColor()));
+        }
     }
 
-    private static Text factionTag(int color, String translationKey) {
-        return Text.literal("[")
-                .withColor(color)
-                .append(Text.translatable(translationKey))
-                .append(Text.literal("]"));
+    private static Text sectionHeader(RoleListSection section) {
+        return Text.translatable(section.headerTranslationKey())
+                .withColor(section.headerColor())
+                .styled(style -> style.withBold(true).withUnderline(true));
     }
 
     private static Text roleText(RoleListEntry entry) {
-        return Text.translatable(entry.roleTranslationKey())
-                .withColor(entry.role().color())
-                .styled(style -> style
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, entry.clickCommand()))
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                Text.translatable(entry.hoverTranslationKey())
-                        ))
-                        .withUnderline(true));
+        MutableText roleText = Text.translatable(entry.roleTranslationKey())
+                .withColor(entry.role().color());
+        if (!entry.toggleable()) {
+            return roleText;
+        }
+        return roleText.styled(style -> style
+                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, entry.clickCommand()))
+                .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        Text.translatable(entry.hoverTranslationKey())
+                ))
+                .withUnderline(true));
     }
 
     private static Text enabledText(String translationKey, int color) {
@@ -130,6 +197,13 @@ public final class GameSettingsCommandRules {
                 .append(Text.translatable(translationKey))
                 .append(Text.literal("]"))
                 .withColor(color);
+    }
+
+    private static FactionHeader factionHeader(Identifier factionId) {
+        FactionDefinition faction = SparkFactionApi.getFaction(factionId).orElse(null);
+        return faction == null
+                ? new FactionHeader(legacyColor(factionId), legacyFactionKey(factionId))
+                : new FactionHeader(faction.color(), faction.translationKeyPrefix());
     }
 
     private static int legacyColor(Identifier factionId) {
@@ -144,5 +218,8 @@ public final class GameSettingsCommandRules {
 
     private static String legacyFactionKey(Identifier factionId) {
         return "faction." + factionId.getNamespace() + "." + factionId.getPath().replace('/', '.');
+    }
+
+    private record FactionHeader(int color, String translationKey) {
     }
 }

@@ -23,6 +23,7 @@
     "GunShootPayloadReceiverMixin",
     "KillerShopBuilderMixin",
     "KnifeStabPayloadReceiverMixin",
+    "LivingEntityCollisionMixin",
     "MurderGameModeMixin",
     "MurderGameModePassiveMoneyMixin",
     "PlayerEntityAffectMixin",

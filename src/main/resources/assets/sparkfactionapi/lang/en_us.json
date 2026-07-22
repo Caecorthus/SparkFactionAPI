@@ -3,5 +3,6 @@
   "faction.sparkfactionapi.custom": "Custom",
   "commands.sparkfactionapi.faction.custom": "Custom Faction",
   "announcement.win.sparkfactionapi.custom": "Custom Faction Wins!",
-  "game.win.sparkfactionapi.custom": "A custom faction completed its objective."
+  "game.win.sparkfactionapi.custom": "A custom faction completed its objective.",
+  "commands.sparkfactionapi.listroles.special": "Special / Wraith Roles"
 }

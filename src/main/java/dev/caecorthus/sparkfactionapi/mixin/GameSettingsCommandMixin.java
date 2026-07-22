@@ -21,7 +21,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class GameSettingsCommandMixin {
     private static final Logger LOGGER = LoggerFactory.getLogger("SparkFactionAPI/GameSettingsCommandMixin");
 
-    @Inject(method = "listRoles", at = @At("HEAD"), cancellable = true)
+    @Inject(
+            method = "listRoles(Lnet/minecraft/server/command/ServerCommandSource;)I",
+            at = @At("HEAD"),
+            cancellable = true,
+            require = 1
+    )
     private static void sparkfactionapi$listRoles(
             ServerCommandSource source,
             CallbackInfoReturnable<Integer> cir
