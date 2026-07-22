@@ -20,8 +20,16 @@ class PlayerAffectAdapterContractTest {
         String gun = source("GunShootPayloadReceiverMixin.java");
 
         assertHeadVeto(knife);
+        assertTrue(knife.contains(
+                "method = \"receive(Ldev/doctor4t/wathe/util/KnifeStabPayload;"
+                        + "Lnet/fabricmc/fabric/api/networking/v1/ServerPlayNetworking$Context;)V\""
+        ));
         assertTrue(knife.contains("GameConstants.DeathReasons.KNIFE"));
         assertHeadVeto(gun);
+        assertTrue(gun.contains(
+                "method = \"receive(Ldev/doctor4t/wathe/util/GunShootPayload;"
+                        + "Lnet/fabricmc/fabric/api/networking/v1/ServerPlayNetworking$Context;)V\""
+        ));
         assertTrue(gun.contains("GameConstants.DeathReasons.GUN"));
     }
 

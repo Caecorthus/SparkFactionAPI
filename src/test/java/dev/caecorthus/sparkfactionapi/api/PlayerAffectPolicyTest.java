@@ -43,6 +43,20 @@ class PlayerAffectPolicyTest {
     }
 
     @Test
+    void allowingPoliciesPreserveTheInteraction() {
+        assertTrue(PlayerAffectRules.canAffectPlayer(
+                List.of(
+                        (actor, target, actionId, gameComponent) -> true,
+                        (actor, target, actionId, gameComponent) -> true
+                ),
+                null,
+                null,
+                ACTION_ID,
+                null
+        ));
+    }
+
+    @Test
     void everyPolicyRunsEvenAfterAVeto() {
         AtomicInteger calls = new AtomicInteger();
         List<PlayerAffectPolicy> policies = List.of(
