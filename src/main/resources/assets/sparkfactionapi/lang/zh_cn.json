@@ -3,5 +3,6 @@
   "faction.sparkfactionapi.custom": "自定义阵营",
   "commands.sparkfactionapi.faction.custom": "自定义阵营",
   "announcement.win.sparkfactionapi.custom": "自定义阵营胜利",
-  "game.win.sparkfactionapi.custom": "自定义阵营完成了胜利目标"
+  "game.win.sparkfactionapi.custom": "自定义阵营完成了胜利目标",
+  "commands.sparkfactionapi.listroles.special": "特殊/冤魂职业"
 }

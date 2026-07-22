@@ -2,6 +2,7 @@ package dev.caecorthus.sparkfactionapi.api;
 
 import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
 import dev.caecorthus.sparkfactionapi.impl.blackout.FactionBlackoutRules;
+import dev.caecorthus.sparkfactionapi.impl.collision.EntityCollisionExemptions;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
@@ -112,5 +113,18 @@ public final class SparkFactionApi {
 
     public static void registerInstinctPolicy(FactionInstinctPolicy policy) {
         FactionRegistryImpl.registerInstinctPolicy(policy);
+    }
+
+    /**
+     * Registers a collision exemption during mod initialization. If either participant matches,
+     * the current {@code LivingEntity.pushAway(Entity)} operation is cancelled; vehicle-specific
+     * collision overrides are outside this contract.
+     * 应在模组初始化期间注册碰撞豁免；任一参与实体匹配时都会取消当前
+     * {@code LivingEntity.pushAway(Entity)} 操作，但不包含载具自有的碰撞覆写。
+     *
+     * @param exemption non-null exemption predicate
+     */
+    public static void registerEntityCollisionExemption(EntityCollisionExemption exemption) {
+        EntityCollisionExemptions.register(exemption);
     }
 }
