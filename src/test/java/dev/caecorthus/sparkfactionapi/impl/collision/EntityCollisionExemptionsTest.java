@@ -9,10 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EntityCollisionExemptionsTest {
     @Test
     void pairRuleIsSymmetric() {
-        assertFalse(EntityCollisionExemptions.shouldCancelPush(false, false));
-        assertTrue(EntityCollisionExemptions.shouldCancelPush(true, false));
-        assertTrue(EntityCollisionExemptions.shouldCancelPush(false, true));
-        assertTrue(EntityCollisionExemptions.shouldCancelPush(true, true));
+        assertFalse(EntityCollisionExemptions.shouldCancelCollision(false, false));
+        assertTrue(EntityCollisionExemptions.shouldCancelCollision(true, false));
+        assertTrue(EntityCollisionExemptions.shouldCancelCollision(false, true));
+        assertTrue(EntityCollisionExemptions.shouldCancelCollision(true, true));
     }
 
     @Test
@@ -23,6 +23,7 @@ class EntityCollisionExemptionsTest {
     @Test
     void nullAndUnregisteredEntitiesFailClosed() {
         assertFalse(EntityCollisionExemptions.isExempt(null));
+        assertFalse(EntityCollisionExemptions.shouldCancelCollision(null, null));
         assertFalse(EntityCollisionExemptions.shouldCancelPush(null, null));
     }
 }

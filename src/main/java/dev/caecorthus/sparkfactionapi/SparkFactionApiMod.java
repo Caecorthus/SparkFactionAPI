@@ -3,6 +3,7 @@ package dev.caecorthus.sparkfactionapi;
 import dev.caecorthus.sparkfactionapi.api.SparkFactionApi;
 import dev.caecorthus.sparkfactionapi.command.admin.SparkFactionAdminCommands;
 import dev.caecorthus.sparkfactionapi.impl.FactionCompatibilityEvents;
+import dev.caecorthus.sparkfactionapi.impl.compat.noellesroles.NoellesCollisionCompatibility;
 import dev.caecorthus.sparkfactionapi.net.version.ServerVersionHandshake;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -22,6 +23,7 @@ public final class SparkFactionApiMod implements ModInitializer {
     public void onInitialize() {
         ServerVersionHandshake.registerServer();
         SparkFactionApi.bootstrap();
+        NoellesCollisionCompatibility.register();
         FactionCompatibilityEvents.register();
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 SparkFactionAdminCommands.register(dispatcher));

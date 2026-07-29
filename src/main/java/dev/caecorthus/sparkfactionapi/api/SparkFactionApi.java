@@ -117,10 +117,12 @@ public final class SparkFactionApi {
 
     /**
      * Registers a collision exemption during mod initialization. If either participant matches,
-     * the current {@code LivingEntity.pushAway(Entity)} operation is cancelled; vehicle-specific
-     * collision overrides are outside this contract.
-     * 应在模组初始化期间注册碰撞豁免；任一参与实体匹配时都会取消当前
-     * {@code LivingEntity.pushAway(Entity)} 操作，但不包含载具自有的碰撞覆写。
+     * pairwise {@code Entity.collidesWith(Entity)} returns false and the corresponding
+     * {@code LivingEntity.pushAway(Entity)} fallback is cancelled. Block collision, projectile
+     * targeting, and vehicle-specific collision overrides are outside this contract.
+     * 应在模组初始化期间注册碰撞豁免；任一参与实体匹配时，双方
+     * {@code Entity.collidesWith(Entity)} 都会返回 false，并取消对应的
+     * {@code LivingEntity.pushAway(Entity)} 兜底推动。本契约不包含方块碰撞、投射物选取或载具碰撞覆写。
      *
      * @param exemption non-null exemption predicate
      */
