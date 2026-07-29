@@ -15,6 +15,7 @@
     "compat.sparkwitch.SparkWitchCombatAffectMixin",
     "compat.sparkwitch.WitchSkillUseAffectMixin",
     "EntityAffectMixin",
+    "EntityCollisionMixin",
     "FactionMixin",
     "GameFunctionsMixin",
     "GameFunctionsPlayerAffectMixin",

@@ -29,12 +29,15 @@ public final class EntityCollisionExemptions {
         return false;
     }
 
-    public static boolean shouldCancelPush(Entity self, Entity other) {
-        return shouldCancelPush(isExempt(self), isExempt(other));
+    public static boolean shouldCancelCollision(Entity self, Entity other) {
+        return shouldCancelCollision(isExempt(self), isExempt(other));
     }
 
-    /** Either side may veto the pair so callers cannot push an exempt entity from the opposite side. */
-    static boolean shouldCancelPush(boolean selfExempt, boolean otherExempt) {
+    public static boolean shouldCancelPush(Entity self, Entity other) {
+        return shouldCancelCollision(self, other);
+    }
+
+    static boolean shouldCancelCollision(boolean selfExempt, boolean otherExempt) {
         return selfExempt || otherExempt;
     }
 }

@@ -156,6 +156,7 @@ tasks.register("verifyModJarVersion") {
                     "dev/caecorthus/sparkfactionapi/impl/target/PlayerAffectRules.class",
                     "dev/caecorthus/sparkfactionapi/impl/target/PlayerAffectMixinGuard.class",
                     "dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipment.class",
+                    "dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesCollisionCompatibility.class",
                     "dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesHiddenEquipmentRegistry.class",
                     "dev/caecorthus/sparkfactionapi/mixin/compat/noellesroles/NoellesHiddenEquipmentHelperMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/compat/noellesroles/NoellesRolesDemonHunterAffectMixin.class",
@@ -168,6 +169,7 @@ tasks.register("verifyModJarVersion") {
                     "dev/caecorthus/sparkfactionapi/mixin/compat/sparkwitch/SparkWitchCombatAffectMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/compat/sparkwitch/WitchSkillUseAffectMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/EntityAffectMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/EntityCollisionMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/GameFunctionsPlayerAffectMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/GameSettingsCommandMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/GunShootPayloadReceiverMixin.class",
@@ -221,6 +223,7 @@ tasks.register("verifyModJarVersion") {
                             "compat.sparkwitch.SparkWitchCombatAffectMixin",
                             "compat.sparkwitch.WitchSkillUseAffectMixin",
                             "EntityAffectMixin",
+                            "EntityCollisionMixin",
                             "GameFunctionsPlayerAffectMixin",
                             "GameSettingsCommandMixin",
                             "GunShootPayloadReceiverMixin",
@@ -279,6 +282,7 @@ def architectureContractFiles = [
         "src/main/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApi.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/api/PlayerAffectPolicy.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipment.java",
+        "src/main/java/dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesCollisionCompatibility.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/impl/shop/FactionShopAccessRules.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/api/PlayerAffectPolicyTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApiCompatibilityTest.java",
@@ -290,7 +294,9 @@ def architectureContractFiles = [
         "src/test/java/dev/caecorthus/sparkfactionapi/command/settings/GameSettingsCommandMixinCompatibilityTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/roundend/FactionWinRulesTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/collision/EntityCollisionExemptionsTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/collision/EntityCollisionMixinContractTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/collision/LivingEntityCollisionMixinContractTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesCollisionCompatibilityContractTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/net/version/VersionProtocolTest.java"
 ]
 
