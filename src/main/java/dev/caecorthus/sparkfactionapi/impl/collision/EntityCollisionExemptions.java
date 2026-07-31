@@ -2,6 +2,7 @@ package dev.caecorthus.sparkfactionapi.impl.collision;
 
 import dev.caecorthus.sparkfactionapi.api.EntityCollisionExemption;
 import net.minecraft.entity.Entity;
+import net.minecraft.server.world.ServerWorld;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,25 @@ public final class EntityCollisionExemptions {
     }
 
     public static boolean isExempt(Entity entity) {
+        return entity instanceof EntityCollisionTrackedState trackedState
+                && trackedState.sparkfactionapi$isCollisionExempt();
+    }
+
+    public static void refresh(Entity entity) {
+        if (entity == null || !(entity.getWorld() instanceof ServerWorld)) {
+            return;
+        }
+        if (!(entity instanceof EntityCollisionTrackedState trackedState)) {
+            return;
+        }
+
+        boolean exempt = evaluateProviders(entity);
+        if (trackedState.sparkfactionapi$isCollisionExempt() != exempt) {
+            trackedState.sparkfactionapi$setCollisionExempt(exempt);
+        }
+    }
+
+    static boolean evaluateProviders(Entity entity) {
         if (entity == null) {
             return false;
         }

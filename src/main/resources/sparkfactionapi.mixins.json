@@ -16,6 +16,7 @@
     "compat.sparkwitch.WitchSkillUseAffectMixin",
     "EntityAffectMixin",
     "EntityCollisionMixin",
+    "EntityCollisionStateMixin",
     "FactionMixin",
     "GameFunctionsMixin",
     "GameFunctionsPlayerAffectMixin",
@@ -30,6 +31,7 @@
     "PlayerEntityAffectMixin",
     "PlayerShopComponentMixin",
     "RoleMixin",
+    "ServerEntityHandlerCollisionMixin",
     "ServerPlayerEntityAffectMixin",
     "WorldProjectileAffectMixin",
     "WorldBlackoutComponentMixin"

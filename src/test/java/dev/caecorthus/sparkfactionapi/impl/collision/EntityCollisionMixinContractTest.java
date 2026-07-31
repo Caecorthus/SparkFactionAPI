@@ -16,13 +16,13 @@ class EntityCollisionMixinContractTest {
         ));
         String config = Files.readString(Path.of("src/main/resources/sparkfactionapi.mixins.json"));
 
-        assertTrue(source.contains("@Mixin(Entity.class)"));
-        assertTrue(source.contains("method = \"collidesWith(Lnet/minecraft/entity/Entity;)Z\""));
-        assertTrue(source.contains("at = @At(\"HEAD\")"));
-        assertTrue(source.contains("cancellable = true"));
-        assertTrue(source.contains("CallbackInfoReturnable<Boolean>"));
+        assertTrue(source.contains("@Mixin(value = Entity.class, priority = 1100)"));
+        assertTrue(source.contains("@WrapMethod(method = \"collidesWith(Lnet/minecraft/entity/Entity;)Z\")"));
+        assertTrue(source.contains("Operation<Boolean> original"));
         assertTrue(source.contains("EntityCollisionExemptions.shouldCancelCollision"));
-        assertTrue(source.contains("cir.setReturnValue(false)"));
+        assertTrue(source.contains("return false;"));
+        assertTrue(source.contains("return original.call(other);"));
+        assertFalse(source.contains("@Inject("));
         assertFalse(source.contains("method = \"isCollidable"));
         assertFalse(source.contains("method = \"isPushable"));
         assertTrue(config.contains("\"EntityCollisionMixin\""));
