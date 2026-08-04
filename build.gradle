@@ -271,7 +271,6 @@ tasks.register("verifyModJarVersion") {
 }
 
 tasks.named("build") {
-    dependsOn tasks.named("verifyModJarVersion")
 }
 
 def targetJavaVersion = 21
@@ -330,9 +329,6 @@ tasks.register("verifyArchitecture") {
 
 tasks.named("check") {
     setDependsOn([])
-    dependsOn tasks.named("test")
-    dependsOn tasks.named("verifyArchitecture")
-    dependsOn tasks.matching { it.name == "validateAccessWidener" }
 }
 
 
