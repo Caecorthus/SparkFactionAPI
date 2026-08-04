@@ -1,12 +1,13 @@
-.gradle/
+/.gradle/
 .idea/
 /ARCHITECTURE.md
 /ARCHITECTURE_LOGS.md
 /ARCHITECTURE LOGS.md
-build/
-run/
-out/
-bin/
+/build/
+/run/
+/out/
+/bin/
+/logs/
 .worktrees/
 *.iml
 .DS_Store
