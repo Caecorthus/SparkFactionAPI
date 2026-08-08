@@ -2,7 +2,6 @@ package dev.caecorthus.sparkfactionapi.impl.collision;
 
 import dev.caecorthus.sparkfactionapi.api.EntityCollisionExemption;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.world.ServerWorld;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,25 +18,9 @@ public final class EntityCollisionExemptions {
     }
 
     public static boolean isExempt(Entity entity) {
-        return entity instanceof EntityCollisionTrackedState trackedState
-                && trackedState.sparkfactionapi$isCollisionExempt();
-    }
-
-    public static void refresh(Entity entity) {
-        if (entity == null || !(entity.getWorld() instanceof ServerWorld)) {
-            return;
-        }
-        if (!(entity instanceof EntityCollisionTrackedState trackedState)) {
-            return;
-        }
-
-        boolean exempt = evaluateProviders(entity);
-        if (trackedState.sparkfactionapi$isCollisionExempt() != exempt) {
-            trackedState.sparkfactionapi$setCollisionExempt(exempt);
-        }
-    }
-
-    static boolean evaluateProviders(Entity entity) {
+        // 回退为本地即时判定：不要再给 Entity 注册额外 DataTracker 字段。
+        // 客户端带 DLC、大厅服未带 DLC 时，新增实体同步字段会把原版字段编号顶偏，
+        // 最终在 clientbound/minecraft:set_entity_data 包里触发类型不一致的网络协议错误。
         if (entity == null) {
             return false;
         }
