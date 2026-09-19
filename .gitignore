@@ -12,3 +12,7 @@
 *.iml
 .DS_Store
 *.log
+
+# Keep test sources local-only.
+/src/test/
+/docs/
