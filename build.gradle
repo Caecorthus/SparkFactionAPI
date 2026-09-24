@@ -155,6 +155,7 @@ tasks.register("verifyModJarVersion") {
                     "dev/caecorthus/sparkfactionapi/net/version/ServerVersionHandshake.class",
                     "dev/caecorthus/sparkfactionapi/net/version/VersionProtocol.class",
                     "dev/caecorthus/sparkfactionapi/api/PlayerAffectPolicy.class",
+                    "dev/caecorthus/sparkfactionapi/api/PoliceRoles.class",
                     "dev/caecorthus/sparkfactionapi/api/EntityCollisionExemption.class",
                     "dev/caecorthus/sparkfactionapi/impl/collision/EntityCollisionExemptions.class",
                     "dev/caecorthus/sparkfactionapi/impl/gun/FactionGunPunishmentAdapter.class",
@@ -290,6 +291,8 @@ def contractFiles = [
 def architectureContractFiles = [
         "src/main/java/dev/caecorthus/sparkfactionapi/api/SparkFactionApi.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/api/PlayerAffectPolicy.java",
+        "src/main/java/dev/caecorthus/sparkfactionapi/api/PoliceRoles.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/api/PoliceRolesTest.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/api/compat/NoellesHiddenEquipment.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesCollisionCompatibility.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/impl/shop/FactionShopAccessRules.java",
