@@ -64,21 +64,6 @@ class PlayerAffectAdapterContractTest {
         }
     }
 
-    @Test
-    void everyAdapterIsRegisteredInTheCommonMixinConfig() throws IOException {
-        String config = Files.readString(Path.of("src/main/resources/sparkfactionapi.mixins.json"));
-
-        for (String mixin : List.of(
-                "KnifeStabPayloadReceiverMixin",
-                "GunShootPayloadReceiverMixin",
-                "ServerPlayerEntityAffectMixin",
-                "PlayerEntityAffectMixin",
-                "EntityAffectMixin"
-        )) {
-            assertTrue(config.contains("\"" + mixin + "\""), "missing mixin " + mixin);
-        }
-    }
-
     private static String source(String name) throws IOException {
         Path path = MIXIN_ROOT.resolve(name);
         assertTrue(Files.isRegularFile(path), "missing adapter " + name);

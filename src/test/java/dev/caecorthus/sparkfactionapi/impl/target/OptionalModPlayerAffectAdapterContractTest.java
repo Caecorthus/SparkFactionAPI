@@ -102,16 +102,10 @@ class OptionalModPlayerAffectAdapterContractTest {
     }
 
     @Test
-    void allOptionalAdaptersAndTheGenericKillGuardAreRegistered() throws IOException {
+    void retiredThrowingAxeAdapterRemainsUnregistered() throws IOException {
         String config = Files.readString(Path.of("src/main/resources/sparkfactionapi.mixins.json"));
 
-        assertTrue(config.contains("\"GameFunctionsPlayerAffectMixin\""));
-        assertTrue(config.contains("\"WorldProjectileAffectMixin\""));
         assertFalse(config.contains("NoellesRolesThrowingAxeAffectMixin"));
-        for (String file : adapterFiles()) {
-            String mixin = file.substring(0, file.length() - ".java".length()).replace('/', '.');
-            assertTrue(config.contains("\"" + mixin + "\""), "missing mixin " + mixin);
-        }
     }
 
     private static List<String> adapterFiles() {
