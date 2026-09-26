@@ -8,7 +8,6 @@
     "compat.noellesroles.NoellesRolesDemonHunterAffectMixin",
     "compat.noellesroles.NoellesRolesPacketAffectMixin",
     "compat.noellesroles.NoellesRolesPoisonGasAffectMixin",
-    "compat.sparkstrength.CriminologistAffectMixin",
     "compat.sparkstrength.NoisemakerAffectMixin",
     "compat.sparkstrength.ProfessorSerumAffectMixin",
     "compat.sparkstrength.VeteranKnifeAffectMixin",
