@@ -51,7 +51,7 @@ final class RoleSkillStoreRegistry {
                             store.nominalTicks(player)
                     ));
                 }
-            } catch (RuntimeException failure) {
+            } catch (RuntimeException | LinkageError failure) {
                 failures.report(source(registered), "slot not listed", failure);
             }
         }
@@ -66,7 +66,7 @@ final class RoleSkillStoreRegistry {
         }
         try {
             return forcible(registered.store(), player) && registered.store().raiseTo(player, ticks);
-        } catch (RuntimeException failure) {
+        } catch (RuntimeException | LinkageError failure) {
             failures.report(source(registered), "raise not written", failure);
             return false;
         }
@@ -80,7 +80,7 @@ final class RoleSkillStoreRegistry {
         }
         try {
             return forcible(registered.store(), player) && registered.store().extendBy(player, ticks);
-        } catch (RuntimeException failure) {
+        } catch (RuntimeException | LinkageError failure) {
             failures.report(source(registered), "extend not written", failure);
             return false;
         }

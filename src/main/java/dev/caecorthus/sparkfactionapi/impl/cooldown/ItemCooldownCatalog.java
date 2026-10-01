@@ -75,7 +75,7 @@ final class ItemCooldownCatalog<I> {
                 if (provided != null && provided.isPresent() && provided.getAsInt() >= 0) {
                     return provided;
                 }
-            } catch (RuntimeException failure) {
+            } catch (RuntimeException | LinkageError failure) {
                 failures.report("Item nominal-cooldown provider #" + index, "treated as no answer", failure);
             }
         }
@@ -100,7 +100,7 @@ final class ItemCooldownCatalog<I> {
                 if (exemptions.get(index).test(item)) {
                     return true;
                 }
-            } catch (RuntimeException failure) {
+            } catch (RuntimeException | LinkageError failure) {
                 failures.report("Item cooldown exemption #" + index, "item treated as exempt", failure);
                 return true;
             }

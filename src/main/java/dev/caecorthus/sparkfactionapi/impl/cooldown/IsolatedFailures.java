@@ -18,7 +18,7 @@ final class IsolatedFailures {
 
     private final Set<String> warnedSources = ConcurrentHashMap.newKeySet();
 
-    void report(String source, String outcome, RuntimeException failure) {
+    void report(String source, String outcome, Throwable failure) {
         if (warnedSources.add(source)) {
             LOGGER.warn("{} threw; {} (further failures from this source are logged at debug)", source, outcome, failure);
         } else {
