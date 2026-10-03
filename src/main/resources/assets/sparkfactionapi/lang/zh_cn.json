@@ -4,5 +4,19 @@
   "commands.sparkfactionapi.faction.custom": "自定义阵营",
   "announcement.win.sparkfactionapi.custom": "自定义阵营胜利",
   "game.win.sparkfactionapi.custom": "自定义阵营完成了胜利目标",
-  "commands.sparkfactionapi.listroles.special": "特殊/冤魂职业"
+  "commands.sparkfactionapi.listroles.special": "特殊/冤魂职业",
+  "replay.sparkfactionapi.role_changed": "⇄ %s 身份转变：%s → %s",
+  "replay.sparkfactionapi.role_changed.cause.noellesroles.shadow_transform": "（化身为真正的小丑）",
+  "replay.sparkfactionapi.roster.title": "本局玩家（打开聊天栏，将鼠标悬停在名字上可查看身份与词条）",
+  "replay.sparkfactionapi.status.alive": "存活",
+  "replay.sparkfactionapi.status.dead": "死亡",
+  "replay.sparkfactionapi.status.left": "离开",
+  "replay.sparkfactionapi.result.win": "胜利",
+  "replay.sparkfactionapi.result.lose": "失败",
+  "replay.sparkfactionapi.tooltip.role": "身份：%s",
+  "replay.sparkfactionapi.tooltip.faction": "阵营：%s",
+  "replay.sparkfactionapi.tooltip.status": "结局：%s",
+  "replay.sparkfactionapi.hint.reopen": "[点击或输入 /replay 重新查看本局回放]",
+  "commands.sparkfactionapi.replay.none": "暂无可查看的回放",
+  "replay.sparkfactionapi.role.none": "无身份"
 }
