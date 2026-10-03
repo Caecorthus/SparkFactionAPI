@@ -13,6 +13,8 @@
     "compat.sparkstrength.VeteranKnifeAffectMixin",
     "compat.sparkwitch.SparkWitchCombatAffectMixin",
     "compat.sparkwitch.WitchSkillUseAffectMixin",
+    "cooldown.ItemCooldownEntryAccessor",
+    "cooldown.ItemCooldownManagerAccessor",
     "EntityAffectMixin",
     "EntityCollisionMixin",
     "FactionMixin",

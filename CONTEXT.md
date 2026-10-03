@@ -26,6 +26,11 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - **Hidden equipment registration**: an item-identity registration through
   `api/compat/NoellesHiddenEquipment`. When NoellesRoles is present, the
   optional Adapter adds registered items to its existing held-item hiding path.
+- **Forced cooldown**: a cooldown imposed on a player by another feature (penalty,
+  aura, debuff) through `api/cooldown/ForcedCooldowns`, covering both
+  registered role-skill stores (`RoleSkillCooldownStore`) and vanilla item
+  cooldowns on carried items. A `CooldownSlot` is a read-only snapshot; writes
+  re-read the live value.
 
 ## Stable Runtime Contracts
 
@@ -38,6 +43,21 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - Hidden-equipment registration is idempotent and monotonic: registrations may
   add hidden items but never unhide an item selected by NoellesRoles. With
   NoellesRoles absent, registration remains inert and does not fail loading.
+- Forced cooldowns are monotonic and exact. `raise` writes only when the new
+  remaining value exceeds the current one; `extend` adds to the remaining value
+  (saturating, ready slots restart) and ignores non-positive amounts. Item
+  writes bypass `ItemCooldownManager.set` duration modifiers by rewriting the
+  vanilla entry in place and sending an exact `CooldownUpdateS2CPacket`.
+  `slots` order is role-skill stores in registration order (only when
+  `appliesTo` and `mayForce` hold), then distinct non-exempt carried items in
+  main inventory, offhand, armor order, including ready items. Item nominal
+  lookup is explicit value (last wins), providers in registration order (first
+  present wins), then Wathe `GameConstants.ITEM_COOLDOWNS`. Items whose registry
+  id is `noellesroles:timed_bomb` are exempt by default; registered exemptions
+  only add to that. Writes re-check `appliesTo`/`mayForce`, exemption, and
+  possession; a throwing store, provider, or exemption is logged and isolated
+  (exemptions fail closed). Player-taking entry points throw
+  `IllegalStateException` off the server thread.
 
 - Replay event type: `sparkfactionapi:role_changed` with NBT keys `player`
   (UUID), `from`, `to` (role ids), optional `cause` (id) and `source` (UUID).
