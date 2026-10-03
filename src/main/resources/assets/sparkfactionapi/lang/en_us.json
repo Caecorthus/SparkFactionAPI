@@ -4,5 +4,19 @@
   "commands.sparkfactionapi.faction.custom": "Custom Faction",
   "announcement.win.sparkfactionapi.custom": "Custom Faction Wins!",
   "game.win.sparkfactionapi.custom": "A custom faction completed its objective.",
-  "commands.sparkfactionapi.listroles.special": "Special / Wraith Roles"
+  "commands.sparkfactionapi.listroles.special": "Special / Wraith Roles",
+  "replay.sparkfactionapi.role_changed": "⇄ %s changed role: %s → %s",
+  "replay.sparkfactionapi.role_changed.cause.noellesroles.shadow_transform": " (became the true Jester)",
+  "replay.sparkfactionapi.roster.title": "Players (open chat and hover a name to see roles and traits)",
+  "replay.sparkfactionapi.status.alive": "Alive",
+  "replay.sparkfactionapi.status.dead": "Dead",
+  "replay.sparkfactionapi.status.left": "Left",
+  "replay.sparkfactionapi.result.win": "Won",
+  "replay.sparkfactionapi.result.lose": "Lost",
+  "replay.sparkfactionapi.tooltip.role": "Role: %s",
+  "replay.sparkfactionapi.tooltip.faction": "Faction: %s",
+  "replay.sparkfactionapi.tooltip.status": "Result: %s",
+  "replay.sparkfactionapi.hint.reopen": "[Click or type /replay to view this replay again]",
+  "commands.sparkfactionapi.replay.none": "No replay is available yet",
+  "replay.sparkfactionapi.role.none": "No role"
 }
