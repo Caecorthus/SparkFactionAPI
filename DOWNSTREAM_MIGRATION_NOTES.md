@@ -1,5 +1,35 @@
 # Downstream Migration Notes
 
+## 2026-10-03 Two-Row Limited Inventory (0.1.5.13)
+
+No API change. Behavior that add-ons can observe while Wathe's limited
+inventory is in use (alive, survival, `TrainWorldComponent#hasHud`; the HUD
+flag defaults to on, so this includes the lobby):
+
+- `LimitedInventoryScreen` also shows and clicks player-inventory slots 27-35
+  as a second row above the hotbar, drawn from Wathe's own strip texture. Main
+  slots 9-26 stay hidden. Items that add-ons park in hidden storage from slot 9
+  upward stay hidden while 9-26 has room; loops that scan 9..35 can reach 27.
+  Players can now move items into, or out of, 27-35. Hotbar-only rules
+  (SparkStrength tablet, SparkWitch bound items) still treat 27-35 as outside
+  the hotbar, so a bound item parked there is a stray to their sweeps.
+- While psycho mode runs, clicks on 27-35 are ignored on both sides, so the
+  psycho bat cannot leave the hotbar.
+- `PlayerInventory#getEmptySlot` prefers 0-8, then 27-35, then 9-26, so
+  pickups, `giveItemStack`, `insertStack` and `offerOrDrop` fill the visible row
+  before hidden storage. Nothing is lost or dropped that vanilla would have
+  kept; merging into existing stacks is unchanged.
+- A default `ShopEntry#onBuy` (no custom handler) whose hotbar is full now
+  succeeds into the second row. Custom buy handlers and direct callers of the
+  static `ShopEntry.insertStackInFreeSlot` remain hotbar-only.
+- The item tooltip in that screen is one box (name, then description) at
+  Wathe's description anchor below the strip; the name no longer floats above
+  the strip, where the second row now sits.
+- An inactive `ClickableWidget` covers the second row's 176x22 band, so
+  per-frame widget-obstacle scans (SparkWitch/SparkTraits info cards, the
+  SparkAssist guidebook) avoid it. Code that hard-codes the 176x32 strip should
+  treat `(x, y - 22, 176, 54)` as the inventory block.
+
 ## 2026-10-03 Replay API (0.1.5.12)
 
 Additive and source/binary compatible. No migration is required.

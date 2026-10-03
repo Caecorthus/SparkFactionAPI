@@ -4,7 +4,9 @@
   "package": "dev.caecorthus.sparkfactionapi.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "RoundTextRendererMixin"
+    "RoundTextRendererMixin",
+    "inventory.LimitedHandledScreenSecondRowMixin",
+    "inventory.LimitedInventoryScreenSecondRowMixin"
   ],
   "injectors": {
     "defaultRequire": 1
