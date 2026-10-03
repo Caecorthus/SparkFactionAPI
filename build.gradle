@@ -207,7 +207,16 @@ tasks.register("verifyModJarVersion") {
                     "dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesShadowTransformReplayCompat.class",
                     "dev/caecorthus/sparkfactionapi/command/replay/ReplayCommand.class",
                     "dev/caecorthus/sparkfactionapi/mixin/GameWorldComponentReplayMixin.class",
-                    "dev/caecorthus/sparkfactionapi/mixin/ReplayGeneratorMixin.class"
+                    "dev/caecorthus/sparkfactionapi/mixin/ReplayGeneratorMixin.class",
+                    "dev/caecorthus/sparkfactionapi/impl/inventory/LimitedInventoryRows.class",
+                    "dev/caecorthus/sparkfactionapi/impl/inventory/LimitedInventoryScope.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/inventory/PlayerInventoryRowOrderMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/inventory/ShopEntrySecondRowMixin.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/inventory/ScreenHandlerPsychoSecondRowMixin.class",
+                    "dev/caecorthus/sparkfactionapi/client/inventory/LimitedInventorySecondRow.class",
+                    "dev/caecorthus/sparkfactionapi/client/inventory/LimitedInventorySecondRow\$Bounds.class",
+                    "dev/caecorthus/sparkfactionapi/client/mixin/inventory/LimitedHandledScreenSecondRowMixin.class",
+                    "dev/caecorthus/sparkfactionapi/client/mixin/inventory/LimitedInventoryScreenSecondRowMixin.class"
             ].each { requiredEntry ->
                 // Runtime compatibility depends on these shipped adapter classes, not just successful compilation.
                 // 运行时兼容依赖这些随 jar 发布的适配类，而不只是编译成功。
@@ -267,10 +276,15 @@ tasks.register("verifyModJarVersion") {
                     "WorldProjectileAffectMixin",
                     "GameRoundEndComponentMixin",
                     "GameWorldComponentReplayMixin",
-                    "ReplayGeneratorMixin"
+                    "ReplayGeneratorMixin",
+                    "inventory.PlayerInventoryRowOrderMixin",
+                    "inventory.ScreenHandlerPsychoSecondRowMixin",
+                    "inventory.ShopEntrySecondRowMixin"
             ],
                     "sparkfactionapi.client.mixins.json": [
-                            "RoundTextRendererMixin"
+                            "RoundTextRendererMixin",
+                            "inventory.LimitedHandledScreenSecondRowMixin",
+                            "inventory.LimitedInventoryScreenSecondRowMixin"
                     ]
             ].each { mixinConfigEntry, requiredMixins ->
                 def mixinEntry = zipFile.getEntry(mixinConfigEntry)
@@ -339,7 +353,9 @@ def architectureContractFiles = [
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesCollisionCompatibilityContractTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/net/version/VersionProtocolTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/replay/ReplayRoleTimelineTest.java",
-        "src/test/java/dev/caecorthus/sparkfactionapi/impl/replay/RoleChangeRecordRulesTest.java"
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/replay/RoleChangeRecordRulesTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/inventory/LimitedInventoryRowsTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/inventory/LimitedInventorySeamTest.java"
 ]
 
 tasks.register("verifyArchitecture") {

@@ -26,6 +26,11 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - **Hidden equipment registration**: an item-identity registration through
   `api/compat/NoellesHiddenEquipment`. When NoellesRoles is present, the
   optional Adapter adds registered items to its existing held-item hiding path.
+- **Limited inventory second row**: player-inventory main slots 27-35, shown
+  directly above the hotbar in Wathe's `LimitedInventoryScreen`. Main slots
+  9-26 stay hidden storage for add-ons. "In the limited inventory" means alive,
+  survival, and Wathe `TrainWorldComponent#hasHud`, the same condition under
+  which Wathe swaps in that screen.
 - **Forced cooldown**: a cooldown imposed on a player by another feature (penalty,
   aura, debuff) through `api/cooldown/ForcedCooldowns`, covering both
   registered role-skill stores (`RoleSkillCooldownStore`) and vanilla item
@@ -66,6 +71,12 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - Replay tooltip contributors run in registration order while Wathe generates
   the replay, before players are reset; a failing contributor is skipped.
 - `/replay` resends the latest generated replay to the calling player.
+- In the limited inventory, `PlayerInventory#getEmptySlot` returns hotbar 0-8,
+  then second row 27-35, then hidden 9-26; capacity and stack merging stay
+  vanilla. A default Wathe shop purchase (no custom buy handler) whose hotbar is
+  full is placed with `setStack` in the first empty second-row slot. The static
+  `ShopEntry.insertStackInFreeSlot` stays hotbar-only. While psycho ticks are
+  positive, slot clicks on second-row slots are ignored.
 
 ## Current Dependency Picture
 
