@@ -7,7 +7,9 @@ inventory is in use (alive, survival, `TrainWorldComponent#hasHud`; the HUD
 flag defaults to on, so this includes the lobby):
 
 - `LimitedInventoryScreen` also shows and clicks player-inventory slots 27-35
-  as a second row above the hotbar, drawn from Wathe's own strip texture. Main
+  as a second row above the hotbar. Its frame is a blue recolor of Wathe's
+  own strip texture, generated in memory at resource load; the divider and the
+  hotbar keep Wathe's gold, and no Wathe artwork is shipped. Main
   slots 9-26 stay hidden. Items that add-ons park in hidden storage from slot 9
   upward stay hidden while 9-26 has room; loops that scan 9..35 can reach 27.
   Players can now move items into, or out of, 27-35. Hotbar-only rules
