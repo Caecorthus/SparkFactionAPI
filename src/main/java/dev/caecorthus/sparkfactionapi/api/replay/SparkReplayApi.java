@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkfactionapi.api.replay;
 
+import dev.caecorthus.sparkfactionapi.impl.replay.ReplayBadgeContributors;
 import dev.caecorthus.sparkfactionapi.impl.replay.ReplayTooltipContributors;
 import dev.caecorthus.sparkfactionapi.impl.replay.RoleChangeCauseScope;
 import net.minecraft.entity.player.PlayerEntity;
@@ -55,6 +56,19 @@ public final class SparkReplayApi {
      */
     public static void registerPlayerTooltipContributor(Identifier id, ReplayTooltipContributor contributor) {
         ReplayTooltipContributors.register(
+                Objects.requireNonNull(id, "id"),
+                Objects.requireNonNull(contributor, "contributor")
+        );
+    }
+
+    /**
+     * Adds badges (small coloured labels, e.g. traits) to every participant's card in the replay screen, in
+     * registration order. Same lifecycle as tooltip contributors; re-registering an id replaces it in place.
+     * 为回放界面中每名参与者的卡片追加标签（彩色小标签，例如词条），按注册顺序执行。生命周期与悬停提示贡献者相同；
+     * 重复注册同一 id 会原位替换。
+     */
+    public static void registerPlayerBadgeContributor(Identifier id, ReplayBadgeContributor contributor) {
+        ReplayBadgeContributors.register(
                 Objects.requireNonNull(id, "id"),
                 Objects.requireNonNull(contributor, "contributor")
         );

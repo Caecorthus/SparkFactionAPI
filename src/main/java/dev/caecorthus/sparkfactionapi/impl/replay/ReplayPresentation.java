@@ -2,10 +2,13 @@ package dev.caecorthus.sparkfactionapi.impl.replay;
 
 import dev.caecorthus.sparkfactionapi.SparkFactionApiMod;
 import dev.caecorthus.sparkfactionapi.command.replay.ReplayCommand;
+import dev.caecorthus.sparkfactionapi.net.replay.ReplaySnapshotPayload;
+import dev.doctor4t.wathe.record.GameRecordEvent;
 import dev.doctor4t.wathe.record.GameRecordManager;
 import dev.doctor4t.wathe.record.replay.ReplayGenerator;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.ClickEvent;
@@ -19,10 +22,11 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Presentation side of the replay module: time-aware names, hover tooltips, roster, archive, and /replay.
+ * Presentation side of the replay module: time-aware names, hover tooltips, roster, end-of-match summary, screen
+ * snapshot, archive, and /replay.
  * The {@code ReplayGeneratorMixin} adapter only forwards Wathe seams here; every hook degrades to Wathe's
  * original behaviour when no session is active or presentation code fails, so the replay itself never breaks.
- * 回放模块的展示侧：按时间解析的名字、悬停提示、名单、存档与 /replay 命令。{@code ReplayGeneratorMixin}
+ * 回放模块的展示侧：按时间解析的名字、悬停提示、名单、局末摘要、界面快照、存档与 /replay 命令。{@code ReplayGeneratorMixin}
  * 适配器只把 Wathe 接缝转发到这里；没有活动会话或展示代码出错时，每个钩子都退回 Wathe 原行为，回放本身不会中断。
  */
 public final class ReplayPresentation {
@@ -55,13 +59,78 @@ public final class ReplayPresentation {
             original.run();
         } finally {
             ReplayRenderContext.clear();
-            List<Text> body = session.generatedLines();
-            if (body != null) {
-                ReplayArchive.store(ReplayArchive.frame(body, reopenHint()));
-            } else {
-                ReplayArchive.clear();
+            archive(session, world);
+        }
+    }
+
+    /**
+     * Stores the chat lines with the optional screen snapshot: if the snapshot fails or is too large, the archive
+     * keeps only chat and /replay falls back to it.
+     * 存入聊天行及可选的界面快照：快照构建失败或过大时存档只保留聊天，/replay 退回聊天回放。
+     */
+    private static void archive(ReplaySession session, ServerWorld world) {
+        List<Text> body = session.generatedLines();
+        if (body == null) {
+            ReplayArchive.clear();
+            return;
+        }
+        long endedAtMillis = System.currentTimeMillis();
+        ReplaySnapshotBuilder.Built built = null;
+        try {
+            built = ReplaySnapshotBuilder.build(session, world.getServer().getRegistryManager());
+        } catch (RuntimeException | LinkageError e) {
+            SparkFactionApiMod.LOGGER.error("Failed to build the replay screen snapshot; /replay will resend chat", e);
+        }
+        ReplayArchive.store(
+                ReplayArchive.frame(body),
+                built == null ? null : built.snapshot(),
+                built == null ? 0 : built.encodedBytes(),
+                endedAtMillis
+        );
+    }
+
+    /**
+     * Captures one formatted line for the snapshot; never breaks Wathe's generation.
+     * 为快照记录一行已格式化内容；不会中断 Wathe 的生成。
+     */
+    public static void recordFormattedLine(GameRecordManager.MatchRecord match, GameRecordEvent event, Text text) {
+        ReplaySession session = ReplayRenderContext.session();
+        if (session == null || !session.isFor(match)) {
+            return;
+        }
+        try {
+            session.recordFormattedLine(event, text);
+        } catch (RuntimeException e) {
+            if (session.markRenderFailureLogged()) {
+                SparkFactionApiMod.LOGGER.error("Failed to capture a replay line for the screen snapshot", e);
             }
         }
+    }
+
+    /**
+     * Sends the short summary in place of Wathe's full chat replay when a session is active and the player's client
+     * registered the snapshot payload. Returns true when sent, so the caller cancels Wathe's chat for this player.
+     * 会话有效且玩家客户端注册了快照数据包时，用简短摘要替代 Wathe 完整聊天回放。已发送时返回 true，由调用方取消该玩家的聊天回放。
+     */
+    public static boolean sendSummaryInstead(ServerPlayerEntity player) {
+        ReplaySession session = ReplayRenderContext.session();
+        if (session == null) {
+            return false;
+        }
+        List<Text> summary;
+        try {
+            if (!ServerPlayNetworking.canSend(player, ReplaySnapshotPayload.ID)) {
+                return false;
+            }
+            summary = session.summaryLines();
+        } catch (RuntimeException | LinkageError e) {
+            SparkFactionApiMod.LOGGER.error("Failed to build the replay summary; sending the full chat replay", e);
+            return false;
+        }
+        for (Text line : summary) {
+            player.sendMessage(line, false);
+        }
+        return true;
     }
 
     /** Session name for {@code formatPlayerName}; null runs Wathe's original. 会话渲染的名字；null 表示执行 Wathe 原逻辑。 */
@@ -106,7 +175,10 @@ public final class ReplayPresentation {
         return body;
     }
 
-    /** Sent after Wathe's footer to each recipient. 在 Wathe 结尾之后发送给每名接收者。 */
+    /**
+     * Sent after Wathe's footer to each full-chat recipient; summary recipients never reach it.
+     * 在 Wathe 结尾之后发送给每名完整聊天接收者；摘要接收者不会走到这里。
+     */
     public static void sendReopenHint(ServerPlayerEntity player) {
         if (ReplayRenderContext.session() != null) {
             player.sendMessage(reopenHint(), false);
