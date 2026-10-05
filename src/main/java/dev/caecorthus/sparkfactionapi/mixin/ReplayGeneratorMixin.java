@@ -59,11 +59,16 @@ public abstract class ReplayGeneratorMixin {
             ServerWorld world,
             Operation<Text> original
     ) {
-        // Names rendered inside this call use the role held at this event's sequence number.
-        // 本次调用内渲染的名字使用该事件序号时刻的身份。
+        // Names rendered inside this call use the role held at this event's sequence number; each non-null result is
+        // also captured, in Wathe's order, for the replay screen snapshot.
+        // 本次调用内渲染的名字使用该事件序号时刻的身份；每个非 null 结果也按 Wathe 顺序记录，供回放界面快照使用。
         GameRecordEvent previous = ReplayRenderContext.swapCurrentEvent(event);
         try {
-            return original.call(formatter, event, match, world);
+            Text formatted = original.call(formatter, event, match, world);
+            if (formatted != null) {
+                ReplayPresentation.recordFormattedLine(match, event, formatted);
+            }
+            return formatted;
         } finally {
             ReplayRenderContext.swapCurrentEvent(previous);
         }
@@ -112,6 +117,27 @@ public abstract class ReplayGeneratorMixin {
             @Local(argsOnly = true) GameRecordManager.MatchRecord match
     ) {
         return ReplayPresentation.prependRoster(match, lines);
+    }
+
+    /**
+     * Wathe calls this once per online player. Players whose client can receive the replay snapshot get a short
+     * summary with buttons instead; cancelling returns before the TAIL hint below, so they never get that hint.
+     * Wathe 对每名在线玩家调用一次。客户端能接收回放快照的玩家改为收到带按钮的简短摘要；取消后直接返回，不会执行下方
+     * TAIL 处的重看提示。
+     */
+    @Inject(
+            method = "sendReplayToPlayer(Lnet/minecraft/server/network/ServerPlayerEntity;Ljava/util/List;)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private static void sparkfactionapi$sendSummaryInstead(
+            ServerPlayerEntity player,
+            List<Text> replayLines,
+            CallbackInfo ci
+    ) {
+        if (ReplayPresentation.sendSummaryInstead(player)) {
+            ci.cancel();
+        }
     }
 
     @Inject(

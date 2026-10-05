@@ -70,7 +70,17 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   `readFromNbt`, when the role id actually changes.
 - Replay tooltip contributors run in registration order while Wathe generates
   the replay, before players are reset; a failing contributor is skipped.
-- `/replay` resends the latest generated replay to the calling player.
+- Replay screen payload: S2C `sparkfactionapi:replay_snapshot` carrying a
+  `ReplaySnapshot` (header, roster with role steps, tooltip and badges, and
+  categorized lines). Player names inside lines carry a `ReplayTextTags`
+  insertion instead of a hover; the client resolves tooltips by UUID. Sent only
+  on request.
+- After a match, clients that registered the payload get a short chat summary
+  with "open replay" and "show in chat" buttons; other clients keep the full
+  chat replay.
+- `/replay` opens the replay screen when the client registered
+  `sparkfactionapi:replay_snapshot` and a snapshot exists, otherwise resends the
+  chat replay; `/replay chat` always resends chat.
 - In the limited inventory, `PlayerInventory#getEmptySlot` returns hotbar 0-8,
   then second row 27-35, then hidden 9-26; capacity and stack merging stay
   vanilla. A default Wathe shop purchase (no custom buy handler) whose hotbar is
@@ -85,5 +95,5 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - SparkWitch is the direct public-API consumer, including replay role-change
   causes.
 - SparkTraits may integrate through optional public seams; it contributes
-  replay trait tooltips through `api/replay`.
+  replay trait tooltips and trait badges through `api/replay`.
 - SparkStrength and SparkAssist are not current Java API consumers.

@@ -1,5 +1,18 @@
 # Downstream Migration Notes
 
+## 2026-10-05 Replay Screen (0.1.5.15)
+
+Additive and source/binary compatible. No migration is required.
+
+- New `SparkReplayApi.registerPlayerBadgeContributor(...)` with `ReplayBadge`
+  and `ReplayBadgeContributor`: small coloured labels on each participant's card
+  in the new replay screen (same lifecycle as tooltip contributors).
+- Players with SparkFactionAPI on the client now get a short end-of-match chat
+  summary instead of the full chat replay; `/replay` opens the screen and
+  `/replay chat` prints the full chat replay. Existing replay formatters need no
+  change: their lines appear in the screen automatically.
+
+
 ## 2026-10-03 Two-Row Limited Inventory (0.1.5.13)
 
 No API change. Behavior that add-ons can observe while Wathe's limited
