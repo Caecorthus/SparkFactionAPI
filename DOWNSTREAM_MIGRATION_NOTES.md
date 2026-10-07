@@ -1,5 +1,20 @@
 # Downstream Migration Notes
 
+## 2026-10-07 Clear Keeping Forced Cooldowns (unreleased)
+
+Additive and source/binary compatible. No migration is required.
+
+- New `ForcedCooldowns.clearItemKeepingForced(ServerPlayerEntity, Item)`
+  returns `int`. Role mechanics that reset or refresh an item cooldown should
+  call it instead of `ItemCooldownManager.remove`. It still removes the
+  natural cooldown, and owner `remove` hooks still run, but a penalty, aura or
+  debuff that another feature forced through `raise`/`extend`/`raiseAll` stays
+  on the item for whatever of it is not yet served (an extension still keeps
+  the ticks it added while the cooldown it was appended to is running).
+- Item `raise`/`extend` behave exactly as before; they now also remember their
+  forced part on the live vanilla entry. A plain `remove` (admin
+  `clearCooldown`, Wathe reset) still clears everything, forced parts included.
+
 ## 2026-10-05 Replay Screen (0.1.5.15)
 
 Additive and source/binary compatible. No migration is required.

@@ -32,6 +32,21 @@ final class ExactItemCooldownWriter {
     }
 
     /**
+     * The live vanilla entry for the item, or {@code null}. Its identity changes on every {@code set} and
+     * {@code remove}; {@code ForcedItemLedger} keys on it.
+     * 物品当前的原版条目，无则为 {@code null}。每次 {@code set} 与 {@code remove} 都会换成新对象；ForcedItemLedger 以其为键。
+     */
+    static ItemCooldownEntryAccessor liveEntry(ItemCooldownManager manager, Item item) {
+        Object entry = ((ItemCooldownManagerAccessor) manager).sparkfactionapi$getEntries().get(item);
+        return entry instanceof ItemCooldownEntryAccessor bounds ? bounds : null;
+    }
+
+    /** The manager's own tick counter (the time base of its entries). / 冷却管理器自身的刻计数（其条目的时间基准）。 */
+    static int tick(ItemCooldownManager manager) {
+        return ((ItemCooldownManagerAccessor) manager).sparkfactionapi$getTick();
+    }
+
+    /**
      * Installs exactly {@code ticks} remaining (callers pass a positive, already-monotonic value). Returns false only
      * when another mod cancelled {@code set} and no entry could be created.
      * 精确写入 {@code ticks} 剩余（调用方传入已满足单调性的正数）。仅当其他模组取消了 {@code set} 导致无法创建条目时返回 false。

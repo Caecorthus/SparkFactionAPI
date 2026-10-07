@@ -75,6 +75,20 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   possession; a throwing store, provider, or exemption is logged and isolated
   (exemptions fail closed). Player-taking entry points throw
   `IllegalStateException` off the server thread.
+- `ForcedCooldowns.clearItemKeepingForced(player, item)` is the role-mechanic
+  clear (refreshes, resets on kill). It runs a plain
+  `ItemCooldownManager.remove`, so owner `remove` hooks still release their own
+  timers. It then re-installs, exactly, the forced part of that item's cooldown
+  that is not yet served, capped at what the item had left, and returns those
+  ticks (0 = ready). Each item `raise`/`extend` that passes the exemption and
+  possession checks records its forced part on the live vanilla entry, keyed
+  weakly by entry identity, so a later plain `remove` (admin `clearCooldown`,
+  Wathe reset) or `set` drops it. A raise is a floor that runs from its write
+  (recorded even when a longer natural cooldown covers it); an extend is
+  appended after the time already there and is served only after it.
+  Natural, and cleared: the item's own use cooldown and owner timers mirrored
+  onto it (SparkWitch Clock, Gift Watch, Ceremonial Sword, White Cane, fish).
+  Role-skill stores are never read or written by it.
 
 - Replay event type: `sparkfactionapi:role_changed` with NBT keys `player`
   (UUID), `from`, `to` (role ids), optional `cause` (id) and `source` (UUID).
@@ -114,3 +128,6 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - SparkTraits may integrate through optional public seams; it contributes
   replay trait tooltips and trait badges through `api/replay`.
 - SparkStrength and SparkAssist are not current Java API consumers.
+  SparkStrength reaches `api/cooldown` (store registration,
+  `clearItemKeepingForced`) only by reflection and falls back when it is
+  missing.
