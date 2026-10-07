@@ -15,5 +15,6 @@ public final class SparkFactionAdminCommands {
         CooldownCommand.register(dispatcher);
         TaskCommand.register(dispatcher);
         SanityCommand.register(dispatcher);
+        AntiFastRoundCommand.register(dispatcher);
     }
 }

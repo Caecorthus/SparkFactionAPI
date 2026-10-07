@@ -54,5 +54,14 @@
   "replay.sparkfactionapi.summary.chat": "[在聊天栏显示]",
   "replay.sparkfactionapi.summary.chat.hover": "把完整回放发到聊天栏（也可以输入 /replay chat）",
   "replay.sparkfactionapi.resend.header": "—— 重新查看上一局回放 ——",
-  "commands.sparkfactionapi.replay.opening": "正在打开回放……"
+  "commands.sparkfactionapi.replay.opening": "正在打开回放……",
+  "commands.sparkfactionapi.antifastround.status.enabled": "防速通局已开启：每局开始时有 %s 秒安全时间",
+  "commands.sparkfactionapi.antifastround.status.disabled": "防速通局已关闭（安全时间设置：%s 秒）",
+  "commands.sparkfactionapi.antifastround.status.window": "当前正处于安全时间（剩余 %s 秒）",
+  "commands.sparkfactionapi.antifastround.enabled": "防速通局已开启：从下一局开始，开局安全时间为 %s 秒",
+  "commands.sparkfactionapi.antifastround.disabled": "防速通局已关闭（安全时间设置：%s 秒）",
+  "commands.sparkfactionapi.antifastround.disabled.window_ended": "防速通局已关闭（安全时间设置：%s 秒），正在进行的安全时间已立即结束",
+  "message.sparkfactionapi.anti_fast_round.start": "开局安全时间：%s 秒内无法使用物品和技能，攻击没有击退",
+  "message.sparkfactionapi.anti_fast_round.end": "安全时间结束，现在可以使用物品和技能了",
+  "message.sparkfactionapi.anti_fast_round.blocked": "安全时间中，暂时无法使用物品和技能（剩余 %s 秒）"
 }

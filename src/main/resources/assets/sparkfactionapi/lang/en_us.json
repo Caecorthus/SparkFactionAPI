@@ -54,5 +54,14 @@
   "replay.sparkfactionapi.summary.chat": "[Show in chat]",
   "replay.sparkfactionapi.summary.chat.hover": "Send the full replay to chat (or type /replay chat)",
   "replay.sparkfactionapi.resend.header": "—— Showing the last match replay again ——",
-  "commands.sparkfactionapi.replay.opening": "Opening the replay…"
+  "commands.sparkfactionapi.replay.opening": "Opening the replay…",
+  "commands.sparkfactionapi.antifastround.status.enabled": "Anti-fast-round is enabled: %s s of safe time at each round start",
+  "commands.sparkfactionapi.antifastround.status.disabled": "Anti-fast-round is disabled (safe time setting: %s s)",
+  "commands.sparkfactionapi.antifastround.status.window": "A safe-time window is running now (%s s left)",
+  "commands.sparkfactionapi.antifastround.enabled": "Anti-fast-round enabled: %s s of safe time from the next round start",
+  "commands.sparkfactionapi.antifastround.disabled": "Anti-fast-round disabled (safe time setting: %s s)",
+  "commands.sparkfactionapi.antifastround.disabled.window_ended": "Anti-fast-round disabled (safe time setting: %s s); the running safe time ended immediately",
+  "message.sparkfactionapi.anti_fast_round.start": "Safe time: items and skills are locked for %s s, hits deal no knockback",
+  "message.sparkfactionapi.anti_fast_round.end": "Safe time is over: items and skills are unlocked",
+  "message.sparkfactionapi.anti_fast_round.blocked": "Safe time: items and skills are locked (%s s left)"
 }

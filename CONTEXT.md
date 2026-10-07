@@ -36,6 +36,18 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   registered role-skill stores (`RoleSkillCooldownStore`) and vanilla item
   cooldowns on carried items. A `CooldownSlot` is a read-only snapshot; writes
   re-read the live value.
+- **Anti-fast-round safe time**: an opt-in window of N seconds, set with
+  `/sparkfactionapi:antifastround`, that opens at Wathe
+  `GameEvents.ON_FINISH_INITIALIZE` and closes on time, at `ON_FINISH_FINALIZE`,
+  or when an administrator disables the feature. It applies to players alive in
+  a running round who are not creative or spectators: item use (right-click use,
+  item-on-block, item-on-entity), payload-fired item uses, and the role-skill
+  C2S payloads listed in `AntiFastRoundRules.BLOCKED_PAYLOADS` are refused, and
+  their entity attacks are cancelled before default-phase listeners run, so hits
+  deal no knockback. Bare-hand block use, bare-hand use of non-player entities, and the
+  shop stay allowed. The N seconds count from the end of Wathe's ~3 s fade-in
+  (the lock already holds during it). Notices use the action bar because Wathe
+  hides chat in-game. Clients stay locked until the server's close sync arrives.
 
 ## Stable Runtime Contracts
 
@@ -87,6 +99,11 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   full is placed with `setStack` in the first empty second-row slot. The static
   `ShopEntry.insertStackInFreeSlot` stays hotbar-only. While psycho ticks are
   positive, slot clicks on second-row slots are ignored.
+- Anti-fast-round component id: `sparkfactionapi:anti_fast_round` (scoreboard).
+  Persisted keys `Enabled` (default false) and `Seconds` (default 10, clamped to
+  1-600). The safe-time window is runtime-only: synced to clients so they can
+  predict the lock, never saved. A new skill payload is blocked only once it is
+  classified in `AntiFastRoundRules.BLOCKED_PAYLOADS`.
 
 ## Current Dependency Picture
 

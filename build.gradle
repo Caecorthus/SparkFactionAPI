@@ -234,7 +234,14 @@ tasks.register("verifyModJarVersion") {
                     "dev/caecorthus/sparkfactionapi/client/inventory/SecondRowPalette.class",
                     "dev/caecorthus/sparkfactionapi/client/inventory/SecondRowTexture.class",
                     "dev/caecorthus/sparkfactionapi/client/mixin/inventory/LimitedHandledScreenSecondRowMixin.class",
-                    "dev/caecorthus/sparkfactionapi/client/mixin/inventory/LimitedInventoryScreenSecondRowMixin.class"
+                    "dev/caecorthus/sparkfactionapi/client/mixin/inventory/LimitedInventoryScreenSecondRowMixin.class",
+                    "dev/caecorthus/sparkfactionapi/impl/antifastround/AntiFastRound.class",
+                    "dev/caecorthus/sparkfactionapi/impl/antifastround/AntiFastRoundRules.class",
+                    "dev/caecorthus/sparkfactionapi/impl/antifastround/AntiFastRoundGuards.class",
+                    "dev/caecorthus/sparkfactionapi/impl/antifastround/AntiFastRoundBootstrap.class",
+                    "dev/caecorthus/sparkfactionapi/component/SparkFactionAntiFastRoundComponent.class",
+                    "dev/caecorthus/sparkfactionapi/command/admin/AntiFastRoundCommand.class",
+                    "dev/caecorthus/sparkfactionapi/mixin/AntiFastRoundPayloadGuardMixin.class"
             ].each { requiredEntry ->
                 // Runtime compatibility depends on these shipped adapter classes, not just successful compilation.
                 // 运行时兼容依赖这些随 jar 发布的适配类，而不只是编译成功。
@@ -297,7 +304,8 @@ tasks.register("verifyModJarVersion") {
                     "ReplayGeneratorMixin",
                     "inventory.PlayerInventoryRowOrderMixin",
                     "inventory.ScreenHandlerPsychoSecondRowMixin",
-                    "inventory.ShopEntrySecondRowMixin"
+                    "inventory.ShopEntrySecondRowMixin",
+                    "AntiFastRoundPayloadGuardMixin"
             ],
                     "sparkfactionapi.client.mixins.json": [
                             "RoundTextRendererMixin",
@@ -374,7 +382,9 @@ def architectureContractFiles = [
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/replay/ReplayRoleTimelineTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/replay/RoleChangeRecordRulesTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/impl/inventory/LimitedInventoryRowsTest.java",
-        "src/test/java/dev/caecorthus/sparkfactionapi/impl/inventory/LimitedInventorySeamTest.java"
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/inventory/LimitedInventorySeamTest.java",
+        "src/main/java/dev/caecorthus/sparkfactionapi/impl/antifastround/AntiFastRoundRules.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/impl/antifastround/AntiFastRoundRulesTest.java"
 ]
 
 tasks.register("verifyArchitecture") {
