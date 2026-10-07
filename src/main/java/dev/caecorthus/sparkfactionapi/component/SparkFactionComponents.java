@@ -8,5 +8,9 @@ public final class SparkFactionComponents implements ScoreboardComponentInitiali
     @Override
     public void registerScoreboardComponentFactories(@NotNull ScoreboardComponentFactoryRegistry registry) {
         registry.registerScoreboardComponent(SparkFactionRoundEndComponent.KEY, SparkFactionRoundEndComponent::new);
+        registry.registerScoreboardComponent(
+                SparkFactionAntiFastRoundComponent.KEY,
+                SparkFactionAntiFastRoundComponent::new
+        );
     }
 }
