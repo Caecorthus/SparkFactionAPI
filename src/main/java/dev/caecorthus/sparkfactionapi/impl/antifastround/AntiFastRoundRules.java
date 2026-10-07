@@ -96,7 +96,10 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkstrength", "timekeeper_watch_mode"),
             Identifier.of("sparkstrength", "drone_pilot_start"),
             Identifier.of("sparkstrength", "drone_pilot_action"),
-            Identifier.of("sparkstrength", "taotie_head_fire")));
+            Identifier.of("sparkstrength", "taotie_head_fire"),
+            // Serial Killer psycho-mode pistol: a gun shot, listed wherever wathe:gunshoot is.
+            // 连环杀手狂暴模式手枪：属于开枪，凡列出 wathe:gunshoot 之处都应同时列出。
+            Identifier.of("sparkstrength", "serial_pistol_shoot")));
 
     private AntiFastRoundRules() {
     }
