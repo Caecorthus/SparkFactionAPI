@@ -23,6 +23,10 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - **Role-change cause**: an identifier attached through
   `SparkReplayApi.withRoleChangeCause`; it selects the optional replay suffix key
   `replay.sparkfactionapi.role_changed.cause.<ns>.<path>[.by]`.
+- **Match record payload**: the structured, non-display copy of one finished
+  Wathe `MatchRecord` (`MatchRecordSnapshot`: event `seq`, `type`, `tick` since
+  the match start, and Wathe's NBT `data`), pushed to clients at round end and
+  read on the client through `client.api.SparkMatchRecordClient.latest()`.
 - **Hidden equipment registration**: an item-identity registration through
   `api/compat/NoellesHiddenEquipment`. When NoellesRoles is present, the
   optional Adapter adds registered items to its existing held-item hiding path.
@@ -107,6 +111,15 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - `/replay` opens the replay screen when the client registered
   `sparkfactionapi:replay_snapshot` and a snapshot exists, otherwise resends the
   chat replay; `/replay chat` always resends chat.
+- Match record payload: S2C `sparkfactionapi:match_record`, sent from Wathe
+  `RecordEvents.ON_RECORD_END` (inside `GameFunctions.finalizeGame`, before
+  `AnnounceEndingPayload` and the INACTIVE status sync) to every online player
+  whose client registered it. Events keep Wathe record order, skip
+  `door_interaction`, and keep only the earliest 8192 that also fit a 900 KiB
+  budget; `tick` is clamped to 0 or more. A failure is logged and never stops
+  finalization. The client stores only the latest snapshot, clears it on
+  disconnect, and opens nothing. `SparkMatchRecordClient.latest()` and the
+  `MatchRecordSnapshot` accessors are read reflectively by SparkAssist.
 - In the limited inventory, `PlayerInventory#getEmptySlot` returns hotbar 0-8,
   then second row 27-35, then hidden 9-26; capacity and stack merging stay
   vanilla. A default Wathe shop purchase (no custom buy handler) whose hotbar is
@@ -130,4 +143,5 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - SparkStrength and SparkAssist are not current Java API consumers.
   SparkStrength reaches `api/cooldown` (store registration,
   `clearItemKeepingForced`) only by reflection and falls back when it is
-  missing.
+  missing. SparkAssist reads the match record through
+  `client.api.SparkMatchRecordClient` only by reflection.
