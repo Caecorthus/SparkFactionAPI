@@ -1,5 +1,19 @@
 # Downstream Migration Notes
 
+## 2026-10-08 Match Record Payload (unreleased)
+
+Additive. No migration is required.
+
+- New S2C payload `sparkfactionapi:match_record`. When Wathe ends a match
+  record, every client that registered it gets the match's structured events
+  (Wathe record order, no `door_interaction`, earliest 8192 within 900 KiB,
+  `tick` since the match start, Wathe NBT unchanged). It arrives before the
+  round-end announcement and opens nothing; replay behavior is unchanged.
+- Client read access: `dev.caecorthus.sparkfactionapi.client.api.SparkMatchRecordClient.latest()`
+  returns the latest `MatchRecordSnapshot` or null (cleared on disconnect).
+  The class name, `latest()`, and the record accessors are a stable contract
+  that SparkAssist reads by reflection.
+
 ## 2026-10-07 Clear Keeping Forced Cooldowns (unreleased)
 
 Additive and source/binary compatible. No migration is required.
