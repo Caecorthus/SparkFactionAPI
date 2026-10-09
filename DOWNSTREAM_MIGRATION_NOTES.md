@@ -1,5 +1,29 @@
 # Downstream Migration Notes
 
+## 2026-10-09 Achievement Record Fields (unreleased)
+
+Additive. No migration is required. Writers and readers follow the
+achievement record contract; new event types have no replay formatter and
+never appear in the replay.
+
+- Wathe `death` records gain kill-start fields: `victim_role`,
+  `victim_faction`, `victim_psycho`, and with a killer `killer_role`,
+  `killer_faction`, `killer_psycho`, `killer_item`, `distance` (same world
+  only). Roles are omitted when absent; factions are effective faction ids;
+  booleans arrive as "1"/"0". Existing fields are unchanged.
+- New `sparkfactionapi:psycho` (actor, `active` bool) on every real psycho
+  start and end. Add-ons that start or stop psycho must keep going through
+  `PlayerPsychoComponent.startPsycho/stopPsycho` (or fire
+  `PsychoModeEvents` themselves, as SparkStrength's Serial Killer override
+  does); writing `psychoTicks` alone from 0 is not recorded.
+- New `sparkfactionapi:consume` (actor, `item`, `kind` `food`/`drink`) for every
+  finished eat/drink use that used or replaced the stack, and for players fed
+  without a use animation. An add-on that makes a player consume an item
+  without `finishUsing` should call Wathe `PoisonUtils.applyFoodPoison(target,
+  stack)` (as Noelle's Waiter and SparkStrength capsules do) to be recorded;
+  an add-on that refuses a drink inside `finishUsing` should return the stack
+  untouched.
+
 ## 2026-10-08 Match Record Payload (unreleased)
 
 Additive. No migration is required.

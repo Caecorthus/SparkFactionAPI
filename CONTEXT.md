@@ -27,6 +27,15 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   Wathe `MatchRecord` (`MatchRecordSnapshot`: event `seq`, `type`, `tick` since
   the match start, and Wathe's NBT `data`), pushed to clients at round end and
   read on the client through `client.api.SparkMatchRecordClient.latest()`.
+- **Kill-start snapshot**: the victim's and killer's role, effective faction,
+  psycho state, the killer's main-hand item and the feet-to-feet distance, read
+  when `GameFunctions.killPlayer` starts and written onto that kill's Wathe
+  `death` record. "Kill start" is before every HEAD injector and before Wathe
+  clears psycho mode or any mod changes roles.
+- **Achievement record events**: the namespaced match-record events
+  `sparkfactionapi:psycho` and `sparkfactionapi:consume` plus the extra `death`
+  fields, written for SparkAssist's local achievements. They have no replay
+  formatter, so the replay never shows them.
 - **Hidden equipment registration**: an item-identity registration through
   `api/compat/NoellesHiddenEquipment`. When NoellesRoles is present, the
   optional Adapter adds registered items to its existing held-item hiding path.
@@ -120,6 +129,43 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   finalization. The client stores only the latest snapshot, clears it on
   disconnect, and opens nothing. `SparkMatchRecordClient.latest()` and the
   `MatchRecordSnapshot` accessors are read reflectively by SparkAssist.
+- Extra `death` record fields (achievement record contract A1), added by
+  wrapping the 5-argument `GameFunctions.killPlayer` (the 3- and 4-argument
+  overloads delegate to it) and modifying the data argument of
+  `GameRecordManager.recordDeath`'s `addEvent` call: `victim_role` (string,
+  omitted without a role or for `wathe:no_role`), `victim_faction` (string),
+  `victim_psycho` (bool); with a killer, `killer_role` (string, same omission),
+  `killer_faction` (string), `killer_psycho` (bool), `killer_item` (string,
+  `minecraft:air` when empty) and, in the same world only, `distance` (double,
+  blocks). Effective faction is `SparkFactionApi.resolveEffectiveFaction`;
+  psycho is `getPsychoTicks() > 0`. Snapshots live in a per-thread stack keyed
+  by victim and popped in `finally`, so a kill cancelled at HEAD, in
+  `KillPlayer.BEFORE` or by the psycho shield records nothing and leaves
+  nothing behind, and a kill nested in another kill uses its own snapshot.
+  Killer fields are written only when `recordDeath`'s killer is the captured
+  killer.
+- `sparkfactionapi:psycho` (actor, `active` bool) is recorded from Wathe
+  `PsychoModeEvents.ON_PSYCHO_START/END` (server only, every psycho source).
+  Per match, an END counts only after a counted START and a repeated START is a
+  refresh, because Wathe's `stopPsycho` fires END unconditionally (game-start
+  and lobby `reset()`, Noelle's Jester reset) and `startPsycho` refires START.
+  Psycho ticks restored from player NBT (rejoin) fire no START, so that
+  psycho's later END is ignored.
+- `sparkfactionapi:consume` (actor = consumer, `item` id, `kind` `food` or
+  `drink`) is recorded after `ItemStack#finishUsing` returns for a server
+  player (every finished eat/drink use, including item overrides that skip
+  `super`) when the stack was used or replaced, so a refusal that returns the
+  untouched stack (SparkStrength's Coroner and base spirits) and a creative
+  player whose stack is not used are not recorded. It is also recorded at
+  Wathe `PoisonUtils.applyFoodPoison(target, stack)` when the target is not
+  inside its own `finishUsing` (Noelle's Waiter feeding, SparkStrength
+  capsules). A drink is a Wathe `CocktailItem` (and subclasses) or an item
+  whose use action is DRINK; otherwise an item with a food component is food;
+  anything else is not recorded. Not covered: a capsule-delivered Blue
+  Belladonna (calls neither seam) and instant items without a food component
+  or DRINK action (SparkWitch Fisher fish, SparkStrength Professor serum).
+- Every achievement-record hook logs and swallows its own failure; killing,
+  eating and psycho mode behave exactly as before.
 - In the limited inventory, `PlayerInventory#getEmptySlot` returns hotbar 0-8,
   then second row 27-35, then hidden 9-26; capacity and stack merging stay
   vanilla. A default Wathe shop purchase (no custom buy handler) whose hotbar is
@@ -144,4 +190,5 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   SparkStrength reaches `api/cooldown` (store registration,
   `clearItemKeepingForced`) only by reflection and falls back when it is
   missing. SparkAssist reads the match record through
-  `client.api.SparkMatchRecordClient` only by reflection.
+  `client.api.SparkMatchRecordClient` only by reflection, including the
+  achievement record events and `death` fields by name.
