@@ -23,6 +23,14 @@ never appear in the replay.
   stack)` (as Noelle's Waiter and SparkStrength capsules do) to be recorded;
   an add-on that refuses a drink inside `finishUsing` should return the stack
   untouched.
+- New `sparkfactionapi:income` (actor, `amount` int), one per player with
+  income, written at the start of `GameRecordManager.endMatch` before
+  `match_end`: the match total of positive actual balance changes made by
+  `PlayerShopComponent#addToBalance` on the server. Add-ons that pay players
+  should keep crediting through `addToBalance` to be counted; `setBalance`
+  writes (starting money, transfers, corrections) and direct `balance` field
+  writes are not income. An offline player's `actor` is written with
+  `putUuid`, so readers must not assume the actor is online.
 
 ## 2026-10-08 Match Record Payload (unreleased)
 
