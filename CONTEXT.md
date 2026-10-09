@@ -33,9 +33,14 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   `death` record. "Kill start" is before every HEAD injector and before Wathe
   clears psycho mode or any mod changes roles.
 - **Achievement record events**: the namespaced match-record events
-  `sparkfactionapi:psycho` and `sparkfactionapi:consume` plus the extra `death`
-  fields, written for SparkAssist's local achievements. They have no replay
-  formatter, so the replay never shows them.
+  `sparkfactionapi:psycho`, `sparkfactionapi:consume` and
+  `sparkfactionapi:income` plus the extra `death` fields, written for
+  SparkAssist's local achievements. They have no replay formatter, so the
+  replay never shows them.
+- **Match income**: the coins a player gained in one match through Wathe
+  `PlayerShopComponent#addToBalance` on the server, i.e. the sum of the positive
+  actual balance changes (after − before) of those calls. Starting money and
+  other `setBalance` writes are not income.
 - **Hidden equipment registration**: an item-identity registration through
   `api/compat/NoellesHiddenEquipment`. When NoellesRoles is present, the
   optional Adapter adds registered items to its existing held-item hiding path.
@@ -164,8 +169,24 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   anything else is not recorded. Not covered: a capsule-delivered Blue
   Belladonna (calls neither seam) and instant items without a food component
   or DRINK action (SparkWitch Fisher fish, SparkStrength Professor serum).
+- `sparkfactionapi:income` (`actor` = player, `amount` int; contract A4) is
+  written once per player with positive match income at the head of
+  `GameRecordManager.endMatch`, while the match is still active and before
+  `match_end`. `actor` is the online player, otherwise the UUID through
+  `putUuid("actor", …)`. A `@WrapMethod` on `addToBalance` reads the personal
+  balance around the call on the server during an active match; it composes
+  with SparkStrength's killer-team purse wrapper (either order sees the same
+  change) and includes SparkTraits' Snowball payout on the inner `setBalance`.
+  A call nested in an open call for the same player is measured by the outer
+  call only. Not income: starting money and every other `setBalance` write
+  (the set-money command, transfers), purchases and deductions, Wathe's
+  dev-environment auto-balance (a direct field write), and money credited
+  somewhere other than the personal balance (SparkWitch's disguised Black
+  Raven wallet, the SparkStrength killer-team purse). Totals are kept per match
+  id and forgotten once `startMatch` has created the next match, so a round
+  that never reached `endMatch` cannot leak into the next one.
 - Every achievement-record hook logs and swallows its own failure; killing,
-  eating and psycho mode behave exactly as before.
+  eating, psycho mode and balance changes behave exactly as before.
 - In the limited inventory, `PlayerInventory#getEmptySlot` returns hotbar 0-8,
   then second row 27-35, then hidden 9-26; capacity and stack merging stay
   vanilla. A default Wathe shop purchase (no custom buy handler) whose hotbar is
