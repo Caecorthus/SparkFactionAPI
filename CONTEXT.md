@@ -198,6 +198,11 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   1-600). The safe-time window is runtime-only: synced to clients so they can
   predict the lock, never saved. A new skill payload is blocked only once it is
   classified in `AntiFastRoundRules.BLOCKED_PAYLOADS`.
+- A creative player can use dye, a glow ink sac or an ink sac on a waxed sign
+  (standing, wall or hanging) as on an unwaxed one; the sign stays waxed and its
+  text stays locked. Honeycomb and every non-creative player keep vanilla
+  behavior, so players in a round (adventure mode) cannot recolor signs. A sign
+  in the map's Wathe `interaction_blacklist` stays blocked for everyone.
 
 ## Current Dependency Picture
 

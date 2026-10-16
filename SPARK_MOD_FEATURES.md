@@ -26,6 +26,7 @@ SparkFactionAPI 主要是给其他 Spark 系列 Mod 使用的共享阵营 API。
 - 自定义关灯免疫、关灯冷却共享和本能高亮策略。
 - 客户端与服务端版本握手，版本不匹配时阻止进入，减少装错版本导致的怪问题。
 - 管理命令：`sparkfactionapi:addTask`、`sparkfactionapi:deleteTask`、`sparkfactionapi:completeTask`、`sparkfactionapi:setSanity`、`sparkfactionapi:clearCooldown`。
+- 修图辅助：创造模式下可以直接对已涂蜡的告示牌使用染料、荧光墨囊和墨囊（改色、点亮、熄灭荧光），告示牌仍保持涂蜡、文字不可编辑；对局中的冒险模式玩家不受影响。地图交互黑名单里的方块仍无法右键。
 
 普通玩家基本不用理解这个 Mod；只要版本匹配，它不会单独改变玩法，而是给其他扩展当兼容地基。
 
