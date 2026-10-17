@@ -97,6 +97,10 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkstrength", "drone_pilot_start"),
             Identifier.of("sparkstrength", "drone_pilot_action"),
             Identifier.of("sparkstrength", "taotie_head_fire"),
+            // SparkStrength sabotage: tablet trigger and breaker repair completion; their cancels stay allowed.
+            // SparkStrength 破坏系统：平板触发与电闸维修完成；对应的取消包放行。
+            Identifier.of("sparkstrength", "trigger_sabotage"),
+            Identifier.of("sparkstrength", "complete_breaker_repair"),
             // Serial Killer psycho-mode pistol: a gun shot, listed wherever wathe:gunshoot is.
             // 连环杀手狂暴模式手枪：属于开枪，凡列出 wathe:gunshoot 之处都应同时列出。
             Identifier.of("sparkstrength", "serial_pistol_shoot")));
