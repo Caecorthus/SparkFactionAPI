@@ -49,6 +49,12 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   9-26 stay hidden storage for add-ons. "In the limited inventory" means alive,
   survival, and Wathe `TrainWorldComponent#hasHud`, the same condition under
   which Wathe swaps in that screen.
+- **Settlement exclusion**: a role registered through
+  `api/settlement/SettlementExclusions` whose holders never count as a living
+  player for round settlement in any mod (killer win checks, SparkTraits Last
+  Stand and Final Moment thresholds, neutral "last one alive" wins). It is a
+  classification read by each settlement point; it changes no win rule, event or
+  alive state by itself.
 - **Forced cooldown**: a cooldown imposed on a player by another feature (penalty,
   aura, debuff) through `api/cooldown/ForcedCooldowns`, covering both
   registered role-skill stores (`RoleSkillCooldownStore`) and vanilla item
@@ -78,6 +84,16 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - Hidden-equipment registration is idempotent and monotonic: registrations may
   add hidden items but never unhide an item selected by NoellesRoles. With
   NoellesRoles absent, registration remains inert and does not fail loading.
+- Settlement exclusions are identifier-only, idempotent and monotonic, with no
+  defaults: `registerRole` (null throws, returns whether the id was new),
+  `containsRole`, `isExcludedRole`, `roleIds` (immutable snapshot). Player
+  lookups (`isExcluded(GameWorldComponent, UUID)`, `isExcluded(PlayerEntity)`)
+  read the raw role through `GameWorldComponent#getRole(UUID)`, never `isRole`,
+  so acting or disguise overlays cannot change them; they do not check liveness
+  and return false for null inputs, a missing world component or no role. Owners
+  register during mod initialization; reads run on the server thread during a
+  round. Callers built against an older SparkFactionAPI must treat a missing
+  class as "not excluded" (the previous behavior).
 - Forced cooldowns are monotonic and exact. `raise` writes only when the new
   remaining value exceeds the current one; `extend` adds to the remaining value
   (saturating, ready slots restart) and ignores non-positive amounts. Item
@@ -212,6 +228,10 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   causes.
 - SparkTraits may integrate through optional public seams; it contributes
   replay trait tooltips and trait badges through `api/replay`.
+- `api/settlement/SettlementExclusions`: SparkWitch registers
+  `sparkwitch:black_raven` by reflection (it compiles against an older
+  SparkFactionAPI and fails closed); SparkTraits and SparkStrength read it,
+  optionally, at their own settlement points.
 - SparkStrength and SparkAssist are not current Java API consumers.
   SparkStrength reaches `api/cooldown` (store registration,
   `clearItemKeepingForced`) only by reflection and falls back when it is
