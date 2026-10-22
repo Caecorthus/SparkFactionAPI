@@ -213,6 +213,10 @@ final class ReplayRosterView {
 
         // Head with a dark frame; dead and departed players are dimmed. 带深色边框的头像；死亡与离开的玩家变暗。
         c.fill(x + PAD - 1, y + PAD - 1, x + PAD + HEAD + 1, y + PAD + HEAD + 1, EDGE);
+        // The head is drawn straight to GL, bypassing the batched buffer (see ReplayScreen#render); flush the card and
+        // frame first so the head lands on top of them.
+        // 头像绕过批量缓冲直接用 GL 绘制（见 ReplayScreen#render）；先提交卡片与边框，使头像位于其上。
+        c.draw();
         PlayerSkinDrawer.draw(c, skin(card.player.uuid()), x + PAD, y + PAD, HEAD);
         if (card.player.presence() == ReplaySnapshot.Presence.DEAD) {
             c.fill(x + PAD, y + PAD, x + PAD + HEAD, y + PAD + HEAD, 0x8C1A0606);

@@ -177,7 +177,20 @@ public class ReplayScreen extends Screen {
 
     // ================================================================ render / 绘制
 
+    /**
+     * Every DrawContext fill or text call flushes on its own, so the procedural passes run inside
+     * {@code DrawContext#draw(Runnable)} (deprecated, but still vanilla's batching hook in 1.21.1; drawTooltip uses
+     * it), which defers those flushes. Paint order is kept: the vertex buffer flushes the previous layer whenever
+     * fills and text alternate, scissor changes flush first, and the roster flushes before each skin head it draws
+     * straight to GL. The search field (vanilla overlay / highlight layers) is drawn unbatched between the two
+     * batches; the tooltip comes last in a batch of its own (vanilla hover events batch themselves).
+     * 每次 DrawContext 填充或文字调用都会单独提交，因此程序化绘制在 {@code DrawContext#draw(Runnable)} 中执行（已弃用，但仍是
+     * 1.21.1 原版的批量入口，drawTooltip 也在用），推迟这些提交。绘制顺序不变：填充与文字交替时顶点缓冲会先提交上一层，
+     * 裁剪变化前会先提交，名单在直接用 GL 绘制每个皮肤头像前也会先提交。搜索框（原版 overlay / 高亮层）在两个批次之间
+     * 不经批量绘制；提示框最后单独成批（原版悬停事件自行批量）。
+     */
     @Override
+    @SuppressWarnings("deprecation")
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         // Vanilla blur + dim exactly once; the search field is drawn by hand between our layers, not by super.
         // 原版模糊与变暗只做一次；搜索框在各层之间手动绘制，不经由 super。
@@ -190,24 +203,28 @@ public class ReplayScreen extends Screen {
         timeline.sync();
         bar.sync();
         boolean hoverEnabled = dragging == null && !scrubbing;
-        ReplayRect panel = layout.panel();
-        ReplayPaint.panel(context, panel);
-        ReplayPaint.band(context, panel, layout.header().bottom() + (layout.compact() ? 0 : 1));
-        drawSeparators(context);
+        context.draw(() -> {
+            ReplayRect panel = layout.panel();
+            ReplayPaint.panel(context, panel);
+            ReplayPaint.band(context, panel, layout.header().bottom() + (layout.compact() ? 0 : 1));
+            drawSeparators(context);
 
-        header.render(context, mouseX, mouseY, hoverEnabled, hover, tooltips);
+            header.render(context, mouseX, mouseY, hoverEnabled, hover, tooltips);
 
-        roster.renderTitle(context);
-        roster.render(context, mouseX, mouseY, model.playerFilter(), hoverEnabled, hover, tooltips);
+            roster.renderTitle(context);
+            roster.render(context, mouseX, mouseY, model.playerFilter(), hoverEnabled, hover, tooltips);
 
-        tabs.render(context, mouseX, mouseY, hoverEnabled);
-        drawSearch(context, mouseX, mouseY, hoverEnabled);
+            tabs.render(context, mouseX, mouseY, hoverEnabled);
+            drawSearch(context, mouseX, mouseY, hoverEnabled);
+        });
         searchField.render(context, mouseX, mouseY, delta);
-        drawCount(context);
-        drawChip(context, mouseX, mouseY, hoverEnabled);
+        context.draw(() -> {
+            drawCount(context);
+            drawChip(context, mouseX, mouseY, hoverEnabled);
 
-        timeline.render(context, mouseX, mouseY, hoverEnabled, hover, tooltips);
-        bar.render(context, mouseX, mouseY, hoverEnabled, hover);
+            timeline.render(context, mouseX, mouseY, hoverEnabled, hover, tooltips);
+            bar.render(context, mouseX, mouseY, hoverEnabled, hover);
+        });
 
         hover.render(context, textRenderer, mouseX, mouseY, width, height);
     }
