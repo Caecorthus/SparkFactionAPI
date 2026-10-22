@@ -13,7 +13,6 @@ import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.cca.PlayerMoodComponent;
 import dev.doctor4t.wathe.game.GameConstants;
 import dev.doctor4t.wathe.util.TaskCompletePayload;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
@@ -48,10 +47,7 @@ final class TaskCommand {
             TaskAction action
     ) {
         dispatcher.register(CommandManager.literal(literal)
-                .requires(Permissions.require(
-                        SparkFactionPermissions.COMMAND_ADMIN,
-                        SparkFactionPermissions.DEFAULT_COMMAND_LEVEL
-                ))
+                .requires(SparkFactionPermissions.admin())
                 .then(CommandManager.argument("task", StringArgumentType.word())
                         .suggests(TaskCommand::suggestTasks)
                         .executes(context -> updateTasks(
