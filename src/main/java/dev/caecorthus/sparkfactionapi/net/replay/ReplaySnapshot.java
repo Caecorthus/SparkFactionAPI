@@ -162,14 +162,24 @@ public record ReplaySnapshot(
         }
         writeCount(buf, snapshot.lines.size(), MAX_LINES);
         for (Line line : snapshot.lines) {
-            buf.writeVarInt(line.second);
-            buf.writeEnumConstant(line.category);
-            writeCount(buf, line.players.size(), MAX_LINE_PLAYERS);
-            for (UUID uuid : line.players) {
-                buf.writeUuid(uuid);
-            }
-            TextCodecs.REGISTRY_PACKET_CODEC.encode(buf, line.text);
+            writeLine(buf, line);
         }
+    }
+
+    /**
+     * Writes one timeline line exactly as {@link #CODEC} does. Lines are the codec's last field and each is written on
+     * its own, so the server sizes trimmed snapshots from per-line sizes instead of re-encoding the whole snapshot.
+     * 按 {@link #CODEC} 的格式写入单条时间线记录。lines 是编解码的最后一个字段且逐条独立写入，因此服务端可按逐行字节数计算
+     * 截断后快照的大小，而无需重新编码整个快照。
+     */
+    public static void writeLine(RegistryByteBuf buf, Line line) {
+        buf.writeVarInt(line.second);
+        buf.writeEnumConstant(line.category);
+        writeCount(buf, line.players.size(), MAX_LINE_PLAYERS);
+        for (UUID uuid : line.players) {
+            buf.writeUuid(uuid);
+        }
+        TextCodecs.REGISTRY_PACKET_CODEC.encode(buf, line.text);
     }
 
     private static ReplaySnapshot read(RegistryByteBuf buf) {
