@@ -34,12 +34,6 @@ import java.util.function.ToLongFunction;
 final class ReplaySnapshotBuilder {
     /** Custom payloads are capped at 1 MiB; keep headroom for framing. 自定义数据包上限 1 MiB，为封装留出余量。 */
     static final long MAX_ENCODED_BYTES = 900L * 1024L;
-    // Mirrors the private caps of ReplaySnapshot's codec. 与 ReplaySnapshot 编解码的私有上限保持一致。
-    static final int MAX_PLAYERS = 256;
-    static final int MAX_LINES = 8192;
-    static final int MAX_ROLES = 64;
-    static final int MAX_BADGES = 32;
-    static final int MAX_NAME_LENGTH = 64;
 
     private ReplaySnapshotBuilder() {
     }
@@ -59,7 +53,7 @@ final class ReplaySnapshotBuilder {
                     lines,
                     sizer(snapshot(header, players, List.of()), new RegistryByteBuf(raw, registries)),
                     MAX_ENCODED_BYTES,
-                    MAX_LINES
+                    ReplaySnapshot.MAX_LINES
             );
         } finally {
             raw.release();
@@ -122,8 +116,9 @@ final class ReplaySnapshotBuilder {
         long startTick = session.header().startTick();
         List<ReplaySnapshot.Player> players = new ArrayList<>();
         for (UUID uuid : session.participants()) {
-            if (players.size() >= MAX_PLAYERS) {
-                SparkFactionApiMod.LOGGER.warn("Replay snapshot keeps only the first {} players", MAX_PLAYERS);
+            if (players.size() >= ReplaySnapshot.MAX_PLAYERS) {
+                SparkFactionApiMod.LOGGER.warn("Replay snapshot keeps only the first {} players",
+                        ReplaySnapshot.MAX_PLAYERS);
                 break;
             }
             ReplaySession.ScreenFacts facts = session.screenFacts(uuid);
@@ -148,16 +143,17 @@ final class ReplaySnapshotBuilder {
     }
 
     /**
-     * Never empty; roles held from the start have reachedSecond -1. Over MAX_ROLES, the final role is kept.
-     * 不为空；开局即持有的身份 reachedSecond 为 -1。超过 MAX_ROLES 时保留最终身份。
+     * Never empty; roles held from the start have reachedSecond -1. Over ReplaySnapshot.MAX_ROLES, the final role is
+     * kept.
+     * 不为空；开局即持有的身份 reachedSecond 为 -1。超过 ReplaySnapshot.MAX_ROLES 时保留最终身份。
      */
     private static List<ReplaySnapshot.RoleStep> roleSteps(ReplaySession session, UUID uuid, long startTick) {
         List<ReplayRoleChain.Step> steps = session.roleSteps(uuid);
         if (steps.isEmpty()) {
             steps = List.of(new ReplayRoleChain.Step(session.nonEmptyHistory(uuid).getLast(), null));
         }
-        if (steps.size() > MAX_ROLES) {
-            List<ReplayRoleChain.Step> kept = new ArrayList<>(steps.subList(0, MAX_ROLES - 1));
+        if (steps.size() > ReplaySnapshot.MAX_ROLES) {
+            List<ReplayRoleChain.Step> kept = new ArrayList<>(steps.subList(0, ReplaySnapshot.MAX_ROLES - 1));
             kept.add(steps.getLast());
             steps = kept;
         }
@@ -182,9 +178,9 @@ final class ReplaySnapshotBuilder {
     }
 
     private static List<ReplaySnapshot.Badge> badges(List<ReplayBadge> badges) {
-        List<ReplaySnapshot.Badge> converted = new ArrayList<>(Math.min(badges.size(), MAX_BADGES));
+        List<ReplaySnapshot.Badge> converted = new ArrayList<>(Math.min(badges.size(), ReplaySnapshot.MAX_BADGES));
         for (ReplayBadge badge : badges) {
-            if (converted.size() >= MAX_BADGES) {
+            if (converted.size() >= ReplaySnapshot.MAX_BADGES) {
                 break;
             }
             converted.add(new ReplaySnapshot.Badge(badge.label(), badge.color(), badge.tooltip()));
@@ -193,7 +189,8 @@ final class ReplaySnapshotBuilder {
     }
 
     private static String clampName(String name) {
-        return name.length() > MAX_NAME_LENGTH ? name.substring(0, MAX_NAME_LENGTH) : name;
+        int max = ReplaySnapshot.MAX_NAME_LENGTH;
+        return name.length() > max ? name.substring(0, max) : name;
     }
 
     /**

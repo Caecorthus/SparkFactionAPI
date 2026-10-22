@@ -31,11 +31,15 @@ public record ReplaySnapshot(
         List<Player> players,
         List<Line> lines
 ) {
-    private static final int MAX_PLAYERS = 256;
-    private static final int MAX_LINES = 8192;
-    private static final int MAX_ROLES = 64;
-    private static final int MAX_BADGES = 32;
-    private static final int MAX_LINE_PLAYERS = 16;
+    // Codec caps: encode throws on a longer list or name and decode rejects one, so the server builder clamps to
+    // these same constants instead of keeping copies that could drift.
+    // 编解码上限：编码遇到更长的列表或名字会抛异常，解码会拒绝；服务端构建器直接按这些常量截断，而不是保留可能不一致的副本。
+    public static final int MAX_PLAYERS = 256;
+    public static final int MAX_LINES = 8192;
+    public static final int MAX_ROLES = 64;
+    public static final int MAX_BADGES = 32;
+    public static final int MAX_LINE_PLAYERS = 16;
+    public static final int MAX_NAME_LENGTH = 64;
 
     public static final PacketCodec<RegistryByteBuf, ReplaySnapshot> CODEC =
             PacketCodec.of(ReplaySnapshot::write, ReplaySnapshot::read);
@@ -140,7 +144,7 @@ public record ReplaySnapshot(
         writeCount(buf, snapshot.players.size(), MAX_PLAYERS);
         for (Player player : snapshot.players) {
             buf.writeUuid(player.uuid);
-            buf.writeString(player.name, 64);
+            buf.writeString(player.name, MAX_NAME_LENGTH);
             writeCount(buf, player.roles.size(), MAX_ROLES);
             for (RoleStep role : player.roles) {
                 buf.writeIdentifier(role.role);
@@ -193,7 +197,7 @@ public record ReplaySnapshot(
         List<Player> players = new ArrayList<>(playerCount);
         for (int i = 0; i < playerCount; i++) {
             UUID uuid = buf.readUuid();
-            String name = buf.readString(64);
+            String name = buf.readString(MAX_NAME_LENGTH);
             int roleCount = readCount(buf, MAX_ROLES);
             List<RoleStep> roles = new ArrayList<>(roleCount);
             for (int r = 0; r < roleCount; r++) {
