@@ -1,5 +1,21 @@
 # Downstream Migration Notes
 
+## 2026-10-22 Custom Faction Wins Freeze at Round End (unreleased)
+
+No API signatures change. No migration is required unless a win condition
+relied on running after the round was decided.
+
+- `FactionWinCondition.checkWin` now runs only while Wathe's game is ACTIVE.
+  Wathe keeps firing `CheckWinCondition` for the roughly 60 STOPPING ticks but
+  ignores every result then, so the only effects of running there were side
+  effects. SparkWitch's Witch condition, including its Shadow Jester showdown
+  trigger, no longer runs during STOPPING.
+- `SparkFactionRoundEndComponent` keeps the state set on the winning tick until
+  the next round. Before, a winner leaving or dying during STOPPING cleared the
+  custom win (end screen, replay title and SparkAssist fell back to the role
+  text or default faction), and a Witch condition that started to hold during
+  STOPPING could set a custom win over a TIME or other neutral result.
+
 ## 2026-10-22 Performance Pass (0.1.5.17)
 
 `api/` is unchanged and the replay wire format is unchanged. No migration is
