@@ -74,6 +74,16 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "seeker_car_recall"),
             Identifier.of("sparkwitch", "seeker_car_use"),
             Identifier.of("sparkwitch", "select_black_raven_disguise"),
+            // Black Raven crow form: start/stop, the crow's door/button right-click (like seeker_car_use) and the
+            // one-shot return feather drop. Per-tick flight (black_raven_crow_move) stays allowed like seeker_car_move.
+            // No crow session can exist inside the window (it opens only at round start and the toggle is refused), so
+            // refusing the toggle never traps a player.
+            // 黑羽鸦化鸦：开始/结束、乌鸦右键门/按钮（同 seeker_car_use）与一次性丢出归羽。每 tick 的飞行包
+            // （black_raven_crow_move）与 seeker_car_move 一样放行。窗口只在开局开启且切换包被拒绝，窗口内不可能存在化鸦会话，
+            // 因此拒绝切换包不会把玩家卡住。
+            Identifier.of("sparkwitch", "black_raven_crow_toggle"),
+            Identifier.of("sparkwitch", "black_raven_crow_use"),
+            Identifier.of("sparkwitch", "black_raven_crow_drop_feather"),
             Identifier.of("sparkwitch", "use_blind_attune"),
             Identifier.of("sparkwitch", "rift_hop"),
             Identifier.of("sparkwitch", "rift_gate_close"),

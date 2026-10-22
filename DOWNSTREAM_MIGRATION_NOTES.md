@@ -1,5 +1,23 @@
 # Downstream Migration Notes
 
+## 2026-10-21 Settlement Exclusions (0.1.5.16)
+
+Additive and source/binary compatible. No migration is required.
+
+- New `api/settlement/SettlementExclusions`: role ids whose holders never count
+  as a living player for round settlement (killer win checks, Last Stand and
+  Final Moment thresholds, neutral "last one alive" wins). Role owners call
+  `registerRole(Identifier)` during initialization; settlement code skips a
+  player when `isExcluded(game, uuid)` / `isExcluded(player)` is true, on top
+  of its own alive check. Lookups read the raw role (`getRole`), never
+  `isRole`. Nothing is excluded by default, and SparkFactionAPI's own round-end
+  paths are unchanged.
+- Mods that must load with an older SparkFactionAPI should reach the class by
+  reflection and treat its absence as "not excluded".
+- Anti-fast-round safe time now also refuses SparkWitch
+  `black_raven_crow_toggle`, `black_raven_crow_use` and
+  `black_raven_crow_drop_feather`; `black_raven_crow_move` stays allowed.
+
 ## 2026-10-09 Achievement Record Fields (unreleased)
 
 Additive. No migration is required. Writers and readers follow the
