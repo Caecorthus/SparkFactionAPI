@@ -1,5 +1,34 @@
 # Downstream Migration Notes
 
+## 2026-10-22 Performance Pass (unreleased)
+
+`api/` is unchanged and the replay wire format is unchanged. No migration is
+required for the Spark mods; the notes below matter only for code that relied
+on call counts or on internal `impl` helpers.
+
+- Collision exemptions (`EntityCollisionExemption`) are now evaluated only for
+  entity pairs that would otherwise collide, and the second entity is skipped
+  once the first is exempt. Predicates must stay side-effect free; one that
+  counted calls would now see far fewer.
+- The NoellesRoles poison-gas guard evaluates `PlayerAffectPolicy` (action
+  `noellesroles:poison_gas`) only for players actually inside the gas, instead
+  of for every player on every tick. Results are unchanged.
+- `SparkFactionRoundEndComponent` syncs only when the winning faction or the
+  winner set changes; it used to sync to every player on every round tick.
+  Client-visible state is identical, and join-time sync is unchanged.
+- Removed `impl` helpers with no callers in any Spark repository:
+  `FactionRegistryImpl.isSparkFactionRole` and its five policy-list getters
+  (`targetEligibility`, `economyPolicies`, `gunPunishmentPolicies`,
+  `blackoutCooldownPolicies`, `instinctPolicies`), the Role-only and unused
+  PlayerEntity overloads in `FactionEconomyRules`, `FactionGunPunishmentRules`,
+  `FactionTargetRules`, `FactionCohortRules` and `FactionInstinctRules`,
+  `FactionCapabilityLookup.hasCustomBaseFaction` and
+  `FactionRoundEndTextRules.winPhraseKey`.
+  `FactionEconomyRules.receivesCustomKillReward` (used by SparkTraits) stays.
+- Additive: `ReplaySnapshot.writeLine` and public codec caps
+  (`MAX_PLAYERS`, `MAX_LINES`, `MAX_ROLES`, `MAX_BADGES`, `MAX_LINE_PLAYERS`,
+  `MAX_NAME_LENGTH`) with unchanged values.
+
 ## 2026-10-21 Settlement Exclusions (0.1.5.16)
 
 Additive and source/binary compatible. No migration is required.
