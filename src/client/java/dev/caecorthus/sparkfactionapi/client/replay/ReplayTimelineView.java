@@ -127,7 +127,7 @@ final class ReplayTimelineView {
         }
         entryTop[count] = y;
         syncedVersion = model.version();
-        scroll.setBounds(y, viewport.height());
+        scroll.setBounds(y, viewport);
     }
 
     private static int entryHeight(int lineCount) {
@@ -209,22 +209,6 @@ final class ReplayTimelineView {
     }
 
     // ================================================================ hit testing / 命中判定
-
-    ReplayRect scrollbarHit() {
-        if (!scroll.scrollable()) {
-            return ReplayRect.EMPTY;
-        }
-        return new ReplayRect(viewport.right() - ReplayPaint.SCROLLBAR_GUTTER - 1, viewport.y(),
-                ReplayPaint.SCROLLBAR_GUTTER + 1, viewport.height());
-    }
-
-    int trackTop() {
-        return viewport.y() + 2;
-    }
-
-    int track() {
-        return Math.max(0, viewport.height() - 4);
-    }
 
     /** Style of the text under the pointer, or null. 指针下文字的样式；没有时为 null。 */
     @Nullable Style styleAt(double mouseX, double mouseY) {
@@ -319,13 +303,7 @@ final class ReplayTimelineView {
         ReplayPaint.scrollFades(c, new ReplayRect(viewport.x() + 1, viewport.y() + 1, rowX2 - rowX1,
                 viewport.height() - 2), scroll, WELL_RGB);
         c.disableScissor();
-
-        if (scroll.scrollable()) {
-            boolean hot = scroll.dragging() || scrollbarHit().contains(mouseX, mouseY);
-            int track = track();
-            ReplayPaint.scrollbar(c, viewport.right() - 4, trackTop(), track, scroll.thumbTop(trackTop(), track),
-                    scroll.thumbHeight(track), hot);
-        }
+        scroll.render(c, mouseX, mouseY);
 
         if (mouseInside && hoveredPosition >= 0) {
             Style style = styleAt(mouseX, mouseY);

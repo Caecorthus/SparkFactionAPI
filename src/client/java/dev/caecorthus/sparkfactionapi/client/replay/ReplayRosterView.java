@@ -88,7 +88,7 @@ final class ReplayRosterView {
         }
         cards = built;
         int content = built.length == 0 ? 0 : y - CARD_GAP + INSET;
-        scroll.setBounds(content, viewport.height());
+        scroll.setBounds(content, viewport);
     }
 
     /** Scrolls so the player's card is fully visible. 滚动使该玩家卡片完全可见。 */
@@ -123,22 +123,6 @@ final class ReplayRosterView {
             }
         }
         return null;
-    }
-
-    ReplayRect scrollbarHit() {
-        if (!scroll.scrollable()) {
-            return ReplayRect.EMPTY;
-        }
-        return new ReplayRect(viewport.right() - ReplayPaint.SCROLLBAR_GUTTER - 1, viewport.y(),
-                ReplayPaint.SCROLLBAR_GUTTER + 1, viewport.height());
-    }
-
-    int trackTop() {
-        return viewport.y() + 2;
-    }
-
-    int track() {
-        return Math.max(0, viewport.height() - 4);
     }
 
     // ================================================================ render / 绘制
@@ -182,12 +166,7 @@ final class ReplayRosterView {
         ReplayPaint.scrollFades(c, new ReplayRect(viewport.x() + 1, viewport.y() + 1,
                 viewport.width() - ReplayPaint.SCROLLBAR_GUTTER - 2, viewport.height() - 2), scroll, WELL_RGB);
         c.disableScissor();
-        if (scroll.scrollable()) {
-            boolean hot = scroll.dragging() || scrollbarHit().contains(mouseX, mouseY);
-            int track = track();
-            ReplayPaint.scrollbar(c, viewport.right() - 4, trackTop(), track, scroll.thumbTop(trackTop(), track),
-                    scroll.thumbHeight(track), hot);
-        }
+        scroll.render(c, mouseX, mouseY);
         if (hovered != null) {
             int cardTop = viewport.y() - top + hovered.y;
             ReplaySnapshot.Badge badge = hovered.badgeAt(mouseX - hovered.x, mouseY - cardTop);

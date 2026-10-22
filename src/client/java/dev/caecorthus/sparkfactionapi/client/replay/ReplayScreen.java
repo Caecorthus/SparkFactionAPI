@@ -40,7 +40,6 @@ public class ReplayScreen extends Screen {
     private @Nullable TextFieldWidget searchField;
     private @Nullable ReplayScreenLayout layout;
     private @Nullable ReplayScroll dragging;
-    private boolean draggingRoster;
     private boolean scrubbing;
     private int countReserve;
     private OrderedText chipLine = OrderedText.EMPTY;
@@ -325,13 +324,7 @@ public class ReplayScreen extends Screen {
         }
         setFocused(null);
 
-        if (beginDrag(roster.scroll(), roster.scrollbarHit(), roster.trackTop(), roster.track(), mouseX, mouseY)) {
-            draggingRoster = true;
-            return true;
-        }
-        if (beginDrag(timeline.scroll(), timeline.scrollbarHit(), timeline.trackTop(), timeline.track(), mouseX,
-                mouseY)) {
-            draggingRoster = false;
+        if (beginDrag(roster.scroll(), mouseX, mouseY) || beginDrag(timeline.scroll(), mouseX, mouseY)) {
             return true;
         }
         if (tabs.click(mouseX, mouseY)) {
@@ -371,12 +364,11 @@ public class ReplayScreen extends Screen {
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private boolean beginDrag(ReplayScroll scroll, ReplayRect hit, int trackTop, int track, double mouseX,
-                              double mouseY) {
-        if (!hit.contains(mouseX, mouseY)) {
+    private boolean beginDrag(ReplayScroll scroll, double mouseX, double mouseY) {
+        if (!scroll.scrollbarHit().contains(mouseX, mouseY)) {
             return false;
         }
-        scroll.beginDrag(mouseY, trackTop, track);
+        scroll.beginDrag(mouseY);
         dragging = scroll;
         return true;
     }
@@ -388,11 +380,7 @@ public class ReplayScreen extends Screen {
             return true;
         }
         if (dragging != null) {
-            if (draggingRoster) {
-                dragging.drag(mouseY, roster.trackTop(), roster.track());
-            } else {
-                dragging.drag(mouseY, timeline.trackTop(), timeline.track());
-            }
+            dragging.drag(mouseY);
             return true;
         }
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
