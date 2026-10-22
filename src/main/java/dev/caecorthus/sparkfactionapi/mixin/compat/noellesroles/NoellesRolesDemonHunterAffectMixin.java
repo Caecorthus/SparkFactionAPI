@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Pseudo
 @Mixin(targets = "org.agmas.noellesroles.demonhunter.DemonHunterShootC2SPacket$Receiver", remap = false)
 public abstract class NoellesRolesDemonHunterAffectMixin {
+    private static final Identifier ACTION = Identifier.of("noellesroles", "demon_hunter_shot");
+
     @Inject(
             method = "receive(Lorg/agmas/noellesroles/demonhunter/DemonHunterShootC2SPacket;Lnet/fabricmc/fabric/api/networking/v1/ServerPlayNetworking$Context;)V",
             at = @At("HEAD"),
@@ -35,11 +37,7 @@ public abstract class NoellesRolesDemonHunterAffectMixin {
                 actor,
                 PlayerAffectMixinGuard.intAccessor(payload, "target")
         );
-        if (target != null && !PlayerAffectMixinGuard.allows(
-                actor,
-                target,
-                Identifier.of("noellesroles", "demon_hunter_shot")
-        )) {
+        if (target != null && !PlayerAffectMixinGuard.allows(actor, target, ACTION)) {
             ci.cancel();
         }
     }

@@ -33,7 +33,9 @@ public final class EntityCollisionExemptions {
     }
 
     public static boolean shouldCancelCollision(Entity self, Entity other) {
-        return shouldCancelCollision(isExempt(self), isExempt(other));
+        // Short-circuits: registered predicates are side-effect free, so other is skipped once self is exempt.
+        // 短路求值：已注册谓词均无副作用，self 已豁免时跳过 other。
+        return isExempt(self) || isExempt(other);
     }
 
     public static boolean shouldCancelPush(Entity self, Entity other) {

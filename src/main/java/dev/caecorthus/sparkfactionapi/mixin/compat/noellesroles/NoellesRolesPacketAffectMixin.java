@@ -26,6 +26,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Pseudo
 @Mixin(targets = "org.agmas.noellesroles.Noellesroles", remap = false)
 public abstract class NoellesRolesPacketAffectMixin {
+    private static final Identifier MORPH_ACTION = Identifier.of("noellesroles", "morph");
+    private static final Identifier SWAPPER_ACTION = Identifier.of("noellesroles", "swapper");
+    private static final Identifier ASSASSIN_ACTION = Identifier.of("noellesroles", "assassin");
+    private static final Identifier REPORTER_ACTION = Identifier.of("noellesroles", "reporter");
+    private static final Identifier DETECTIVE_ACTION = Identifier.of("noellesroles", "detective");
+    private static final Identifier TAOTIE_ACTION = Identifier.of("noellesroles", "taotie");
+    private static final Identifier SHADOW_JESTER_ACTION = Identifier.of("noellesroles", "shadow_jester");
+    private static final Identifier SILENCER_ACTION = Identifier.of("noellesroles", "silencer");
+    private static final Identifier PARTY_ANIMAL_ACTION = Identifier.of("noellesroles", "party_animal");
+
     @Inject(
             method = "lambda$registerPackets$0(Lorg/agmas/noellesroles/packet/MorphC2SPacket;Lnet/fabricmc/fabric/api/networking/v1/ServerPlayNetworking$Context;)V",
             at = @At("HEAD"),
@@ -38,7 +48,7 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        cancelIfDenied(payload, context, "player", Identifier.of("noellesroles", "morph"), ci);
+        cancelIfDenied(payload, context, "player", MORPH_ACTION, ci);
     }
 
     @Inject(
@@ -53,10 +63,9 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        Identifier actionId = Identifier.of("noellesroles", "swapper");
-        cancelIfDenied(payload, context, "player", actionId, ci);
+        cancelIfDenied(payload, context, "player", SWAPPER_ACTION, ci);
         if (!ci.isCancelled()) {
-            cancelIfDenied(payload, context, "player2", actionId, ci);
+            cancelIfDenied(payload, context, "player2", SWAPPER_ACTION, ci);
         }
     }
 
@@ -72,7 +81,7 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        cancelIfDenied(payload, context, "targetPlayer", Identifier.of("noellesroles", "assassin"), ci);
+        cancelIfDenied(payload, context, "targetPlayer", ASSASSIN_ACTION, ci);
     }
 
     @Inject(
@@ -87,7 +96,7 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        cancelIfDenied(payload, context, "targetPlayer", Identifier.of("noellesroles", "reporter"), ci);
+        cancelIfDenied(payload, context, "targetPlayer", REPORTER_ACTION, ci);
     }
 
     @Inject(
@@ -102,7 +111,7 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        cancelIfDenied(payload, context, "targetPlayer", Identifier.of("noellesroles", "detective"), ci);
+        cancelIfDenied(payload, context, "targetPlayer", DETECTIVE_ACTION, ci);
     }
 
     @Inject(
@@ -117,7 +126,7 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        cancelIfDenied(payload, context, "targetPlayer", Identifier.of("noellesroles", "taotie"), ci);
+        cancelIfDenied(payload, context, "targetPlayer", TAOTIE_ACTION, ci);
     }
 
     @Inject(
@@ -132,7 +141,7 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        cancelIfDenied(payload, context, "targetPlayer", Identifier.of("noellesroles", "shadow_jester"), ci);
+        cancelIfDenied(payload, context, "targetPlayer", SHADOW_JESTER_ACTION, ci);
     }
 
     @Inject(
@@ -147,7 +156,7 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        cancelIfDenied(payload, context, "targetPlayer", Identifier.of("noellesroles", "silencer"), ci);
+        cancelIfDenied(payload, context, "targetPlayer", SILENCER_ACTION, ci);
     }
 
     @Inject(
@@ -162,7 +171,7 @@ public abstract class NoellesRolesPacketAffectMixin {
             ServerPlayNetworking.Context context,
             CallbackInfo ci
     ) {
-        cancelIfDenied(payload, context, "targetPlayer", Identifier.of("noellesroles", "party_animal"), ci);
+        cancelIfDenied(payload, context, "targetPlayer", PARTY_ANIMAL_ACTION, ci);
     }
 
     private static void cancelIfDenied(

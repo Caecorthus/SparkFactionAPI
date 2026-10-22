@@ -19,6 +19,8 @@ import java.util.UUID;
 @Pseudo
 @Mixin(targets = "dev.caecorthus.sparkwitch.skill.WitchSkillUseService", remap = false)
 public abstract class WitchSkillUseAffectMixin {
+    private static final Identifier ACTION = Identifier.of("sparkwitch", "witch_skill");
+
     @Inject(method = "use", at = @At("HEAD"), cancellable = true, require = 0, remap = false)
     private static void sparkfactionapi$guardTargetedWitchSkill(
             ServerPlayerEntity actor,
@@ -28,11 +30,7 @@ public abstract class WitchSkillUseAffectMixin {
         ServerPlayerEntity target = targetUuid
                 .map(uuid -> PlayerAffectMixinGuard.onlineTarget(actor, uuid))
                 .orElse(null);
-        if (target != null && !PlayerAffectMixinGuard.allows(
-                actor,
-                target,
-                Identifier.of("sparkwitch", "witch_skill")
-        )) {
+        if (target != null && !PlayerAffectMixinGuard.allows(actor, target, ACTION)) {
             cir.setReturnValue(false);
         }
     }
