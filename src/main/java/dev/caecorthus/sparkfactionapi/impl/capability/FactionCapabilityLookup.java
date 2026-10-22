@@ -31,10 +31,6 @@ public final class FactionCapabilityLookup {
         return FactionRegistryImpl.capabilities(effectiveFaction(player, gameComponent));
     }
 
-    public static boolean hasCustomBaseFaction(Role role) {
-        return FactionRegistryImpl.isCustomFaction(baseFaction(role));
-    }
-
     public static boolean hasCustomEffectiveFaction(PlayerEntity player, GameWorldComponent gameComponent) {
         if (player == null || gameComponent == null) {
             return false;

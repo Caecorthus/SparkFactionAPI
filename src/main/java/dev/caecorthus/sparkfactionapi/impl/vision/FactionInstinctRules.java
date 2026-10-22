@@ -5,7 +5,6 @@ import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
 import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
 import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
-import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,10 +17,6 @@ public final class FactionInstinctRules {
     private FactionInstinctRules() {
     }
 
-    public static boolean canUseInstinct(Role role) {
-        return FactionCapabilityLookup.capabilities(role).canUseInstinct();
-    }
-
     public static boolean canUseInstinct(PlayerEntity player, GameWorldComponent gameComponent) {
         return FactionCapabilityLookup.capabilities(player, gameComponent).canUseInstinct();
     }
@@ -32,25 +27,6 @@ public final class FactionInstinctRules {
      */
     public static boolean shouldUseCustomHighlight(boolean viewerPlayingAndAlive, boolean viewerSpectatingOrCreative) {
         return viewerPlayingAndAlive || !viewerSpectatingOrCreative;
-    }
-
-    public static int instinctColor(Role role) {
-        return FactionCapabilityLookup.capabilities(role).instinctColor();
-    }
-
-    public static int instinctColor(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.capabilities(player, gameComponent).instinctColor();
-    }
-
-    public static int displayColor(Role role) {
-        FactionCapabilities capabilities = FactionCapabilityLookup.capabilities(role);
-        if (capabilities.instinctColor() != -1) {
-            return capabilities.instinctColor();
-        }
-        Identifier factionId = FactionCapabilityLookup.baseFaction(role);
-        return FactionRegistryImpl.getFaction(factionId)
-                .map(FactionDefinition::color)
-                .orElse(-1);
     }
 
     public static int displayColor(PlayerEntity player, GameWorldComponent gameComponent) {

@@ -2,7 +2,6 @@ package dev.caecorthus.sparkfactionapi.impl.gun;
 
 import dev.caecorthus.sparkfactionapi.api.FactionGunPunishmentPolicy;
 import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
-import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -10,10 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 public final class FactionGunPunishmentRules {
     private FactionGunPunishmentRules() {
-    }
-
-    public static boolean isPunishableInnocentGunVictim(Role role) {
-        return FactionCapabilityLookup.capabilities(role).isPunishableInnocentGunVictim();
     }
 
     public static boolean isPunishableInnocentGunVictim(PlayerEntity player, GameWorldComponent gameComponent) {
@@ -37,10 +32,6 @@ public final class FactionGunPunishmentRules {
             GameWorldComponent gameComponent
     ) {
         return firstGunPunishmentPolicyResult(player, subject, gameComponent);
-    }
-
-    public static boolean isPunishableInnocentGunShooter(Role role) {
-        return FactionCapabilityLookup.capabilities(role).isPunishableInnocentGunShooter();
     }
 
     public static boolean isPunishableInnocentGunShooter(PlayerEntity player, GameWorldComponent gameComponent) {
@@ -69,21 +60,12 @@ public final class FactionGunPunishmentRules {
                 && shooterDecision(player, gameComponent, factionId));
     }
 
-    public static boolean consumesPunishableGunLikeKiller(Role role) {
-        return canUseKillerFeatureAccess(role)
-                || (FactionCapabilityLookup.hasCustomBaseFaction(role) && isPunishableInnocentGunShooter(role));
-    }
-
     static boolean usesCustomShooterDecision(
             PlayerEntity shooter,
             @Nullable Boolean shooterOverride,
             GameWorldComponent gameComponent
     ) {
         return shooterOverride != null || FactionCapabilityLookup.hasCustomEffectiveFaction(shooter, gameComponent);
-    }
-
-    private static boolean canUseKillerFeatureAccess(Role role) {
-        return FactionCapabilityLookup.capabilities(role).canUseKillerFeatures();
     }
 
     private static boolean canUseKillerFeatureAccess(Identifier effectiveFaction) {

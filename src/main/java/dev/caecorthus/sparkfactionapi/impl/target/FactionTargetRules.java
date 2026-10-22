@@ -2,7 +2,6 @@ package dev.caecorthus.sparkfactionapi.impl.target;
 
 import dev.caecorthus.sparkfactionapi.api.FactionTargetEligibility;
 import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
-import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -14,10 +13,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class FactionTargetRules {
     private FactionTargetRules() {
-    }
-
-    public static boolean canTarget(Role viewerRole, Role targetRole, Identifier targetTag) {
-        return targetTag != null && FactionCapabilityLookup.capabilities(targetRole).targetTags().contains(targetTag);
     }
 
     public static boolean canTarget(

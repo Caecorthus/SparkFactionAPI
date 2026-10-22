@@ -21,10 +21,6 @@ public final class FactionRoundEndTextRules {
         return "announcement.win." + winPhrasePath(factionId);
     }
 
-    public static String winPhraseKey(Identifier factionId) {
-        return "game.win." + winPhrasePath(factionId);
-    }
-
     public static String winPhrasePath(Identifier factionId) {
         return factionId.getNamespace() + "." + factionId.getPath().replace('/', '.');
     }

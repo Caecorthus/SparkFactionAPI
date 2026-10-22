@@ -58,10 +58,6 @@ public final class FactionRoleCatalog {
         return role;
     }
 
-    public static boolean isSparkFactionRole(Role role) {
-        return ROLE_FACTIONS.containsKey(role);
-    }
-
     /**
      * Makes default SparkFactionAPI roles visible to Wathe as neutral instead of NONE.
      * 让默认 SparkFactionAPI 角色在 Wathe 侧显示为中立阵营，而不是 NONE。

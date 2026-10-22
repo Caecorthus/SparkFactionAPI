@@ -2,7 +2,6 @@ package dev.caecorthus.sparkfactionapi.impl.economy;
 
 import dev.caecorthus.sparkfactionapi.api.FactionEconomyPolicy;
 import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
-import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -10,10 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 public final class FactionEconomyRules {
     private FactionEconomyRules() {
-    }
-
-    public static boolean receivesKillerPassiveMoney(Role role) {
-        return FactionCapabilityLookup.capabilities(role).receivesKillerPassiveMoney();
     }
 
     public static boolean receivesKillerPassiveMoney(PlayerEntity player, GameWorldComponent gameComponent) {
@@ -29,10 +24,6 @@ public final class FactionEconomyRules {
         return FactionCapabilityLookup.isCustomFaction(factionId)
                 && !gameComponent.canUseKillerFeatures(player)
                 && passiveMoneyDecision(player, gameComponent, factionId);
-    }
-
-    public static boolean receivesKillReward(Role role) {
-        return FactionCapabilityLookup.capabilities(role).receivesKillRewards();
     }
 
     public static boolean receivesKillReward(PlayerEntity player, GameWorldComponent gameComponent) {
