@@ -10,11 +10,13 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class EntityCollisionMixin {
     @WrapMethod(method = "collidesWith(Lnet/minecraft/entity/Entity;)Z")
     private boolean sparkfactionapi$cancelExemptCollision(Entity other, Operation<Boolean> original) {
-        // 以高于 Wathe 默认 1000 的优先级包裹 collidesWith，先否决豁免碰撞再进入玩家硬碰撞逻辑。
+        // Wraps Wathe's priority-1000 player wall. The inner chain is side-effect free and false for almost every
+        // pair, so it runs first and the exemption predicates only veto pairs that would collide.
+        // 以高于 Wathe 默认 1000 的优先级包裹 collidesWith（含玩家硬碰撞）。内层链无副作用且对绝大多数实体对返回 false，
+        // 因此先求内层结果，仅对原本会碰撞的实体对用豁免谓词否决。
+        // Still a local instant check: no extra DataTracker fields on Entity/LivingEntity/PlayerEntity.
         // 这里仍然只做本地即时判定，不注册 Entity/LivingEntity/PlayerEntity 的 DataTracker 字段，避免协议编号错位。
-        if (EntityCollisionExemptions.shouldCancelCollision((Entity) (Object) this, other)) {
-            return false;
-        }
-        return original.call(other);
+        boolean collides = original.call(other);
+        return collides && !EntityCollisionExemptions.shouldCancelCollision((Entity) (Object) this, other);
     }
 }

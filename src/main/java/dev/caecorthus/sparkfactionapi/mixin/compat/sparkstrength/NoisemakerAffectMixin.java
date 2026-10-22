@@ -18,6 +18,8 @@ import java.util.UUID;
 @Pseudo
 @Mixin(targets = "annina.sparkstrength.role.noisemaker.NoisemakerGlowService", remap = false)
 public abstract class NoisemakerAffectMixin {
+    private static final Identifier ACTION = Identifier.of("sparkstrength", "noisemaker_glow");
+
     @Inject(method = "tryUseBackpackGlow", at = @At("HEAD"), cancellable = true, require = 0, remap = false)
     private static void sparkfactionapi$guardNoisemakerGlow(
             ServerPlayerEntity actor,
@@ -25,11 +27,7 @@ public abstract class NoisemakerAffectMixin {
             CallbackInfo ci
     ) {
         ServerPlayerEntity target = PlayerAffectMixinGuard.onlineTarget(actor, targetUuid);
-        if (target != null && !PlayerAffectMixinGuard.allows(
-                actor,
-                target,
-                Identifier.of("sparkstrength", "noisemaker_glow")
-        )) {
+        if (target != null && !PlayerAffectMixinGuard.allows(actor, target, ACTION)) {
             ci.cancel();
         }
     }

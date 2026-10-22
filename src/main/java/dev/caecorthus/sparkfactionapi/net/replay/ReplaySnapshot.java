@@ -31,11 +31,15 @@ public record ReplaySnapshot(
         List<Player> players,
         List<Line> lines
 ) {
-    private static final int MAX_PLAYERS = 256;
-    private static final int MAX_LINES = 8192;
-    private static final int MAX_ROLES = 64;
-    private static final int MAX_BADGES = 32;
-    private static final int MAX_LINE_PLAYERS = 16;
+    // Codec caps: encode throws on a longer list or name and decode rejects one, so the server builder clamps to
+    // these same constants instead of keeping copies that could drift.
+    // 编解码上限：编码遇到更长的列表或名字会抛异常，解码会拒绝；服务端构建器直接按这些常量截断，而不是保留可能不一致的副本。
+    public static final int MAX_PLAYERS = 256;
+    public static final int MAX_LINES = 8192;
+    public static final int MAX_ROLES = 64;
+    public static final int MAX_BADGES = 32;
+    public static final int MAX_LINE_PLAYERS = 16;
+    public static final int MAX_NAME_LENGTH = 64;
 
     public static final PacketCodec<RegistryByteBuf, ReplaySnapshot> CODEC =
             PacketCodec.of(ReplaySnapshot::write, ReplaySnapshot::read);
@@ -140,7 +144,7 @@ public record ReplaySnapshot(
         writeCount(buf, snapshot.players.size(), MAX_PLAYERS);
         for (Player player : snapshot.players) {
             buf.writeUuid(player.uuid);
-            buf.writeString(player.name, 64);
+            buf.writeString(player.name, MAX_NAME_LENGTH);
             writeCount(buf, player.roles.size(), MAX_ROLES);
             for (RoleStep role : player.roles) {
                 buf.writeIdentifier(role.role);
@@ -162,14 +166,24 @@ public record ReplaySnapshot(
         }
         writeCount(buf, snapshot.lines.size(), MAX_LINES);
         for (Line line : snapshot.lines) {
-            buf.writeVarInt(line.second);
-            buf.writeEnumConstant(line.category);
-            writeCount(buf, line.players.size(), MAX_LINE_PLAYERS);
-            for (UUID uuid : line.players) {
-                buf.writeUuid(uuid);
-            }
-            TextCodecs.REGISTRY_PACKET_CODEC.encode(buf, line.text);
+            writeLine(buf, line);
         }
+    }
+
+    /**
+     * Writes one timeline line exactly as {@link #CODEC} does. Lines are the codec's last field and each is written on
+     * its own, so the server sizes trimmed snapshots from per-line sizes instead of re-encoding the whole snapshot.
+     * 按 {@link #CODEC} 的格式写入单条时间线记录。lines 是编解码的最后一个字段且逐条独立写入，因此服务端可按逐行字节数计算
+     * 截断后快照的大小，而无需重新编码整个快照。
+     */
+    public static void writeLine(RegistryByteBuf buf, Line line) {
+        buf.writeVarInt(line.second);
+        buf.writeEnumConstant(line.category);
+        writeCount(buf, line.players.size(), MAX_LINE_PLAYERS);
+        for (UUID uuid : line.players) {
+            buf.writeUuid(uuid);
+        }
+        TextCodecs.REGISTRY_PACKET_CODEC.encode(buf, line.text);
     }
 
     private static ReplaySnapshot read(RegistryByteBuf buf) {
@@ -183,7 +197,7 @@ public record ReplaySnapshot(
         List<Player> players = new ArrayList<>(playerCount);
         for (int i = 0; i < playerCount; i++) {
             UUID uuid = buf.readUuid();
-            String name = buf.readString(64);
+            String name = buf.readString(MAX_NAME_LENGTH);
             int roleCount = readCount(buf, MAX_ROLES);
             List<RoleStep> roles = new ArrayList<>(roleCount);
             for (int r = 0; r < roleCount; r++) {

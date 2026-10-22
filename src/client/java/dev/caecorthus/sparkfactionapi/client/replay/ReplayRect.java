@@ -29,16 +29,6 @@ record ReplayRect(int x, int y, int width, int height) {
         return px >= x && px < x + width && py >= y && py < y + height;
     }
 
-    boolean intersects(ReplayRect other) {
-        return !isEmpty() && !other.isEmpty()
-                && x < other.right() && other.x < right()
-                && y < other.bottom() && other.y < bottom();
-    }
-
-    boolean containsRect(ReplayRect other) {
-        return other.x >= x && other.y >= y && other.right() <= right() && other.bottom() <= bottom();
-    }
-
     ReplayRect inset(int amount) {
         return new ReplayRect(x + amount, y + amount, width - 2 * amount, height - 2 * amount);
     }

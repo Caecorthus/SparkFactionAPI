@@ -27,10 +27,32 @@ public final class FactionWinRules {
             GameWorldComponent gameComponent,
             GameFunctions.WinStatus currentStatus
     ) {
-        List<FactionWinResult> results = new ArrayList<>();
-        for (FactionDefinition faction : factions.stream()
+        return customWinResultInPriorityOrder(priorityOrder(factions), world, gameComponent, currentStatus);
+    }
+
+    /**
+     * Highest priority first; the stable sort keeps registration order between equal priorities.
+     * 优先级从高到低；稳定排序让同优先级保持注册顺序。
+     */
+    public static List<FactionDefinition> priorityOrder(Collection<FactionDefinition> factions) {
+        return factions.stream()
                 .sorted(Comparator.comparingInt(FactionDefinition::priority).reversed())
-                .toList()) {
+                .toList();
+    }
+
+    /**
+     * Same as {@link #customWinResult} for factions already in {@link #priorityOrder}; every win condition still
+     * runs before the results are aggregated.
+     * 与 customWinResult 相同，但输入必须已按 priorityOrder 排序；聚合前仍会执行每个胜利条件。
+     */
+    static FactionWinResult customWinResultInPriorityOrder(
+            List<FactionDefinition> prioritySortedFactions,
+            ServerWorld world,
+            GameWorldComponent gameComponent,
+            GameFunctions.WinStatus currentStatus
+    ) {
+        List<FactionWinResult> results = new ArrayList<>(prioritySortedFactions.size());
+        for (FactionDefinition faction : prioritySortedFactions) {
             results.add(faction.winCondition().checkWin(
                     new FactionWinContext(world, gameComponent, currentStatus, faction.id())
             ));

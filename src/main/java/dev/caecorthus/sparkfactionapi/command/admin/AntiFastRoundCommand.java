@@ -7,7 +7,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import dev.caecorthus.sparkfactionapi.component.SparkFactionAntiFastRoundComponent;
 import dev.caecorthus.sparkfactionapi.impl.antifastround.AntiFastRound;
 import dev.caecorthus.sparkfactionapi.impl.antifastround.AntiFastRoundRules;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -29,10 +28,7 @@ final class AntiFastRoundCommand {
 
     static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("sparkfactionapi:antifastround")
-                .requires(Permissions.require(
-                        SparkFactionPermissions.COMMAND_ADMIN,
-                        SparkFactionPermissions.DEFAULT_COMMAND_LEVEL
-                ))
+                .requires(SparkFactionPermissions.admin())
                 .executes(context -> showStatus(context.getSource()))
                 .then(CommandManager.argument("enabled", BoolArgumentType.bool())
                         .executes(context -> {

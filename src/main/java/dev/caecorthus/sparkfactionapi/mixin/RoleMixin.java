@@ -15,6 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class RoleMixin {
     @Inject(method = "isNeutral", at = @At("HEAD"), cancellable = true)
     private void sparkfactionapi$overrideNeutralStatus(CallbackInfoReturnable<Boolean> cir) {
-        FactionRegistryImpl.nativeNeutralOverride((Role) (Object) this).ifPresent(cir::setReturnValue);
+        Boolean override = FactionRegistryImpl.nativeNeutralOverrideOrNull((Role) (Object) this);
+        if (override != null) {
+            cir.setReturnValue(override);
+        }
     }
 }

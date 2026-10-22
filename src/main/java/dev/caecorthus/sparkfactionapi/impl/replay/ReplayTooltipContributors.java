@@ -3,7 +3,6 @@ package dev.caecorthus.sparkfactionapi.impl.replay;
 import dev.caecorthus.sparkfactionapi.api.replay.ReplayTooltipContributor;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,6 @@ public final class ReplayTooltipContributors {
     }
 
     public static synchronized List<Map.Entry<Identifier, ReplayTooltipContributor>> entries() {
-        return List.copyOf(new ArrayList<>(CONTRIBUTORS.entrySet()));
+        return List.copyOf(CONTRIBUTORS.entrySet());
     }
 }

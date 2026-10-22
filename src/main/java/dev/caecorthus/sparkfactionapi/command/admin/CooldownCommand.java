@@ -1,7 +1,6 @@
 package dev.caecorthus.sparkfactionapi.command.admin;
 
 import com.mojang.brigadier.CommandDispatcher;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
@@ -18,10 +17,7 @@ final class CooldownCommand {
 
     static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("sparkfactionapi:clearCooldown")
-                .requires(Permissions.require(
-                        SparkFactionPermissions.COMMAND_ADMIN,
-                        SparkFactionPermissions.DEFAULT_COMMAND_LEVEL
-                ))
+                .requires(SparkFactionPermissions.admin())
                 .executes(context -> clearCooldown(
                         context.getSource(),
                         List.of(context.getSource().getPlayerOrThrow())

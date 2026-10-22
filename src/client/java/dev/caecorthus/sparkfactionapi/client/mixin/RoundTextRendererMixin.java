@@ -67,7 +67,7 @@ public abstract class RoundTextRendererMixin {
         }
         SparkFactionRoundEndComponent roundEnd = SparkFactionRoundEndComponent.KEY.get(player.getScoreboard());
         Identifier winningFaction = roundEnd.getWinningFaction();
-        if (winningFaction == null || !roundEnd.hasCustomWin()) {
+        if (winningFaction == null) {
             return Optional.empty();
         }
         return SparkFactionApi.getFaction(winningFaction);

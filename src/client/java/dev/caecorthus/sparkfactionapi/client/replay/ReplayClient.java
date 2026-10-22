@@ -7,6 +7,7 @@ import dev.doctor4t.wathe.cca.MapVotingComponent;
 import dev.doctor4t.wathe.client.gui.screen.MapVotingScreen;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
@@ -44,10 +45,12 @@ public final class ReplayClient {
     private static int requestCooldown;
 
     // ReplayScreen does not expose its parent, so remember what we handed the last one we opened. Every use
-    // checks screen identity, so a stale entry is harmless; it is kept (not cleared) so a replay that opened
-    // its own child screen and came back is still recognised.
+    // checks screen identity, so a stale entry is harmless; it is kept while connected (so a replay that opened
+    // its own child screen and came back is still recognised) and dropped on disconnect, which would otherwise
+    // pin that screen, its snapshot and its parent for the rest of the session.
     // ReplayScreen 不暴露 parent，这里记住最近一次打开时传入的值。每次使用都会比对界面身份，旧记录无害；
-    // 不主动清除，以便回放界面打开子界面再返回后仍能被识别。
+    // 连接期间保留（以便回放界面打开子界面再返回后仍能被识别），断开连接时清除，否则该界面、快照及其 parent
+    // 会在整个游戏会话中一直占用内存。
     private static @Nullable OpenedReplay opened;
     // The replay screen removed since the last tick start. Screen#removed and the next screen's init run
     // synchronously inside one setScreen call, so AFTER_INIT can tell which screen replaced it.
@@ -74,6 +77,14 @@ public final class ReplayClient {
         ClientTickEvents.START_CLIENT_TICK.register(ReplayClient::onStartTick);
         ClientTickEvents.END_CLIENT_TICK.register(ReplayClient::onEndTick);
         ScreenEvents.AFTER_INIT.register(ReplayClient::afterScreenInit);
+        // DISCONNECT may fire on the netty thread (channelInactive); clear on the render thread that owns these fields.
+        // DISCONNECT 可能在 netty 线程（channelInactive）触发，因此回到持有这些字段的渲染线程再清除。
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(ReplayClient::forgetReplay));
+    }
+
+    private static void forgetReplay() {
+        opened = null;
+        removedReplay = null;
     }
 
     private static void onStartTick(MinecraftClient client) {

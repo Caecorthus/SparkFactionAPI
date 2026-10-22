@@ -3,7 +3,6 @@ package dev.caecorthus.sparkfactionapi.command.admin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import dev.doctor4t.wathe.cca.PlayerMoodComponent;
-import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -19,10 +18,7 @@ final class SanityCommand {
 
     static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("sparkfactionapi:setSanity")
-                .requires(Permissions.require(
-                        SparkFactionPermissions.COMMAND_ADMIN,
-                        SparkFactionPermissions.DEFAULT_COMMAND_LEVEL
-                ))
+                .requires(SparkFactionPermissions.admin())
                 .then(CommandManager.argument("value", FloatArgumentType.floatArg(-100.0f, 125.0f))
                         .executes(context -> setSanity(
                                 context.getSource(),

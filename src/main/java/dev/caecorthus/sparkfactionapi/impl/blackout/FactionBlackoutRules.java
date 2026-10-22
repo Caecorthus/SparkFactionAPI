@@ -6,6 +6,7 @@ import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public final class FactionBlackoutRules {
@@ -46,13 +47,14 @@ public final class FactionBlackoutRules {
      * 只给 wathe 原生杀手路径跳过的自定义阵营玩家追加熄灯冷却共享。
      */
     public static boolean sharesCustomBlackoutCooldown(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.hasCustomEffectiveFaction(player, gameComponent)
+        Identifier factionId = FactionCapabilityLookup.effectiveFaction(player, gameComponent);
+        return FactionCapabilityLookup.isCustomFaction(factionId)
                 && !gameComponent.canUseKillerFeatures(player)
-                && canUseKillerFeatureAccess(player, gameComponent);
+                && canUseKillerFeatureAccess(factionId);
     }
 
-    private static boolean canUseKillerFeatureAccess(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.capabilities(player, gameComponent).canUseKillerFeatures();
+    private static boolean canUseKillerFeatureAccess(Identifier effectiveFaction) {
+        return FactionCapabilityLookup.capabilitiesForFaction(effectiveFaction).canUseKillerFeatures();
     }
 
     private static @Nullable Boolean firstBlackoutCooldownPolicyResult(

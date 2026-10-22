@@ -2,26 +2,13 @@ package dev.caecorthus.sparkfactionapi.impl.economy;
 
 import dev.caecorthus.sparkfactionapi.api.FactionEconomyPolicy;
 import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
-import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public final class FactionEconomyRules {
     private FactionEconomyRules() {
-    }
-
-    public static boolean receivesKillerPassiveMoney(Role role) {
-        return FactionCapabilityLookup.capabilities(role).receivesKillerPassiveMoney();
-    }
-
-    public static boolean receivesKillerPassiveMoney(PlayerEntity player, GameWorldComponent gameComponent) {
-        return economyDecision(
-                player,
-                FactionEconomyPolicy.RewardKind.PASSIVE,
-                gameComponent,
-                FactionCapabilityLookup.capabilities(player, gameComponent).receivesKillerPassiveMoney()
-        );
     }
 
     /**
@@ -29,22 +16,10 @@ public final class FactionEconomyRules {
      * 防止追加被动金钱时重复支付原生杀手或 SparkTraits 已调整过的杀手。
      */
     public static boolean receivesCustomKillerPassiveMoney(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.hasCustomEffectiveFaction(player, gameComponent)
+        Identifier factionId = FactionCapabilityLookup.effectiveFaction(player, gameComponent);
+        return FactionCapabilityLookup.isCustomFaction(factionId)
                 && !gameComponent.canUseKillerFeatures(player)
-                && receivesKillerPassiveMoney(player, gameComponent);
-    }
-
-    public static boolean receivesKillReward(Role role) {
-        return FactionCapabilityLookup.capabilities(role).receivesKillRewards();
-    }
-
-    public static boolean receivesKillReward(PlayerEntity player, GameWorldComponent gameComponent) {
-        return economyDecision(
-                player,
-                FactionEconomyPolicy.RewardKind.DIRECT_KILL,
-                gameComponent,
-                FactionCapabilityLookup.capabilities(player, gameComponent).receivesKillRewards()
-        );
+                && passiveMoneyDecision(player, gameComponent, factionId);
     }
 
     /**
@@ -52,9 +27,36 @@ public final class FactionEconomyRules {
      * 将直接击杀奖励补偿限制在 wathe 原生路径跳过的自定义阵营上。
      */
     public static boolean receivesCustomKillReward(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.hasCustomEffectiveFaction(player, gameComponent)
+        Identifier factionId = FactionCapabilityLookup.effectiveFaction(player, gameComponent);
+        return FactionCapabilityLookup.isCustomFaction(factionId)
                 && !gameComponent.canUseKillerFeatures(player)
-                && receivesKillReward(player, gameComponent);
+                && killRewardDecision(player, gameComponent, factionId);
+    }
+
+    private static boolean passiveMoneyDecision(
+            PlayerEntity player,
+            GameWorldComponent gameComponent,
+            Identifier effectiveFaction
+    ) {
+        return economyDecision(
+                player,
+                FactionEconomyPolicy.RewardKind.PASSIVE,
+                gameComponent,
+                FactionCapabilityLookup.capabilitiesForFaction(effectiveFaction).receivesKillerPassiveMoney()
+        );
+    }
+
+    private static boolean killRewardDecision(
+            PlayerEntity player,
+            GameWorldComponent gameComponent,
+            Identifier effectiveFaction
+    ) {
+        return economyDecision(
+                player,
+                FactionEconomyPolicy.RewardKind.DIRECT_KILL,
+                gameComponent,
+                FactionCapabilityLookup.capabilitiesForFaction(effectiveFaction).receivesKillRewards()
+        );
     }
 
     private static boolean economyDecision(

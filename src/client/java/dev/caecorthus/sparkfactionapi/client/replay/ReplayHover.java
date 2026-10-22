@@ -37,9 +37,12 @@ final class ReplayHover {
         return lines == null && style == null;
     }
 
+    /** Brass tooltips are batched like the panels (see ReplayScreen#render). 黄铜提示框与面板一样批量提交。 */
+    @SuppressWarnings("deprecation")
     void render(DrawContext c, TextRenderer f, int mouseX, int mouseY, int screenW, int screenH) {
         if (lines != null) {
-            ReplayPaint.tooltip(c, f, lines, mouseX, mouseY, screenW, screenH);
+            List<OrderedText> shown = lines;
+            c.draw(() -> ReplayPaint.tooltip(c, f, shown, mouseX, mouseY, screenW, screenH));
         } else if (style != null) {
             c.drawHoverEvent(f, style, mouseX, mouseY);
         }

@@ -19,6 +19,11 @@ public abstract class FactionMixin {
             Role role,
             CallbackInfoReturnable<Faction> cir
     ) {
-        FactionRegistryImpl.nativeFactionOverride(role).ifPresent(cir::setReturnValue);
+        // Null-returning lookup avoids an Optional and a bound method ref on every fromRole call.
+        // 返回 null 的查询避免每次 fromRole 调用都分配 Optional 与绑定方法引用。
+        Faction override = FactionRegistryImpl.nativeFactionOverrideOrNull(role);
+        if (override != null) {
+            cir.setReturnValue(override);
+        }
     }
 }

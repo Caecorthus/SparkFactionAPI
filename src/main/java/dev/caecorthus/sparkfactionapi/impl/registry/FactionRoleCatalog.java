@@ -6,6 +6,7 @@ import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.api.WatheRoles;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,24 +58,32 @@ public final class FactionRoleCatalog {
         return role;
     }
 
-    public static boolean isSparkFactionRole(Role role) {
-        return ROLE_FACTIONS.containsKey(role);
-    }
-
     /**
      * Makes default SparkFactionAPI roles visible to Wathe as neutral instead of NONE.
      * 让默认 SparkFactionAPI 角色在 Wathe 侧显示为中立阵营，而不是 NONE。
      */
     public static Optional<Faction> nativeFactionOverride(Role role) {
-        return nativeWatheFaction(role)
-                .filter(faction -> faction == Faction.NONE)
-                .map(faction -> Faction.NEUTRAL);
+        return Optional.ofNullable(nativeFactionOverrideOrNull(role));
+    }
+
+    /**
+     * Allocation-free form of {@link #nativeFactionOverride} for the hot Faction#fromRole mixin; null means no override.
+     * 供高频 Faction#fromRole mixin 使用的无分配版本 {@link #nativeFactionOverride}；null 表示不覆盖。
+     */
+    public static @Nullable Faction nativeFactionOverrideOrNull(Role role) {
+        return ROLE_NATIVE_FACTIONS.get(role) == Faction.NONE ? Faction.NEUTRAL : null;
     }
 
     public static Optional<Boolean> nativeNeutralOverride(Role role) {
-        return nativeWatheFaction(role)
-                .filter(faction -> faction == Faction.NONE)
-                .map(faction -> true);
+        return Optional.ofNullable(nativeNeutralOverrideOrNull(role));
+    }
+
+    /**
+     * Allocation-free form of {@link #nativeNeutralOverride} for the hot Role#isNeutral mixin; null means no override.
+     * 供高频 Role#isNeutral mixin 使用的无分配版本 {@link #nativeNeutralOverride}；null 表示不覆盖。
+     */
+    public static @Nullable Boolean nativeNeutralOverrideOrNull(Role role) {
+        return ROLE_NATIVE_FACTIONS.get(role) == Faction.NONE ? Boolean.TRUE : null;
     }
 
     public static Identifier resolveBaseFaction(Role role) {
@@ -104,9 +113,5 @@ public final class FactionRoleCatalog {
             }
         }
         return Collections.unmodifiableList(roles);
-    }
-
-    private static Optional<Faction> nativeWatheFaction(Role role) {
-        return Optional.ofNullable(ROLE_NATIVE_FACTIONS.get(role));
     }
 }

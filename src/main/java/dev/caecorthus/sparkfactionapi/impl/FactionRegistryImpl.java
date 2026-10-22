@@ -27,6 +27,7 @@ import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,16 +49,20 @@ public final class FactionRegistryImpl {
         return FactionRoleCatalog.registerRole(definition);
     }
 
-    public static boolean isSparkFactionRole(Role role) {
-        return FactionRoleCatalog.isSparkFactionRole(role);
-    }
-
     public static Optional<Faction> nativeFactionOverride(Role role) {
         return FactionRoleCatalog.nativeFactionOverride(role);
     }
 
+    public static @Nullable Faction nativeFactionOverrideOrNull(Role role) {
+        return FactionRoleCatalog.nativeFactionOverrideOrNull(role);
+    }
+
     public static Optional<Boolean> nativeNeutralOverride(Role role) {
         return FactionRoleCatalog.nativeNeutralOverride(role);
+    }
+
+    public static @Nullable Boolean nativeNeutralOverrideOrNull(Role role) {
+        return FactionRoleCatalog.nativeNeutralOverrideOrNull(role);
     }
 
     public static Identifier resolveBaseFaction(Role role) {
@@ -100,32 +105,16 @@ public final class FactionRegistryImpl {
         return FactionCatalog.getCustomFactions();
     }
 
+    public static List<FactionDefinition> customFactionsByPriority() {
+        return FactionCatalog.customFactionsByPriority();
+    }
+
     public static boolean isCustomFaction(Identifier factionId) {
         return FactionCatalog.isCustomFaction(factionId);
     }
 
     public static Collection<Role> getRolesForFaction(Identifier factionId) {
         return FactionRoleCatalog.getRolesForFaction(factionId);
-    }
-
-    public static List<FactionTargetEligibility> targetEligibility() {
-        return FactionTargetPolicies.targetEligibility();
-    }
-
-    public static List<FactionEconomyPolicy> economyPolicies() {
-        return FactionEconomyPolicies.economyPolicies();
-    }
-
-    public static List<FactionGunPunishmentPolicy> gunPunishmentPolicies() {
-        return FactionGunPunishmentPolicies.gunPunishmentPolicies();
-    }
-
-    public static List<FactionBlackoutCooldownPolicy> blackoutCooldownPolicies() {
-        return FactionBlackoutCooldownPolicies.blackoutCooldownPolicies();
-    }
-
-    public static List<FactionInstinctPolicy> instinctPolicies() {
-        return FactionInstinctPolicies.instinctPolicies();
     }
 
     public static void registerEffectiveFactionResolver(EffectiveFactionResolver resolver) {

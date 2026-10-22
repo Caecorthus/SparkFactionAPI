@@ -5,24 +5,16 @@ import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
 import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
 import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
-import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public final class FactionInstinctRules {
     private FactionInstinctRules() {
-    }
-
-    public static boolean canUseInstinct(Role role) {
-        return FactionCapabilityLookup.capabilities(role).canUseInstinct();
-    }
-
-    public static boolean canUseInstinct(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.capabilities(player, gameComponent).canUseInstinct();
     }
 
     /**
@@ -33,42 +25,37 @@ public final class FactionInstinctRules {
         return viewerPlayingAndAlive || !viewerSpectatingOrCreative;
     }
 
-    public static int instinctColor(Role role) {
-        return FactionCapabilityLookup.capabilities(role).instinctColor();
-    }
-
-    public static int instinctColor(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.capabilities(player, gameComponent).instinctColor();
-    }
-
-    public static int displayColor(Role role) {
-        FactionCapabilities capabilities = FactionCapabilityLookup.capabilities(role);
-        if (capabilities.instinctColor() != -1) {
-            return capabilities.instinctColor();
-        }
-        Identifier factionId = FactionCapabilityLookup.baseFaction(role);
-        return FactionRegistryImpl.getFaction(factionId)
-                .map(FactionDefinition::color)
-                .orElse(-1);
-    }
-
     public static int displayColor(PlayerEntity player, GameWorldComponent gameComponent) {
-        FactionCapabilities capabilities = FactionCapabilityLookup.capabilities(player, gameComponent);
+        Identifier factionId = FactionCapabilityLookup.effectiveFaction(player, gameComponent);
+        FactionCapabilities capabilities = FactionCapabilityLookup.capabilitiesForFaction(factionId);
         if (capabilities.instinctColor() != -1) {
             return capabilities.instinctColor();
         }
-        Identifier factionId = FactionCapabilityLookup.effectiveFaction(player, gameComponent);
         return FactionRegistryImpl.getFaction(factionId)
                 .map(FactionDefinition::color)
                 .orElse(-1);
     }
 
     public static boolean hasCustomInstinctViewer(PlayerEntity viewer, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.hasCustomEffectiveFaction(viewer, gameComponent)
-                && canUseInstinct(viewer, gameComponent);
+        Identifier factionId = FactionCapabilityLookup.effectiveFaction(viewer, gameComponent);
+        return FactionCapabilityLookup.isCustomFaction(factionId)
+                && FactionCapabilityLookup.capabilitiesForFaction(factionId).canUseInstinct();
     }
 
     public static Optional<FactionInstinctPolicy.InstinctResult> policyResult(
+            PlayerEntity viewer,
+            Entity target,
+            GameWorldComponent gameComponent
+    ) {
+        return Optional.ofNullable(policyResultOrNull(viewer, target, gameComponent));
+    }
+
+    /**
+     * Allocation-free form of {@link #policyResult} for Wathe's per-frame instinct highlight event; null means no
+     * policy answered.
+     * 供 wathe 每帧直觉高亮事件使用的无分配版本 {@link #policyResult}；返回 null 表示没有策略给出结果。
+     */
+    public static FactionInstinctPolicy.@Nullable InstinctResult policyResultOrNull(
             PlayerEntity viewer,
             Entity target,
             GameWorldComponent gameComponent
@@ -80,6 +67,6 @@ public final class FactionInstinctRules {
                 bestResult = result;
             }
         }
-        return Optional.ofNullable(bestResult);
+        return bestResult;
     }
 }

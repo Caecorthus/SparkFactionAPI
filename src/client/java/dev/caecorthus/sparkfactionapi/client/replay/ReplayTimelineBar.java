@@ -35,6 +35,15 @@ final class ReplayTimelineBar {
     private final int reportedDuration;
     private int[] markers = new int[0];
     private int markerCount;
+    // Rebuilt on sync() and layout(), never per frame: each marker's x, whether those x ascend (lines arrive in time
+    // order, so they do unless a snapshot is out of order), and each paint pass's de-duplicated x and colour.
+    // 只在 sync() 与 layout() 时重建，不会每帧重算：各标记的 x、这些 x 是否递增（行按时间顺序到达，除非快照乱序否则递增），
+    // 以及每个绘制层去重后的 x 与颜色。
+    private int[] markerXs = new int[0];
+    private boolean markersAscending = true;
+    private final int[][] passX = {new int[0], new int[0], new int[0]};
+    private final int[][] passColor = {new int[0], new int[0], new int[0]};
+    private final int[] passCount = new int[3];
     private int syncedVersion = -1;
     private ReplayRect rect = ReplayRect.EMPTY;
     private List<OrderedText> tipLines = List.of();
@@ -59,6 +68,7 @@ final class ReplayTimelineBar {
 
     void layout(ReplayRect rect) {
         this.rect = rect;
+        placeMarkers();
     }
 
     void sync() {
@@ -77,6 +87,58 @@ final class ReplayTimelineBar {
             }
         }
         syncedVersion = model.version();
+        placeMarkers();
+    }
+
+    private void placeMarkers() {
+        if (markerXs.length < markerCount) {
+            markerXs = new int[markers.length];
+        }
+        for (int pass = 0; pass < passX.length; pass++) {
+            if (passX[pass].length < markerCount) {
+                passX[pass] = new int[markers.length];
+                passColor[pass] = new int[markers.length];
+            }
+            passCount[pass] = 0;
+        }
+        markersAscending = true;
+        int[] lastX = {Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
+        for (int i = 0; i < markerCount; i++) {
+            ReplaySnapshot.Line line = model.line(markers[i]);
+            int x = markerX(line.second());
+            markerXs[i] = x;
+            if (i > 0 && x < markerXs[i - 1]) {
+                markersAscending = false;
+            }
+            // A pass skips a marker on the same pixel as the one it drew last. 同一绘制层跳过与上一个已绘制标记同一像素的标记。
+            int pass = pass(line.category());
+            if (x != lastX[pass]) {
+                lastX[pass] = x;
+                passX[pass][passCount[pass]] = x;
+                passColor[pass][passCount[pass]] = ReplayPalette.category(line.category());
+                passCount[pass]++;
+            }
+        }
+    }
+
+    /** Paint pass of a marked line: 0 faint category, 1 role change, 2 death. 标记所属绘制层：0 淡色分类、1 转化、2 死亡。 */
+    private static int pass(ReplaySnapshot.Category category) {
+        return category == ReplaySnapshot.Category.DEATH ? 2 : category == ReplaySnapshot.Category.CONVERSION ? 1 : 0;
+    }
+
+    /** First marker index whose x is at least {@code x}; markers must ascend. 首个 x 不小于给定值的标记下标；要求标记递增。 */
+    private int firstMarkerAtOrAfter(int x) {
+        int low = 0;
+        int high = markerCount;
+        while (low < high) {
+            int mid = (low + high) >>> 1;
+            if (markerXs[mid] < x) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        return low;
     }
 
     private boolean marked(ReplaySnapshot.Category category) {
@@ -125,9 +187,19 @@ final class ReplayTimelineBar {
         }
         int best = -1;
         double bestDistance = HIT_SLOP + 0.5;
-        for (int i = 0; i < markerCount; i++) {
+        // Only markers within the slop can win. When x ascend they are one contiguous run, found by binary search and
+        // widened by a pixel each way so rounding never drops a candidate; the comparison below is unchanged.
+        // 只有容差内的标记可能被选中。x 递增时它们是连续的一段，用二分查找定位并向两侧各多放 1 像素以免舍入漏掉候选；
+        // 下方比较逻辑不变。
+        int from = 0;
+        int last = Integer.MAX_VALUE;
+        if (markersAscending) {
+            from = firstMarkerAtOrAfter((int) Math.floor(mouseX - 0.5 - bestDistance) - 1);
+            last = (int) Math.ceil(mouseX - 0.5 + bestDistance) + 1;
+        }
+        for (int i = from; i < markerCount && markerXs[i] <= last; i++) {
             int lineIndex = markers[i];
-            double distance = Math.abs(markerX(model.line(lineIndex).second()) + 0.5 - mouseX);
+            double distance = Math.abs(markerXs[i] + 0.5 - mouseX);
             // Deaths win ties so the red marker drawn on top is the one picked. 距离相同时优先死亡，与绘制顺序一致。
             boolean death = model.line(lineIndex).category() == ReplaySnapshot.Category.DEATH;
             if (distance < bestDistance || (distance == bestDistance && death)) {
@@ -205,20 +277,11 @@ final class ReplayTimelineBar {
     }
 
     private void drawMarkers(DrawContext c, int ty, int pass) {
-        int lastX = Integer.MIN_VALUE;
-        for (int i = 0; i < markerCount; i++) {
-            ReplaySnapshot.Category category = model.line(markers[i]).category();
-            int markerPass = category == ReplaySnapshot.Category.DEATH ? 2
-                    : category == ReplaySnapshot.Category.CONVERSION ? 1 : 0;
-            if (markerPass != pass) {
-                continue;
-            }
-            int x = markerX(model.line(markers[i]).second());
-            if (x == lastX) {
-                continue;
-            }
-            lastX = x;
-            int color = ReplayPalette.category(category);
+        int[] xs = passX[pass];
+        int[] colors = passColor[pass];
+        for (int k = 0; k < passCount[pass]; k++) {
+            int x = xs[k];
+            int color = colors[k];
             if (pass == 0) {
                 c.fill(x, ty - 2, x + 1, ty + 6, withAlpha(color, 0xB0));
             } else {
@@ -234,8 +297,10 @@ final class ReplayTimelineBar {
     private List<OrderedText> tooltip(int hovered, int hoveredX) {
         int first = -1;
         int count = 0;
-        for (int i = 0; i < markerCount; i++) {
-            if (Math.abs(markerX(model.line(markers[i]).second()) - hoveredX) <= CLUSTER) {
+        int from = markersAscending ? firstMarkerAtOrAfter(hoveredX - CLUSTER) : 0;
+        int last = markersAscending ? hoveredX + CLUSTER : Integer.MAX_VALUE;
+        for (int i = from; i < markerCount && markerXs[i] <= last; i++) {
+            if (Math.abs(markerXs[i] - hoveredX) <= CLUSTER) {
                 if (first < 0) {
                     first = i;
                 }
@@ -248,9 +313,9 @@ final class ReplayTimelineBar {
         List<OrderedText> lines = new ArrayList<>(Math.min(count, MAX_TIP_LINES) + 1);
         Style clockStyle = Style.EMPTY.withColor(TextColor.fromRgb(FAINT & 0xFFFFFF));
         int shown = 0;
-        for (int i = first; i < markerCount && shown < MAX_TIP_LINES; i++) {
+        for (int i = first; i < markerCount && shown < MAX_TIP_LINES && markerXs[i] <= last; i++) {
             int lineIndex = markers[i];
-            if (Math.abs(markerX(model.line(lineIndex).second()) - hoveredX) > CLUSTER) {
+            if (Math.abs(markerXs[i] - hoveredX) > CLUSTER) {
                 continue;
             }
             StringVisitable text = StringVisitable.concat(

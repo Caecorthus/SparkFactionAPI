@@ -31,7 +31,19 @@ public final class FactionAssignmentService {
             return 0;
         }
 
-        List<AssignmentRequest> requests = requestsForPhase(world, gameComponent, players, availablePlayers.size(), phase);
+        // Built once per phase: it only holds the player list and Wathe's dividend-based targets, which nothing
+        // here changes, and Wathe's own selector likewise builds one per phase (createSelectionContext).
+        // 每个阶段只构建一次：它只包含玩家列表和基于 Wathe 除数的目标人数，本流程不会修改这些输入；
+        // Wathe 自己的选择器（createSelectionContext）同样每阶段只构建一次。
+        RoleSelectionContext roleContext = roleSelectionContext(world, gameComponent, players);
+        List<AssignmentRequest> requests = requestsForPhase(
+                world,
+                gameComponent,
+                players,
+                availablePlayers.size(),
+                phase,
+                roleContext
+        );
         if (requests.isEmpty()) {
             return 0;
         }
@@ -44,7 +56,6 @@ public final class FactionAssignmentService {
 
         int assigned = 0;
         int playerIndex = 0;
-        RoleSelectionContext roleContext = roleSelectionContext(world, gameComponent, players);
         for (AssignmentRequest request : assignmentOrder) {
             while (request.remainingSlots() > 0 && playerIndex < availablePlayers.size()) {
                 Role role = request.takeRole(roleContext, gameComponent, world);
@@ -75,7 +86,8 @@ public final class FactionAssignmentService {
             GameWorldComponent gameComponent,
             List<ServerPlayerEntity> players,
             int availablePlayerCount,
-            FactionAssignmentPhase phase
+            FactionAssignmentPhase phase,
+            RoleSelectionContext roleContext
     ) {
         FactionAssignmentContext context = new FactionAssignmentContext(
                 world,
@@ -86,7 +98,6 @@ public final class FactionAssignmentService {
                 phase
         );
         List<AssignmentRequest> requests = new ArrayList<>();
-        RoleSelectionContext roleContext = roleSelectionContext(world, gameComponent, players);
         for (FactionDefinition faction : FactionRegistryImpl.getCustomFactions()) {
             if (faction.assignmentPhase() != phase) {
                 continue;
