@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Assembles the frozen per-participant hover tooltip and the status/role-chain texts shared with the roster.
@@ -119,27 +121,44 @@ final class ReplayTooltipBuilder {
             ReplayPlayerView view,
             List<Map.Entry<Identifier, ReplayTooltipContributor>> contributors
     ) {
-        List<Text> lines = new ArrayList<>();
-        for (Map.Entry<Identifier, ReplayTooltipContributor> entry : contributors) {
-            List<Text> own = new ArrayList<>();
+        return runContributors(view, contributors, "tooltip",
+                (contributor, sink) -> contributor.contribute(view, sink));
+    }
+
+    /**
+     * Shared loop for tooltip and badge contributors: each contributor's non-null output is kept only if it returns
+     * normally; one that throws is logged as "Replay {kind} contributor ..." and skipped with everything it emitted.
+     * 悬停提示与标签贡献者共用的循环：贡献者正常返回时才保留其非空输出；抛异常的贡献者以 "Replay {kind} contributor ..."
+     * 记录日志，并连同其已输出的内容一起跳过。
+     */
+    static <C, T> List<T> runContributors(
+            ReplayPlayerView view,
+            List<Map.Entry<Identifier, C>> contributors,
+            String kind,
+            BiConsumer<C, Consumer<T>> contribute
+    ) {
+        List<T> out = new ArrayList<>();
+        for (Map.Entry<Identifier, C> entry : contributors) {
+            List<T> own = new ArrayList<>();
             try {
-                entry.getValue().contribute(view, line -> {
-                    if (line != null) {
-                        own.add(line);
+                contribute.accept(entry.getValue(), item -> {
+                    if (item != null) {
+                        own.add(item);
                     }
                 });
             } catch (RuntimeException | LinkageError e) {
                 SparkFactionApiMod.LOGGER.error(
-                        "Replay tooltip contributor {} failed for player {}; skipping it",
+                        "Replay {} contributor {} failed for player {}; skipping it",
+                        kind,
                         entry.getKey(),
                         view.uuid(),
                         e
                 );
                 continue;
             }
-            lines.addAll(own);
+            out.addAll(own);
         }
-        return lines;
+        return out;
     }
 
     static Text timeStamp(long tick, long startTick) {

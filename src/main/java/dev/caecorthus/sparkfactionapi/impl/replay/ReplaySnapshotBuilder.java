@@ -88,35 +88,17 @@ final class ReplaySnapshotBuilder {
 
     /**
      * Runs every badge contributor for one participant in registration order; a contributor that throws is logged and
-     * skipped together with the badges it emitted, like {@code ReplayTooltipBuilder#contributorLines}.
-     * 按注册顺序为单名参与者执行标签贡献者；抛异常的贡献者会被记录并连同其已输出的标签一起跳过，与
-     * {@code ReplayTooltipBuilder#contributorLines} 一致。
+     * skipped together with the badges it emitted, through the same {@code ReplayTooltipBuilder#runContributors} loop
+     * as tooltip lines.
+     * 按注册顺序为单名参与者执行标签贡献者；抛异常的贡献者会被记录并连同其已输出的标签一起跳过，与悬停提示行共用
+     * {@code ReplayTooltipBuilder#runContributors} 循环。
      */
     static List<ReplayBadge> contributorBadges(
             ReplayPlayerView view,
             List<Map.Entry<Identifier, ReplayBadgeContributor>> contributors
     ) {
-        List<ReplayBadge> badges = new ArrayList<>();
-        for (Map.Entry<Identifier, ReplayBadgeContributor> entry : contributors) {
-            List<ReplayBadge> own = new ArrayList<>();
-            try {
-                entry.getValue().contribute(view, badge -> {
-                    if (badge != null) {
-                        own.add(badge);
-                    }
-                });
-            } catch (RuntimeException | LinkageError e) {
-                SparkFactionApiMod.LOGGER.error(
-                        "Replay badge contributor {} failed for player {}; skipping it",
-                        entry.getKey(),
-                        view.uuid(),
-                        e
-                );
-                continue;
-            }
-            badges.addAll(own);
-        }
-        return badges;
+        return ReplayTooltipBuilder.runContributors(view, contributors, "badge",
+                (contributor, sink) -> contributor.contribute(view, sink));
     }
 
     private static ReplaySnapshot snapshot(
