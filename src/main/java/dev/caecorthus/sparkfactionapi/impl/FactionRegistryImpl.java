@@ -27,8 +27,11 @@ import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,8 +59,16 @@ public final class FactionRegistryImpl {
         return FactionRoleCatalog.nativeFactionOverride(role);
     }
 
+    public static @Nullable Faction nativeFactionOverrideOrNull(Role role) {
+        return FactionRoleCatalog.nativeFactionOverrideOrNull(role);
+    }
+
     public static Optional<Boolean> nativeNeutralOverride(Role role) {
         return FactionRoleCatalog.nativeNeutralOverride(role);
+    }
+
+    public static @Nullable Boolean nativeNeutralOverrideOrNull(Role role) {
+        return FactionRoleCatalog.nativeNeutralOverrideOrNull(role);
     }
 
     public static Identifier resolveBaseFaction(Role role) {
@@ -100,6 +111,10 @@ public final class FactionRegistryImpl {
         return FactionCatalog.getCustomFactions();
     }
 
+    public static List<FactionDefinition> customFactionsByPriority() {
+        return FactionCatalog.customFactionsByPriority();
+    }
+
     public static boolean isCustomFaction(Identifier factionId) {
         return FactionCatalog.isCustomFaction(factionId);
     }
@@ -109,23 +124,23 @@ public final class FactionRegistryImpl {
     }
 
     public static List<FactionTargetEligibility> targetEligibility() {
-        return FactionTargetPolicies.targetEligibility();
+        return snapshot(FactionTargetPolicies.targetEligibility());
     }
 
     public static List<FactionEconomyPolicy> economyPolicies() {
-        return FactionEconomyPolicies.economyPolicies();
+        return snapshot(FactionEconomyPolicies.economyPolicies());
     }
 
     public static List<FactionGunPunishmentPolicy> gunPunishmentPolicies() {
-        return FactionGunPunishmentPolicies.gunPunishmentPolicies();
+        return snapshot(FactionGunPunishmentPolicies.gunPunishmentPolicies());
     }
 
     public static List<FactionBlackoutCooldownPolicy> blackoutCooldownPolicies() {
-        return FactionBlackoutCooldownPolicies.blackoutCooldownPolicies();
+        return snapshot(FactionBlackoutCooldownPolicies.blackoutCooldownPolicies());
     }
 
     public static List<FactionInstinctPolicy> instinctPolicies() {
-        return FactionInstinctPolicies.instinctPolicies();
+        return snapshot(FactionInstinctPolicies.instinctPolicies());
     }
 
     public static void registerEffectiveFactionResolver(EffectiveFactionResolver resolver) {
@@ -154,6 +169,14 @@ public final class FactionRegistryImpl {
 
     public static void registerInstinctPolicy(FactionInstinctPolicy policy) {
         FactionInstinctPolicies.register(policy);
+    }
+
+    /**
+     * Keeps these getters returning independent snapshots now that the policy registries hand out live views.
+     * 策略注册表改为返回实时视图后，这些 getter 仍返回独立快照，持有者不会看到之后的注册。
+     */
+    private static <T> List<T> snapshot(List<T> policies) {
+        return Collections.unmodifiableList(new ArrayList<>(policies));
     }
 
 }

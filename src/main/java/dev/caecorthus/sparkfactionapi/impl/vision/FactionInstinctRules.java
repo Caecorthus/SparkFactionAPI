@@ -10,6 +10,7 @@ import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -53,22 +54,36 @@ public final class FactionInstinctRules {
     }
 
     public static int displayColor(PlayerEntity player, GameWorldComponent gameComponent) {
-        FactionCapabilities capabilities = FactionCapabilityLookup.capabilities(player, gameComponent);
+        Identifier factionId = FactionCapabilityLookup.effectiveFaction(player, gameComponent);
+        FactionCapabilities capabilities = FactionCapabilityLookup.capabilitiesForFaction(factionId);
         if (capabilities.instinctColor() != -1) {
             return capabilities.instinctColor();
         }
-        Identifier factionId = FactionCapabilityLookup.effectiveFaction(player, gameComponent);
         return FactionRegistryImpl.getFaction(factionId)
                 .map(FactionDefinition::color)
                 .orElse(-1);
     }
 
     public static boolean hasCustomInstinctViewer(PlayerEntity viewer, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.hasCustomEffectiveFaction(viewer, gameComponent)
-                && canUseInstinct(viewer, gameComponent);
+        Identifier factionId = FactionCapabilityLookup.effectiveFaction(viewer, gameComponent);
+        return FactionCapabilityLookup.isCustomFaction(factionId)
+                && FactionCapabilityLookup.capabilitiesForFaction(factionId).canUseInstinct();
     }
 
     public static Optional<FactionInstinctPolicy.InstinctResult> policyResult(
+            PlayerEntity viewer,
+            Entity target,
+            GameWorldComponent gameComponent
+    ) {
+        return Optional.ofNullable(policyResultOrNull(viewer, target, gameComponent));
+    }
+
+    /**
+     * Allocation-free form of {@link #policyResult} for Wathe's per-frame instinct highlight event; null means no
+     * policy answered.
+     * 供 wathe 每帧直觉高亮事件使用的无分配版本 {@link #policyResult}；返回 null 表示没有策略给出结果。
+     */
+    public static FactionInstinctPolicy.@Nullable InstinctResult policyResultOrNull(
             PlayerEntity viewer,
             Entity target,
             GameWorldComponent gameComponent
@@ -80,6 +95,6 @@ public final class FactionInstinctRules {
                 bestResult = result;
             }
         }
-        return Optional.ofNullable(bestResult);
+        return bestResult;
     }
 }

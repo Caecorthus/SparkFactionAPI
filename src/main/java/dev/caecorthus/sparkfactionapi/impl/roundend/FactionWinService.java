@@ -41,8 +41,8 @@ public final class FactionWinService {
             GameFunctions.WinStatus currentStatus
     ) {
         SparkFactionRoundEndComponent roundEnd = SparkFactionRoundEndComponent.KEY.get(world.getScoreboard());
-        FactionWinResult result = FactionWinRules.customWinResult(
-                FactionRegistryImpl.getCustomFactions(),
+        FactionWinResult result = FactionWinRules.customWinResultInPriorityOrder(
+                FactionRegistryImpl.customFactionsByPriority(),
                 world,
                 gameComponent,
                 currentStatus

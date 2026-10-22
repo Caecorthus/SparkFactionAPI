@@ -26,7 +26,7 @@ public final class FactionCohortRules {
         Identifier viewerFaction = FactionCapabilityLookup.effectiveFaction(viewer, gameComponent);
         Identifier targetFaction = FactionCapabilityLookup.effectiveFaction(target, gameComponent);
         return viewerFaction.equals(targetFaction)
-                && FactionCapabilityLookup.capabilities(viewer, gameComponent).sharesCohort()
-                && FactionCapabilityLookup.capabilities(target, gameComponent).sharesCohort();
+                && FactionCapabilityLookup.capabilitiesForFaction(viewerFaction).sharesCohort()
+                && FactionCapabilityLookup.capabilitiesForFaction(targetFaction).sharesCohort();
     }
 }

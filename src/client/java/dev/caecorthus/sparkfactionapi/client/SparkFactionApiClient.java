@@ -40,9 +40,14 @@ public final class SparkFactionApiClient implements ClientModInitializer {
             )) {
                 return null;
             }
-            return FactionInstinctRules.policyResult(viewer, target, gameComponent)
-                    .map(SparkFactionApiClient::toWatheHighlight)
-                    .orElseGet(() -> fallbackInstinctHighlight(viewer, target, gameComponent));
+            // Wathe fires this several times per visible entity per frame, so stay allocation-free and stateless.
+            // wathe 每帧对每个可见实体多次触发此事件，因此保持无分配、无状态。
+            FactionInstinctPolicy.InstinctResult policyResult =
+                    FactionInstinctRules.policyResultOrNull(viewer, target, gameComponent);
+            if (policyResult != null) {
+                return toWatheHighlight(policyResult);
+            }
+            return fallbackInstinctHighlight(viewer, target, gameComponent);
         });
 
         // Cohort display is visual only; it must not put custom factions into native killer teams.
