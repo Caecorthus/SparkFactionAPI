@@ -1,6 +1,6 @@
 # Downstream Migration Notes
 
-## 2026-10-22 Performance Pass (unreleased)
+## 2026-10-22 Performance Pass (0.1.5.17)
 
 `api/` is unchanged and the replay wire format is unchanged. No migration is
 required for the Spark mods; the notes below matter only for code that relied
