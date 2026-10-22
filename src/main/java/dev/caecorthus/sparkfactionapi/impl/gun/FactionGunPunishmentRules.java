@@ -11,10 +11,6 @@ public final class FactionGunPunishmentRules {
     private FactionGunPunishmentRules() {
     }
 
-    public static boolean isPunishableInnocentGunVictim(PlayerEntity player, GameWorldComponent gameComponent) {
-        return victimDecision(player, gameComponent, FactionCapabilityLookup.effectiveFaction(player, gameComponent));
-    }
-
     /**
      * Marks custom-faction victims that should trigger innocent-shot punishment additively.
      * 标记需要追加触发射击无辜惩罚的自定义阵营受击者。
@@ -36,17 +32,6 @@ public final class FactionGunPunishmentRules {
 
     public static boolean isPunishableInnocentGunShooter(PlayerEntity player, GameWorldComponent gameComponent) {
         return shooterDecision(player, gameComponent, FactionCapabilityLookup.effectiveFaction(player, gameComponent));
-    }
-
-    /**
-     * Marks custom-faction shooters whose gun punishment should be handled outside native checks.
-     * 标记需要在原生判断外处理枪罚的自定义阵营开枪者。
-     */
-    public static boolean isCustomPunishableInnocentGunShooter(PlayerEntity player, GameWorldComponent gameComponent) {
-        Identifier factionId = FactionCapabilityLookup.effectiveFaction(player, gameComponent);
-        return FactionCapabilityLookup.isCustomFaction(factionId)
-                && !gameComponent.isInnocent(player)
-                && shooterDecision(player, gameComponent, factionId);
     }
 
     /**

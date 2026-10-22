@@ -11,10 +11,6 @@ public final class FactionEconomyRules {
     private FactionEconomyRules() {
     }
 
-    public static boolean receivesKillerPassiveMoney(PlayerEntity player, GameWorldComponent gameComponent) {
-        return passiveMoneyDecision(player, gameComponent, FactionCapabilityLookup.effectiveFaction(player, gameComponent));
-    }
-
     /**
      * Prevents passive-money add-ons from double-paying native or SparkTraits-adjusted killers.
      * 防止追加被动金钱时重复支付原生杀手或 SparkTraits 已调整过的杀手。
@@ -24,10 +20,6 @@ public final class FactionEconomyRules {
         return FactionCapabilityLookup.isCustomFaction(factionId)
                 && !gameComponent.canUseKillerFeatures(player)
                 && passiveMoneyDecision(player, gameComponent, factionId);
-    }
-
-    public static boolean receivesKillReward(PlayerEntity player, GameWorldComponent gameComponent) {
-        return killRewardDecision(player, gameComponent, FactionCapabilityLookup.effectiveFaction(player, gameComponent));
     }
 
     /**

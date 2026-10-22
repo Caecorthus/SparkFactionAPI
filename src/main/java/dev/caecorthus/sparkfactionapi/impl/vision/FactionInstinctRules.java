@@ -17,10 +17,6 @@ public final class FactionInstinctRules {
     private FactionInstinctRules() {
     }
 
-    public static boolean canUseInstinct(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionCapabilityLookup.capabilities(player, gameComponent).canUseInstinct();
-    }
-
     /**
      * Dead spectators must fall through to Wathe's built-in spectator information colors.
      * 死亡旁观者必须回落到 wathe 原生旁观信息颜色，避免自定义阵营透视覆盖。
