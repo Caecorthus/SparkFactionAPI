@@ -46,7 +46,6 @@ final class ReplayTimelineView {
     private int timeX;
     private int iconX;
     private int textX;
-    private int textWidth;
     private int flashLine = -1;
     private long flashStart;
 

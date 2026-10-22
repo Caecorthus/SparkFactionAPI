@@ -402,7 +402,7 @@ public final class ReplaySession {
     private static @Nullable Text customWinTitle(ServerWorld world) {
         SparkFactionRoundEndComponent customRoundEnd = SparkFactionRoundEndComponent.KEY.get(world.getScoreboard());
         Identifier winningFaction = customRoundEnd.getWinningFaction();
-        if (winningFaction == null || !customRoundEnd.hasCustomWin()) {
+        if (winningFaction == null) {
             return null;
         }
         return SparkFactionApi.getFaction(winningFaction).map(FactionRoundEndTextRules::winTitle).orElse(null);
