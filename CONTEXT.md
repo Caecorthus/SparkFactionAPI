@@ -219,6 +219,16 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   text stays locked. Honeycomb and every non-creative player keep vanilla
   behavior, so players in a round (adventure mode) cannot recolor signs. A sign
   in the map's Wathe `interaction_blacklist` stays blocked for everyone.
+- Caecorthus team badge: glyph `\uE784` (font `minecraft:default`, texture
+  `sparkfactionapi:font/caecorthus_team.png`; E780 is Ratatouille, E781 Wathe,
+  E782/E783 SparkWitch). Members are the UUIDs from the website's
+  `GET https://express-dlc.tlspark.cn/api/team/minecraft`
+  (`{"members": [{"uuid", "groups"}]}`), fetched by client and server at start
+  and every 30 minutes; a failed or malformed fetch keeps the last list, cached
+  in `config/sparkfactionapi/caecorthus_team.json`. The badge is appended once,
+  white, to `PlayerEntity#getDisplayName` outside running Wathe rounds (disguise
+  roles rebuild names from plain text) and always to Tab list names. Wathe's
+  letter name strips both E780 and E784.
 
 ## Current Dependency Picture
 

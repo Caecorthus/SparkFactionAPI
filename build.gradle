@@ -312,12 +312,15 @@ tasks.register("verifyModJarVersion") {
                     "inventory.PlayerInventoryRowOrderMixin",
                     "inventory.ScreenHandlerPsychoSecondRowMixin",
                     "inventory.ShopEntrySecondRowMixin",
-                    "AntiFastRoundPayloadGuardMixin"
+                    "AntiFastRoundPayloadGuardMixin",
+                    "team.GameFunctionsLetterNameMixin",
+                    "team.PlayerEntityTeamTagMixin"
             ],
                     "sparkfactionapi.client.mixins.json": [
                             "RoundTextRendererMixin",
                             "inventory.LimitedHandledScreenSecondRowMixin",
-                            "inventory.LimitedInventoryScreenSecondRowMixin"
+                            "inventory.LimitedInventoryScreenSecondRowMixin",
+                            "team.PlayerListHudTeamTagMixin"
                     ]
             ].each { mixinConfigEntry, requiredMixins ->
                 def mixinEntry = zipFile.getEntry(mixinConfigEntry)
