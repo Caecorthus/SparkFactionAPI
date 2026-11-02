@@ -1,6 +1,19 @@
 # Downstream Migration Notes
 
-## 2026-10-22 Custom Faction Wins Freeze at Round End (unreleased)
+## 2026-11-02 Caecorthus Team Badge (0.1.5.18)
+
+No API signatures change. No migration is required.
+
+- Team members (listed by the Caecorthus website) get glyph `\uE784` after
+  their name: `PlayerEntity#getDisplayName` outside running Wathe rounds, and
+  Tab list names always. Code that compares `getDisplayName().getString()` with
+  a plain profile name should compare UUIDs or `getName()` instead.
+- `\uE784` is now taken in `minecraft:default`; pick another private-use
+  character for new glyphs.
+- Client and server make one HTTPS request to `express-dlc.tlspark.cn` at start
+  and every 30 minutes on a daemon thread.
+
+## 2026-10-22 Custom Faction Wins Freeze at Round End (0.1.5.18)
 
 No API signatures change. No migration is required unless a win condition
 relied on running after the round was decided.

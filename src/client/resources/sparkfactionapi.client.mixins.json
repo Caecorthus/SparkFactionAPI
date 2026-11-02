@@ -6,7 +6,8 @@
   "client": [
     "RoundTextRendererMixin",
     "inventory.LimitedHandledScreenSecondRowMixin",
-    "inventory.LimitedInventoryScreenSecondRowMixin"
+    "inventory.LimitedInventoryScreenSecondRowMixin",
+    "team.PlayerListHudTeamTagMixin"
   ],
   "injectors": {
     "defaultRequire": 1

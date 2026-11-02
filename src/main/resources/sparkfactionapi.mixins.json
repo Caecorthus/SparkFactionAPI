@@ -44,6 +44,8 @@
     "ReplayGeneratorMixin",
     "RoleMixin",
     "ServerPlayerEntityAffectMixin",
+    "team.GameFunctionsLetterNameMixin",
+    "team.PlayerEntityTeamTagMixin",
     "WaxedSignRecolorMixin",
     "WorldProjectileAffectMixin",
     "WorldBlackoutComponentMixin"
