@@ -226,9 +226,13 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   (`{"members": [{"uuid", "groups"}]}`), fetched by client and server at start
   and every 30 minutes; a failed or malformed fetch keeps the last list, cached
   in `config/sparkfactionapi/caecorthus_team.json`. The badge is appended once,
-  white, to `PlayerEntity#getDisplayName` outside running Wathe rounds (disguise
-  roles rebuild names from plain text) and always to Tab list names. Wathe's
-  letter name strips both E780 and E784.
+  white, to `PlayerEntity#getDisplayName` and Tab list names, in and out of
+  rounds, before a trailing Ratatouille E780 (name, E784, E780). Wathe's
+  crosshair name is re-matched after every disguise wrapper: the drawn name is
+  looked up by account name and carries that player's badge, so a disguise shows
+  the imitated player's badge and never the disguiser's. NoellesRoles builds with
+  the Puppeteer get the badge on `PuppeteerClient.getName`. Wathe's letter name
+  strips both E780 and E784.
 
 ## Current Dependency Picture
 

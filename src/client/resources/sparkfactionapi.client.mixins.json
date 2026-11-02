@@ -7,7 +7,9 @@
     "RoundTextRendererMixin",
     "inventory.LimitedHandledScreenSecondRowMixin",
     "inventory.LimitedInventoryScreenSecondRowMixin",
-    "team.PlayerListHudTeamTagMixin"
+    "team.NoellesPuppetNameTeamTagMixin",
+    "team.PlayerListHudTeamTagMixin",
+    "team.RoleNameRendererTeamTagMixin"
   ],
   "injectors": {
     "defaultRequire": 1
