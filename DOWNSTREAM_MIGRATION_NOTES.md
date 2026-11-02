@@ -12,9 +12,9 @@ No API signatures change. No migration is required.
   disguise wrappers: its text (without E780/E784) is looked up by account name
   among online players, then Wathe's `PLAYER_ENTRIES_CACHE`, and the badge
   follows that player. A disguise that returns another player's plain name gets
-  that player's badge; a name that matches nobody (obfuscated, hallucination,
-  team prefix) is left as it is.
-- NoellesRoles `PuppeteerClient.getName(UUID)` returns names with the badge
+  that player's badge; a name that matches nobody (team prefix, "Unknown
+  Player") and any obfuscated text (psycho, hallucination) is left as it is.
+- NoellesRoles `PuppeteerClient.getName(UUID)` gets the same name-based badge
   (`@Pseudo`, skipped on builds without the Puppeteer).
 
 ## 2026-11-02 Caecorthus Team Badge (0.1.5.18)

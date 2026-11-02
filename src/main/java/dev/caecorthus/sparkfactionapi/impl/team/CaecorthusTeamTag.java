@@ -1,9 +1,11 @@
 package dev.caecorthus.sparkfactionapi.impl.team;
 
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -71,14 +73,15 @@ public final class CaecorthusTeamTag {
      * Badge for a name as it is shown, which may be a disguise: Morphling, Coroner and other disguises put another
      * player's name on screen, sometimes as plain text without that player's badge. The shown name (without badge
      * glyphs) is looked up with {@code playerByName}; the badge then matches that player, so a disguise carries the
-     * badge of whoever it imitates and never the disguiser's own. A name that matches no player is left as it is.
+     * badge of whoever it imitates and never the disguiser's own. A name that matches no player, and any obfuscated
+     * text (psycho and hallucination placeholders), is left as it is.
      * 按屏幕上显示的名字加标签，这个名字可能是伪装：变形者、验尸官等伪装会把别人的名字显示出来，有时是不带标签的纯文本。
      * 用 {@code playerByName} 查出显示的名字（去掉图标）是谁，标签跟着这个人走：伪装成谁就带谁的标签，不会带出伪装者自己的。
-     * 查不到人的名字原样返回。
+     * 查不到人的名字，以及带乱码样式的文字（疯魔、幻觉的占位名），原样返回。
      */
     public static Text withTagForShownName(Text shown, Function<String, UUID> playerByName) {
-        if (shown == null) {
-            return null;
+        if (shown == null || isObfuscated(shown)) {
+            return shown;
         }
         String text = shown.getString();
         UUID shownPlayer = playerByName.apply(stripGlyphs(text));
@@ -94,6 +97,11 @@ public final class CaecorthusTeamTag {
         MutableText untagged = shown.copy();
         untagged.getSiblings().removeIf(sibling -> GLYPH_TEXT.equals(sibling.getString()));
         return untagged;
+    }
+
+    private static boolean isObfuscated(Text text) {
+        return text.visit((style, part) -> style.isObfuscated() && !part.isEmpty() ? Optional.of(Boolean.TRUE)
+                : Optional.empty(), Style.EMPTY).isPresent();
     }
 
     /**

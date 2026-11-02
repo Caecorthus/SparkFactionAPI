@@ -231,8 +231,9 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   crosshair name is re-matched after every disguise wrapper: the drawn name is
   looked up by account name and carries that player's badge, so a disguise shows
   the imitated player's badge and never the disguiser's. NoellesRoles builds with
-  the Puppeteer get the badge on `PuppeteerClient.getName`. Wathe's letter name
-  strips both E780 and E784.
+  the Puppeteer get the same name-based badge on `PuppeteerClient.getName`.
+  Obfuscated text and names matching no player are left as they are. Wathe's
+  letter name strips both E780 and E784.
 
 ## Current Dependency Picture
 
