@@ -63,5 +63,9 @@
   "commands.sparkfactionapi.antifastround.disabled.window_ended": "Anti-fast-round disabled (safe time setting: %s s); the running safe time ended immediately",
   "message.sparkfactionapi.anti_fast_round.start": "Safe time: items and skills are locked for %s s, hits deal no knockback",
   "message.sparkfactionapi.anti_fast_round.end": "Safe time is over: items and skills are unlocked",
-  "message.sparkfactionapi.anti_fast_round.blocked": "Safe time: items and skills are locked (%s s left)"
+  "message.sparkfactionapi.anti_fast_round.blocked": "Safe time: items and skills are locked (%s s left)",
+  "hud.sparkfactionapi.map_reset.progress": "Resetting map %s%%",
+  "hud.sparkfactionapi.map_reset.complete": "Map reset complete",
+  "message.sparkfactionapi.map_reset.start_blocked": "The map is resetting (%s%%). The game can start once it finishes.",
+  "message.sparkfactionapi.map_reset.command_blocked": "The map is resetting (%s%%). Map commands are unavailable until it finishes."
 }

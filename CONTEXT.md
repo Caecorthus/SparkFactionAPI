@@ -72,6 +72,21 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   shop stay allowed. The N seconds count from the end of Wathe's ~3 s fade-in
   (the lock already holds during it). Notices use the action bar because Wathe
   hides chat in-game. Clients stay locked until the server's close sync arrives.
+- **Lobby map reset**: the gradual copy of a map's Wathe reset template
+  (`resetTemplateArea` moved by `resetPasteOffset`) onto its play area while
+  players wait in the lobby. It starts when Wathe's map-vote countdown ends and
+  picks a map (`MapVotingComponent.endVoting`, roulette phase), or at
+  `GameFunctions.finalizeVoting` when no reset for that map is running or
+  finished (the single-eligible-map case, which skips the vote). It runs the
+  passes, order and block flags of Wathe's `GameFunctions.tryResetTrain`, but
+  spends at most 8 ms of server time per tick. One reset runs at a time; a new
+  pick aborts the running one.
+- **Prepared map**: a world whose lobby map reset finished and whose reset
+  template area and paste offset still equal the ones that reset copied.
+  Wathe's start-of-round copy of a prepared world is narrowed to one probe
+  block, and its success consumes the state. Anything else is not prepared and
+  gets Wathe's original full copy: no vote, a failed or aborted reset, a server
+  restart, or any `/wathe:mapVariables set ...` run outside a reset.
 
 ## Stable Runtime Contracts
 
@@ -214,6 +229,47 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   1-600). The safe-time window is runtime-only: synced to clients so they can
   predict the lock, never saved. A new skill payload is blocked only once it is
   classified in `AntiFastRoundRules.BLOCKED_PAYLOADS`.
+- Lobby map reset component id: `sparkfactionapi:map_reset` (scoreboard,
+  optional on clients, runtime-only: nothing is saved). Its synced progress is
+  `-1` (nothing to show), `0`-`99` (a reset runs; capped at 99 until the copy
+  is done) or `100` (complete, held about 3 s, then `-1`). A failed or aborted
+  reset goes straight to `-1`. Clients draw it as a lobby HUD line at the top
+  of the screen, never during a round.
+- While a lobby map reset runs: `GameFunctions.startGame` is refused at HEAD,
+  before Wathe stores the mode, effect or time, with an action-bar notice
+  (covers `/wathe:start`, the train horn and auto start); Wathe's auto-start
+  countdown waits at zero on both sides instead of firing, and still restarts
+  when the ready area drops below the minimum; commands executed through
+  `CommandManager.execute` (players, console, command blocks) whose literal
+  chain contains `wathe:mapvote`, or `wathe:mapVariables` directly followed by
+  `set`, are refused, also behind `execute ... run`. Matching is exact and
+  case-sensitive; `/wathe:mapVariables help` stays available. Datapack
+  functions skip `CommandManager.execute`, so `MapVotingComponent.startVoting`
+  is also refused at HEAD (logged); a map-variables write from a function is
+  caught afterwards by the prepared-map template check. The auto-start hold
+  never applies while a vote is active, and clients hold on the synced
+  progress alone, without their own ready-player count. A round that starts
+  anyway fails the reset.
+- For a prepared map, a `@WrapOperation` on every
+  `MapVariablesWorldComponent#getResetTemplateArea()` read inside
+  `GameFunctions.tryResetTrain` returns a zero-size box at the probe block:
+  an interior air block whose six neighbors are air when the template has one,
+  otherwise any air block, otherwise any non-barrier block without a block
+  entity (a template with none is never prepared). Wathe's copy still checks
+  loading, changes that one block (barrier, then its template state), discards
+  bodies, items, firecrackers and notes, and returns `false` ("no retry"). The
+  copy is narrowed instead of skipped so that injectors on `tryResetTrain`
+  RETURN keep firing on a real success: SparkStrength's
+  `TrainResetSabotageMixin` scans the play area for junction boxes and breakers
+  only then. The signature is unchanged. Any return consumes the prepared
+  state: after `false` any later copy in that world is a full copy, and a
+  `true` ("retry") makes the retry Wathe's full copy, so a narrowed copy can
+  never retry forever.
+- The template and paste chunks, plus one chunk of margin, are held with
+  FULL-level tickets (`sparkfactionapi_map_reset`, radius 0: loaded, not
+  ticking) during the copy, and after it until 10 s after that world's next
+  successful Wathe copy, 30 minutes without one, or the next reset. A failed
+  or aborted reset releases them at once.
 - A creative player can use dye, a glow ink sac or an ink sac on a waxed sign
   (standing, wall or hanging) as on an unwaxed one; the sign stays waxed and its
   text stays locked. Honeycomb and every non-creative player keep vanilla

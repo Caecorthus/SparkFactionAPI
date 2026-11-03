@@ -1,5 +1,36 @@
 # Downstream Migration Notes
 
+## 2026-11-03 Lobby Map Reset (unreleased)
+
+No API signatures change. No migration is required unless a mod relied on
+Wathe's start-of-round train copy overwriting the play area.
+
+- Once Wathe's map vote picks a map (or `finalizeVoting` sends players to the
+  only eligible map), SparkFactionAPI copies that world's reset template onto
+  the play area gradually while players wait in the lobby, and clients show the
+  progress at the top of the lobby HUD. Until it finishes, game starts
+  (`/wathe:start`, the horn, auto start), `/wathe:mapvote` and
+  `/wathe:mapVariables set ...` are refused, and the auto-start countdown waits
+  at zero.
+- For a world reset this way, Wathe's `GameFunctions.tryResetTrain` at round
+  start now copies one block instead of the whole template. Blocks and
+  block-entity contents (containers included) that add-ons place or change in
+  the play area during the first ~0.5 s of a round, before that copy runs, are
+  no longer overwritten. The copy still discards bodies, dropped items,
+  firecrackers and notes.
+- `tryResetTrain`'s signature and return value are unchanged (`false` on
+  success), and mixins on it keep working: SparkStrength's
+  `TrainResetSabotageMixin` (RETURN) still runs once per successful copy and
+  scans the play area as before. Only `getResetTemplateArea()` reads inside
+  `tryResetTrain` see the narrowed box; reads anywhere else are unaffected.
+- Without a finished lobby reset (no vote, a failed or aborted reset, a server
+  restart, `/wathe:mapVariables set ...` since the reset, or a changed template
+  area or paste offset), Wathe's full copy runs at round start as before.
+- A finished lobby reset also discards bodies, dropped items, firecrackers and
+  notes in that world, as Wathe's copy does, so this now happens once in the
+  lobby too. The train chunks stay loaded, not ticking, from the reset until
+  10 s after the round starts (at most 30 minutes).
+
 ## 2026-11-02 Team Badge In Rounds (0.1.5.19)
 
 No API signatures change. No migration is required.

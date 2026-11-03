@@ -12,5 +12,6 @@ public final class SparkFactionComponents implements ScoreboardComponentInitiali
                 SparkFactionAntiFastRoundComponent.KEY,
                 SparkFactionAntiFastRoundComponent::new
         );
+        registry.registerScoreboardComponent(SparkFactionMapResetComponent.KEY, SparkFactionMapResetComponent::new);
     }
 }

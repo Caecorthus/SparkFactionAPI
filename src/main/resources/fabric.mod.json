@@ -33,7 +33,8 @@
   "custom": {
     "cardinal-components": [
       "sparkfactionapi:round_end",
-      "sparkfactionapi:anti_fast_round"
+      "sparkfactionapi:anti_fast_round",
+      "sparkfactionapi:map_reset"
     ]
   },
   "depends": {
