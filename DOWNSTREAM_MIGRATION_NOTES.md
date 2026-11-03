@@ -5,13 +5,18 @@
 No API signatures change. No migration is required unless a mod relied on
 Wathe's start-of-round train copy overwriting the play area.
 
-- Once Wathe's map vote picks a map (or `finalizeVoting` sends players to the
-  only eligible map), SparkFactionAPI copies that world's reset template onto
-  the play area gradually while players wait in the lobby, and clients show the
-  progress at the top of the lobby HUD. Until it finishes, game starts
-  (`/wathe:start`, the horn, auto start), `/wathe:mapvote` and
+- When a game start that Wathe would accept (the auto-start countdown reaching
+  zero, `/wathe:start` or the horn) finds the map not yet reset,
+  SparkFactionAPI defers it at `GameFunctions.startGame` HEAD and first copies
+  that world's reset template onto the play area gradually while players wait
+  in the lobby; clients show the progress at the top of the lobby HUD. When the
+  copy ends, the same start (mode, effect, time) is replayed through Wathe's
+  `startGame`, which counts the ready area at that moment, so players can
+  still board during the copy. Until then, other starts, `/wathe:mapvote` and
   `/wathe:mapVariables set ...` are refused, and the auto-start countdown waits
-  at zero.
+  at zero. Starts Wathe would refuse itself (a vote, too few ready players)
+  are left to Wathe. Other mixins at `startGame` HEAD may see both the
+  deferred call and the replay; the rest of `startGame` runs once.
 - For a world reset this way, Wathe's `GameFunctions.tryResetTrain` at round
   start now copies one block instead of the whole template. Blocks and
   block-entity contents (containers included) that add-ons place or change in
@@ -23,9 +28,10 @@ Wathe's start-of-round train copy overwriting the play area.
   `TrainResetSabotageMixin` (RETURN) still runs once per successful copy and
   scans the play area as before. Only `getResetTemplateArea()` reads inside
   `tryResetTrain` see the narrowed box; reads anywhere else are unaffected.
-- Without a finished lobby reset (no vote, a failed or aborted reset, a server
-  restart, `/wathe:mapVariables set ...` since the reset, or a changed template
-  area or paste offset), Wathe's full copy runs at round start as before.
+- Without a finished lobby reset (a failed or aborted reset,
+  `/wathe:mapVariables set ...` since the reset, a changed template area or
+  paste offset, or a narrowed copy that asked for a retry), Wathe's full copy
+  runs at round start as before.
 - A finished lobby reset also discards bodies, dropped items, firecrackers and
   notes in that world, as Wathe's copy does, so this now happens once in the
   lobby too. The train chunks stay loaded, not ticking, from the reset until

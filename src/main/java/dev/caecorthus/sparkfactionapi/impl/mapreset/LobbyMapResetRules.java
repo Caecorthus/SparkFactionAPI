@@ -3,9 +3,9 @@ package dev.caecorthus.sparkfactionapi.impl.mapreset;
 import java.util.List;
 
 /**
- * Pure rules for the lobby map reset: progress display, the per-tick budget, the auto-start hold and which
- * administrator commands are refused while a reset runs.
- * 大厅地图重置的纯规则：进度显示、每 tick 预算、自动开局的等待判断，以及重置期间拒绝哪些管理员命令。
+ * Pure rules for the lobby map reset: which starts reset the map first, progress display, the per-tick budget, the
+ * auto-start hold and which administrator commands are refused while a reset runs.
+ * 大厅地图重置的纯规则：哪些开局先重置地图、进度显示、每 tick 预算、自动开局的等待判断，以及重置期间拒绝哪些管理员命令。
  */
 public final class LobbyMapResetRules {
     /** Synced progress value meaning "no reset to show". / 同步进度值，表示"没有要显示的重置"。 */
@@ -57,11 +57,22 @@ public final class LobbyMapResetRules {
     }
 
     /**
-     * Wathe's auto start fires when its countdown is at zero. While a reset runs, the countdown waits at zero instead
-     * of firing and being refused, which would restart it from the full start time. It still restarts as usual when
-     * the ready area empties.
-     * Wathe 的自动开局在倒计时为零时触发。重置期间倒计时停在零，而不是触发后被拒绝（那样会从完整时长重新开始）。
-     * 准备区人数不足时仍照常重新计时。
+     * A start that Wathe would accept, on a map not already prepared, runs the lobby reset first and is replayed
+     * afterwards. Starts Wathe refuses itself (not inactive, a vote, too few ready players) stay Wathe's to refuse.
+     * Wathe 会接受的开局，若地图尚未准备好，先运行大厅重置，结束后重放。Wathe 自己会拒绝的开局
+     * （非空闲、投票中、准备人数不足）仍交给 Wathe 拒绝。
+     */
+    public static boolean resetsBeforeStart(boolean inactive, boolean votingActive, boolean prepared, int readyPlayers,
+                                            int minPlayers) {
+        return inactive && !votingActive && !prepared && readyPlayers >= minPlayers;
+    }
+
+    /**
+     * Wathe's auto start fires once its countdown reaches zero and then restarts it from the full start time. Once
+     * that start has become a reset, the countdown waits at zero instead, until the replayed start takes over. It
+     * still restarts as usual when the ready area drops below the minimum.
+     * Wathe 的自动开局在倒计时归零时触发，随后从完整时长重新计时。该次开局转为重置后，倒计时改为停在零，
+     * 直到重放的开局接手。准备区人数低于下限时仍照常重新计时。
      */
     public static boolean holdsAutoStart(boolean resetting, int startTime, int time, int readyPlayers, int minPlayers) {
         return resetting && startTime > 0 && time <= 0 && readyPlayers >= minPlayers;
