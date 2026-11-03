@@ -2,6 +2,7 @@ package dev.caecorthus.sparkfactionapi.client;
 
 import dev.caecorthus.sparkfactionapi.SparkFactionApiMod;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
+import dev.caecorthus.sparkfactionapi.client.mapreset.MapResetHud;
 import dev.caecorthus.sparkfactionapi.client.net.version.ClientVersionHandshake;
 import dev.caecorthus.sparkfactionapi.client.record.MatchRecordClient;
 import dev.caecorthus.sparkfactionapi.client.replay.ReplayClient;
@@ -24,6 +25,8 @@ public final class SparkFactionApiClient implements ClientModInitializer {
         ReplayClient.register();
         // Match record: store-only receiver behind SparkMatchRecordClient. 对局记录：仅保存，经 SparkMatchRecordClient 读取。
         MatchRecordClient.register();
+        // Lobby map reset: progress line at the top of the HUD. 大厅地图重置：HUD 顶部的进度行。
+        MapResetHud.register();
 
         // Bridge through Wathe's event so other add-ons can still win by priority.
         // 通过 wathe 事件桥接，保留下游模组按优先级覆盖的空间。

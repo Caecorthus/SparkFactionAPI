@@ -63,5 +63,9 @@
   "commands.sparkfactionapi.antifastround.disabled.window_ended": "防速通局已关闭（安全时间设置：%s 秒），正在进行的安全时间已立即结束",
   "message.sparkfactionapi.anti_fast_round.start": "开局安全时间：%s 秒内无法使用物品和技能，攻击没有击退",
   "message.sparkfactionapi.anti_fast_round.end": "安全时间结束，现在可以使用物品和技能了",
-  "message.sparkfactionapi.anti_fast_round.blocked": "安全时间中，暂时无法使用物品和技能（剩余 %s 秒）"
+  "message.sparkfactionapi.anti_fast_round.blocked": "安全时间中，暂时无法使用物品和技能（剩余 %s 秒）",
+  "hud.sparkfactionapi.map_reset.progress": "地图重置中 %s%%",
+  "hud.sparkfactionapi.map_reset.complete": "地图重置完成",
+  "message.sparkfactionapi.map_reset.start_blocked": "地图正在重置（%s%%），完成后自动开局",
+  "message.sparkfactionapi.map_reset.command_blocked": "地图正在重置（%s%%），完成前不能用指令更改地图"
 }
