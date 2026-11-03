@@ -9,13 +9,15 @@ import org.spongepowered.asm.mixin.injection.At;
 
 /**
  * Adds the Caecorthus team badge to player display names (chat, death messages, name tags, Wathe's crosshair name),
- * on both sides, outside running rounds.
- * 给玩家显示名（聊天、死亡消息、头顶名字、Wathe 准星下的名字）加 Caecorthus 团队标签，两端都生效，一局进行中不加。
+ * on both sides, in and out of rounds. Disguised crosshair names are matched up by the client's
+ * {@code RoleNameRendererTeamTagMixin}.
+ * 给玩家显示名（聊天、死亡消息、头顶名字、Wathe 准星下的名字）加 Caecorthus 团队标签，两端都生效，对局内外都加。
+ * 准星名字被伪装替换时，由客户端的 {@code RoleNameRendererTeamTagMixin} 按显示的名字校正。
  */
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityTeamTagMixin {
     @ModifyReturnValue(method = "getDisplayName", at = @At("RETURN"))
     private Text sparkfactionapi$appendCaecorthusTeamTag(Text original) {
-        return CaecorthusTeamTag.withTagOutsideRound((PlayerEntity) (Object) this, original);
+        return CaecorthusTeamTag.withTag(((PlayerEntity) (Object) this).getUuid(), original);
     }
 }

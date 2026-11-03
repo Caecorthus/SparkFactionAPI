@@ -320,7 +320,9 @@ tasks.register("verifyModJarVersion") {
                             "RoundTextRendererMixin",
                             "inventory.LimitedHandledScreenSecondRowMixin",
                             "inventory.LimitedInventoryScreenSecondRowMixin",
-                            "team.PlayerListHudTeamTagMixin"
+                            "team.NoellesPuppetNameTeamTagMixin",
+                            "team.PlayerListHudTeamTagMixin",
+                            "team.RoleNameRendererTeamTagMixin"
                     ]
             ].each { mixinConfigEntry, requiredMixins ->
                 def mixinEntry = zipFile.getEntry(mixinConfigEntry)
