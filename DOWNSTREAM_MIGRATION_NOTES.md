@@ -1,5 +1,53 @@
 # Downstream Migration Notes
 
+## 2026-11-04 Native Wathe Factions (0.1.6.0, provisional)
+
+Additive and source/binary compatible. No migration is required for factions
+that do not opt in.
+
+- A mod can turn custom factions into real Wathe `Faction` constants by adding
+  to its `fabric.mod.json`:
+  `"custom": {"sparkfactionapi:native_wathe_factions": {"sparkwitch:witch": "WITCH"}}`.
+  The constants are appended after Wathe's four, sorted by faction id. A bad or
+  conflicting declaration crashes startup with a message naming the mod.
+- Roles registered under such a faction with the default NONE bucket now read
+  as that constant in Wathe (`Role#getFaction`), not NEUTRAL, and
+  `Role#isNeutral` is false for them. Code that gave these roles neutral perks
+  through `isNeutral()` or `getFaction() == NEUTRAL` should call
+  `SparkFactionApi.isNeutralAligned(role)` (true for NEUTRAL and for native
+  factions built with `neutralAligned(true)`). Mods built against an older
+  SparkFactionAPI should look the method up by reflection and fall back to
+  `role.isNeutral()`.
+- Any exhaustive `switch` over `Faction` without a `default` throws
+  `MatchException` for the new constants. Add a default, or map the constant
+  with `SparkFactionApi.factionIdOf(faction)`.
+- Wathe stops counting these roles in its neutral pass: they no longer take a
+  neutral slot and are never drawn there, unless the faction is built with
+  `dealtInWatheNeutralPool(true)` (then exactly as before). Wathe's rotation
+  history counts them as civilian rounds (`RoleHistoryComponent` uses
+  `isNeutral`).
+- Wathe `role_assigned` match records carry the constant's `name()`
+  (`"WITCH"`). Map a record name with
+  `SparkFactionApi.factionIdOf(Faction.valueOf(name))` and catch
+  `IllegalArgumentException` for names this side does not declare.
+- New: `SparkFactionApi.nativeWatheFaction(Identifier)`,
+  `factionIdOf(Faction)`, `bindRoleFaction(Identifier roleId, Identifier factionId)`,
+  `isNeutralAligned(Role)`; `FactionDefinition.Builder.neutralAligned(boolean)`
+  and `.dealtInWatheNeutralPool(boolean)` with matching record accessors. The
+  8-argument `FactionDefinition` constructor is kept.
+- `bindRoleFaction` changes `resolveBaseFaction` for that role (and so its
+  capabilities, letter faction text, `/listRoles` group and replay faction)
+  to the bound faction; for a native faction also its Wathe faction.
+  `getRolesForFaction` now lists bound roles after registered ones.
+- `resolveBaseFaction` no longer uses a `switch` and cannot throw for unknown
+  constants; one SparkFactionAPI did not append resolves to `wathe:neutral`.
+- NoellesRoles needs nothing: on the client, SparkFactionAPI makes its two
+  Scavenger hidden-body faction gates (see and target) treat neutral-aligned
+  native factions as NEUTRAL. It is pinned to noellesroles-1.7.6-h1.5.6-spark;
+  a NoellesRoles build whose lambda or merged handler changed fails client
+  startup until the SparkFactionAPI adapters are re-pinned. The client mixin
+  config now has a plugin (`SparkFactionClientMixinPlugin`).
+
 ## 2026-11-03 Lobby Map Reset (unreleased)
 
 No API signatures change. No migration is required unless a mod relied on

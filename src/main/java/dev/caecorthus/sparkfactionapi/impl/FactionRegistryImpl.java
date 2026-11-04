@@ -13,6 +13,8 @@ import dev.caecorthus.sparkfactionapi.api.PlayerAffectPolicy;
 import dev.caecorthus.sparkfactionapi.impl.blackout.FactionBlackoutCooldownPolicies;
 import dev.caecorthus.sparkfactionapi.impl.economy.FactionEconomyPolicies;
 import dev.caecorthus.sparkfactionapi.impl.gun.FactionGunPunishmentPolicies;
+import dev.caecorthus.sparkfactionapi.impl.nativefaction.NativeFactionRules;
+import dev.caecorthus.sparkfactionapi.impl.nativefaction.NativeWatheFactions;
 import dev.caecorthus.sparkfactionapi.impl.registry.EffectiveFactionResolvers;
 import dev.caecorthus.sparkfactionapi.impl.registry.FactionCatalog;
 import dev.caecorthus.sparkfactionapi.impl.registry.FactionRegistryBootstrap;
@@ -67,6 +69,22 @@ public final class FactionRegistryImpl {
 
     public static Identifier resolveBaseFaction(Role role) {
         return FactionRoleCatalog.resolveBaseFaction(role);
+    }
+
+    public static Optional<Faction> nativeWatheFaction(Identifier factionId) {
+        return NativeWatheFactions.constant(factionId);
+    }
+
+    public static Optional<Identifier> factionIdOf(Faction faction) {
+        return NativeWatheFactions.factionId(faction);
+    }
+
+    public static void bindRoleFaction(Identifier roleId, Identifier factionId) {
+        FactionRoleCatalog.bindRoleFaction(roleId, factionId);
+    }
+
+    public static boolean isNeutralAligned(Role role) {
+        return NativeFactionRules.isNeutralAligned(role);
     }
 
     public static Identifier resolveEffectiveFaction(PlayerEntity player, GameWorldComponent gameComponent) {

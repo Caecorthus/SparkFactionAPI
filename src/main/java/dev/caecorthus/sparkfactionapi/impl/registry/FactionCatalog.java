@@ -3,8 +3,12 @@ package dev.caecorthus.sparkfactionapi.impl.registry;
 import dev.caecorthus.sparkfactionapi.api.FactionCapabilities;
 import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionIds;
+import dev.caecorthus.sparkfactionapi.impl.nativefaction.NativeFactionRules;
 import dev.caecorthus.sparkfactionapi.impl.roundend.FactionWinRules;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -17,6 +21,7 @@ import java.util.Optional;
  * 持有阵营定义与能力查询。
  */
 public final class FactionCatalog {
+    private static final Logger LOGGER = LoggerFactory.getLogger("SparkFactionAPI/FactionCatalog");
     private static final Map<Identifier, FactionDefinition> FACTIONS = new LinkedHashMap<>();
     // FactionCapabilities is an immutable record (Set.copyOf tags), so one shared fallback is safe.
     // FactionCapabilities 是不可变 record（标签经 Set.copyOf），因此可以共享同一个缺省实例。
@@ -59,6 +64,12 @@ public final class FactionCatalog {
         if (FACTIONS.containsKey(definition.id())) {
             throw new IllegalArgumentException("Faction already registered: " + definition.id());
         }
+        // dealtInWatheNeutralPool off a native faction throws; neutralAligned there is only meaningless.
+        // 非原生阵营设置 dealtInWatheNeutralPool 直接抛出；设置 neutralAligned 只是无意义。
+        if (NativeFactionRules.validateNativeFlags(definition)) {
+            LOGGER.warn("Faction {} sets neutralAligned(true) but is not a native Wathe faction; the flag is ignored. "
+                    + "阵营 {} 不是原生 Wathe 阵营，neutralAligned 被忽略。", definition.id(), definition.id());
+        }
         FACTIONS.put(definition.id(), definition);
         customFactionsByPriority = null;
         return definition;
@@ -75,6 +86,15 @@ public final class FactionCatalog {
     public static Optional<FactionDefinition> getFaction(Identifier factionId) {
         FactionRegistryBootstrap.bootstrap();
         return Optional.ofNullable(FACTIONS.get(factionId));
+    }
+
+    /**
+     * Allocation-free form of {@link #getFaction} for per-tick callers; null when the id is not registered.
+     * 供每 tick 调用方使用的无分配版本 {@link #getFaction}；未注册时返回 null。
+     */
+    public static @Nullable FactionDefinition definitionOrNull(@Nullable Identifier factionId) {
+        FactionRegistryBootstrap.bootstrap();
+        return factionId == null ? null : FACTIONS.get(factionId);
     }
 
     public static Collection<FactionDefinition> getCustomFactions() {
