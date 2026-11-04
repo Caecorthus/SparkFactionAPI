@@ -9,6 +9,19 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   through all registered resolvers in registration order.
 - **Custom faction**: a faction registered through `SparkFactionApi` rather than
   one of the native Wathe faction buckets.
+- **Native Wathe faction**: a custom faction that is also a real constant of
+  Wathe's `dev.doctor4t.wathe.api.Faction` enum. SparkFactionAPI appends the
+  constant at the end of `Faction`'s static initializer from a
+  `sparkfactionapi:native_wathe_factions` declaration in some mod's
+  `fabric.mod.json`. The built-ins (`wathe:none/civilian/killer/neutral`) are
+  not native custom factions.
+- **Bound role**: a role that SparkFactionAPI did not register (for example a
+  NoellesRoles role) attached by role id to a registered custom faction with
+  `SparkFactionApi.bindRoleFaction`.
+- **Neutral-aligned**: `SparkFactionApi.isNeutralAligned(Role)`; the role's
+  Wathe faction is NEUTRAL, or is the constant of a native faction whose
+  definition has `neutralAligned(true)`. It is the test for the "neutral perks"
+  that native factions keep after `Role#isNeutral` became false for them.
 - **Policy `null`**: abstention, not denial. Evaluation continues or falls back
   through the registered policy chain before capability or native fallback.
 - **Registration order**: the order in which downstream integrations register
@@ -95,7 +108,77 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - Component id: `sparkfactionapi:round_end`.
 - Persisted round-end keys: `WinningFaction` and `Winners`.
 - Custom wins return Wathe `NEUTRAL`; winner UUID rows are supplied by the
-  FactionAPI round-end state path.
+  FactionAPI round-end state path. This holds for native Wathe factions too:
+  `WinStatus` is never extended.
+- Native Wathe faction declaration (since 0.1.6.0): `fabric.mod.json`
+  `custom."sparkfactionapi:native_wathe_factions"` is a JSON object of
+  `"namespace:path": "CONSTANT_NAME"`. Ids need an explicit namespace other than
+  `wathe`; names match `[A-Z][A-Z0-9_]*` and are not existing constants; one id
+  has one name and one name one id (the same pair from several mods merges).
+  Anything else fails `Faction` class initialization (a startup crash, logged at
+  ERROR). The constants are appended after the built-ins, sorted by the id string,
+  with consecutive ordinals, so client and server agree whatever the mod order.
+  The append runs at TAIL of `Faction.<clinit>` (`FactionEnumExtensionMixin`
+  through `FactionEnumAccessor`'s `$VALUES` setter and `<init>` invoker) and
+  never calls `Faction.fromRole`, a SparkFactionAPI registry, `valueOf`,
+  `EnumMap` or `EnumSet`, so `values()`, `valueOf`, `EnumMap` and switch maps
+  see the extended set. One INFO line lists the appended constants.
+- `nativeWatheFaction(Identifier)` maps built-in ids to the built-ins and a
+  declared id to its constant (registered or not), otherwise empty;
+  `factionIdOf(Faction)` is its inverse (empty for null or a constant
+  SparkFactionAPI did not append). Wathe's `role_assigned` record uses
+  `Faction.name()`, so native roles show `WITCH`-style names there.
+- Wathe faction of a role: an SFA role registered with a NONE bucket reads as
+  its faction's constant when that faction is native (`isNeutral` false,
+  `isInnocent` and `canUseKiller` false), otherwise as NEUTRAL (`isNeutral`
+  true), as before. An explicit CIVILIAN, KILLER or NEUTRAL bucket keeps Wathe's
+  own answer; an explicit appended constant must be the faction's own. A bound
+  role reads as its faction's constant when that faction is native
+  (`isNeutral` false) and is otherwise untouched by Wathe. Every other role is
+  unchanged.
+- `bindRoleFaction(roleId, factionId)`: the faction must be a registered custom
+  faction and the role must not be registered through SparkFactionAPI
+  (`IllegalArgumentException`); rebinding to another faction throws
+  `IllegalStateException`, the same pair again is a no-op; a bound id cannot be
+  registered later. Resolved lazily by `Role#identifier()` on both sides, so
+  Wathe registration order does not matter. Bound roles are listed after
+  registered ones by `getRolesForFaction` once Wathe knows them.
+- `resolveBaseFaction` never throws: registered faction, then bound faction,
+  then a switch-free reverse lookup of `role.getFaction()`; a constant that
+  SparkFactionAPI did not append resolves to `wathe:neutral`. No SparkFactionAPI
+  class switches over `Faction`.
+- `FactionDefinition` flags (since 0.1.6.0, default false):
+  `dealtInWatheNeutralPool` makes the two `role.getFaction()` reads in Wathe's
+  `ScoreboardRoleSelectorComponent.assignNeutrals` (already-assigned neutral
+  count, candidate filter) return NEUTRAL for that native faction's roles, so
+  they are drawn with Wathe's neutral odds and take a neutral slot; nothing else
+  sees it (`@WrapOperation`, require = allow = 2). Registering it on a faction
+  that is not declared native throws `IllegalArgumentException`.
+  `neutralAligned` feeds `isNeutralAligned`; on a non-native faction it is
+  logged as a warning and has no effect. Roles of a native faction without
+  `dealtInWatheNeutralPool` are drawn by no Wathe pass and do not consume a
+  neutral slot.
+- NoellesRoles Scavenger hidden bodies (D3, client only, pinned to
+  noellesroles-1.7.6-h1.5.6-spark, sha256 fcb0da69...): NoellesRoles' two
+  `KILLER || NEUTRAL` faction gates, the only ones in that jar, read
+  `NoellesNeutralPerkRules.neutralPerkFaction`, which returns NEUTRAL for an
+  appended neutral-aligned native constant and any other faction unchanged, so
+  witch and Jiahao roles still see and target hidden bodies. Targeting: a
+  `@Pseudo` `@WrapOperation` (require = allow = 1) on the `Role#getFaction`
+  read in `NoellesrolesClient.lambda$onInitializeClient$6` (the
+  `CanTargetBody` listener, selected by name). Visibility: NoellesRoles'
+  `ScavengerBodyHideMixin.hideScavengerBodies` is merged into Wathe's
+  `PlayerBodyEntityRenderer` under a per-session unique name that no selector or
+  injection point can reach, so the client config's
+  `SparkFactionClientMixinPlugin` rewrites its two `getFaction()` calls to
+  `NoellesNeutralPerkRules.neutralPerkFactionOf(Role)` in `postApply` of the
+  empty anchor `NoellesScavengerBodyHideNeutralPerkMixin` (skipped without
+  NoellesRoles), after every mixin has been applied. The handler is found by
+  `@MixinMerged(mixin = ...)` and its original name. Any other shape (no or
+  several handlers, a faction read that is not a KILLER/NEUTRAL comparison)
+  throws at startup, like a stale `require = 1` selector. Hiding, `canHit`
+  and every other NoellesRoles path are unchanged. The local
+  `NoellesRolesPinnedSelectorTest` resolves both selectors against that jar.
 - Version protocol channel, payload order, rejection behavior, policy ordering,
   and capability fallbacks are compatibility-sensitive.
 - Hidden-equipment registration is idempotent and monotonic: registrations may
@@ -313,7 +396,11 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - Wathe is the hard host dependency and exact mixin target.
 - NoellesRoles is an optional compatibility target, never a hard dependency.
 - SparkWitch is the direct public-API consumer, including replay role-change
-  causes.
+  causes. It declares the native Wathe factions (`sparkwitch:witch`,
+  `sparkwitch:jiahao`) and binds `noellesroles:corrupt_cop` by id.
+- Wathe `Faction` is extended in place; Wathe itself is not edited. Its only
+  switch over `Faction` (`GameSettingsCommand.listRoles`) is cancelled at HEAD
+  by `GameSettingsCommandMixin`.
 - SparkTraits may integrate through optional public seams; it contributes
   replay trait tooltips and trait badges through `api/replay`.
 - `api/settlement/SettlementExclusions`: SparkWitch registers
