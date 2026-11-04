@@ -89,6 +89,8 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "rift_gate_close"),
             Identifier.of("sparkwitch", "use_fiend_dash"),
             Identifier.of("sparkwitch", "use_apprentice_purify"),
+            // SparkWitch Noa painting (SparkWitch #186). / SparkWitch 城崎诺亚作画（SparkWitch #186）。
+            Identifier.of("sparkwitch", "use_noa_paint"),
             Identifier.of("sparkwitch", "magician_ability"),
             Identifier.of("sparkwitch", "ragpicker_search"),
 
