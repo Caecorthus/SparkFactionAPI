@@ -88,6 +88,8 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "rift_hop"),
             Identifier.of("sparkwitch", "rift_gate_close"),
             Identifier.of("sparkwitch", "use_fiend_dash"),
+            // SparkWitch Athlete dash (SparkWitch #191). / SparkWitch 运动员冲刺（SparkWitch #191）。
+            Identifier.of("sparkwitch", "use_athlete_dash"),
             Identifier.of("sparkwitch", "use_apprentice_purify"),
             Identifier.of("sparkwitch", "magician_ability"),
 
