@@ -66,6 +66,8 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "swordfish_stab"),
             Identifier.of("sparkwitch", "open_judge_selection"),
             Identifier.of("sparkwitch", "confirm_judge_selection"),
+            // SparkWitch Knight duel target pick (SparkWitch #169). / SparkWitch 骑士决斗目标选择（SparkWitch #169）。
+            Identifier.of("sparkwitch", "knight_duel_target"),
             Identifier.of("sparkwitch", "request_prophecy"),
             Identifier.of("sparkwitch", "confirm_prophecy"),
             Identifier.of("sparkwitch", "submit_tarot_divination_selection"),
