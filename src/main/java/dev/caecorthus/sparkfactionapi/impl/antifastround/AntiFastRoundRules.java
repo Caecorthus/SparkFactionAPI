@@ -90,6 +90,7 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "use_fiend_dash"),
             Identifier.of("sparkwitch", "use_apprentice_purify"),
             Identifier.of("sparkwitch", "magician_ability"),
+            Identifier.of("sparkwitch", "ragpicker_search"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
