@@ -92,6 +92,8 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "use_fiend_dash"),
             // SparkWitch Athlete dash (SparkWitch #191). / SparkWitch 运动员冲刺（SparkWitch #191）。
             Identifier.of("sparkwitch", "use_athlete_dash"),
+            // SparkWitch Dominator mark/release (G key, SparkWitch #192). / SparkWitch 支配者标记/释放（G 键，SparkWitch #192）。
+            Identifier.of("sparkwitch", "use_dominator_skill"),
             Identifier.of("sparkwitch", "use_apprentice_purify"),
             // SparkWitch Noa painting (SparkWitch #186). / SparkWitch 城崎诺亚作画（SparkWitch #186）。
             Identifier.of("sparkwitch", "use_noa_paint"),
