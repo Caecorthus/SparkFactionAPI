@@ -97,6 +97,10 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "use_noa_paint"),
             Identifier.of("sparkwitch", "magician_ability"),
             Identifier.of("sparkwitch", "ragpicker_search"),
+            // SparkWitch 夏目安安 hypnosis menu request and target confirm (SparkWitch #194); both halves are dropped,
+            // like the Judge pair. / SparkWitch 夏目安安催眠菜单请求与目标确认（SparkWitch #194）；与法官的两个包一样两半都拦截。
+            Identifier.of("sparkwitch", "request_natsume_menu"),
+            Identifier.of("sparkwitch", "confirm_natsume_target"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
