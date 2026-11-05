@@ -100,6 +100,10 @@ public final class AntiFastRoundRules {
             // SparkWitch Accountant passbook withdrawal (left-click item use, SparkWitch #195).
             // SparkWitch 会计存折取款（左键物品使用，SparkWitch #195）。
             Identifier.of("sparkwitch", "accountant_withdraw"),
+            // SparkWitch 夏目安安 hypnosis menu request and target confirm (SparkWitch #194); both halves are dropped,
+            // like the Judge pair. / SparkWitch 夏目安安催眠菜单请求与目标确认（SparkWitch #194）；与法官的两个包一样两半都拦截。
+            Identifier.of("sparkwitch", "request_natsume_menu"),
+            Identifier.of("sparkwitch", "confirm_natsume_target"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
