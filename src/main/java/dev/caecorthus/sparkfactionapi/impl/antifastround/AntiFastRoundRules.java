@@ -97,6 +97,9 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "use_noa_paint"),
             Identifier.of("sparkwitch", "magician_ability"),
             Identifier.of("sparkwitch", "ragpicker_search"),
+            // SparkWitch Accountant passbook withdrawal (left-click item use, SparkWitch #195).
+            // SparkWitch 会计存折取款（左键物品使用，SparkWitch #195）。
+            Identifier.of("sparkwitch", "accountant_withdraw"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
