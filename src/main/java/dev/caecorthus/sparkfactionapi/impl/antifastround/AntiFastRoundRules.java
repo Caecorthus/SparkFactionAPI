@@ -57,6 +57,9 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "emma_factor"),
             Identifier.of("sparkwitch", "fire_death_ray"),
             Identifier.of("sparkwitch", "fire_potion_launcher"),
+            // SparkWitch BEAR M32A1 fire (smoke rounds), a held-item shot like the launcher's.
+            // SparkWitch BEAR M32A1 开火（烟雾榴弹），与炮筒同类的手持射击。
+            Identifier.of("sparkwitch", "fire_m32a1"),
             Identifier.of("sparkwitch", "use_curser_ability"),
             Identifier.of("sparkwitch", "use_orthopedist_skill"),
             Identifier.of("sparkwitch", "use_saboteur_skill"),
