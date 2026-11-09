@@ -114,6 +114,11 @@ public final class AntiFastRoundRules {
             // SparkWitch 幽魂标记/尖啸（G 键）与里世界（职业技能 2），SparkWitch #207，与控场专家名单一致。
             Identifier.of("sparkwitch", "use_specter_skill"),
             Identifier.of("sparkwitch", "use_specter_second_skill"),
+            // SparkWitch Charon pardon (shared ability key, FerrymanPardonC2SPayload) and ferry (secondary key on a
+            // body, FerrymanFerryC2SPayload), SparkWitch #202.
+            // SparkWitch 卡戎宽恕（共享技能键）与摆渡（对遗体按第二技能键），SparkWitch #202。
+            Identifier.of("sparkwitch", "ferryman_pardon"),
+            Identifier.of("sparkwitch", "ferryman_ferry"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
