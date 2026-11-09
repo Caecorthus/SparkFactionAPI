@@ -109,6 +109,11 @@ public final class AntiFastRoundRules {
             // like the Judge pair. / SparkWitch 夏目安安催眠菜单请求与目标确认（SparkWitch #194）；与法官的两个包一样两半都拦截。
             Identifier.of("sparkwitch", "request_natsume_menu"),
             Identifier.of("sparkwitch", "confirm_natsume_target"),
+            // SparkWitch Specter mark/shriek (G, UseSpecterSkillC2SPacket) and Otherworld (Role Skill 2,
+            // UseSpecterSecondSkillC2SPacket), SparkWitch #207, mirrored from the Control Expert list.
+            // SparkWitch 幽魂标记/尖啸（G 键）与里世界（职业技能 2），SparkWitch #207，与控场专家名单一致。
+            Identifier.of("sparkwitch", "use_specter_skill"),
+            Identifier.of("sparkwitch", "use_specter_second_skill"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
