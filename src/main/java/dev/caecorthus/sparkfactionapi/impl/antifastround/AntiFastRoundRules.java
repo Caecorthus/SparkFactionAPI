@@ -123,6 +123,17 @@ public final class AntiFastRoundRules {
             // SparkWitch 幽魂标记/尖啸（G 键）与里世界（职业技能 2），SparkWitch #207，与控场专家名单一致。
             Identifier.of("sparkwitch", "use_specter_skill"),
             Identifier.of("sparkwitch", "use_specter_second_skill"),
+            // SparkWitch Medium Séance (G) and Haunt (Role Skill 2), SparkWitch #209: the two menu requests
+            // (UseMediumSkillC2SPacket, UseMediumSecondSkillC2SPacket) and their two paid confirmations
+            // (SubmitMediumSeanceC2SPacket, SubmitMediumHauntTargetC2SPacket), mirrored from the Control Expert list.
+            // The dead voter's submit_medium_vote stays allowed: only a dead round member may send it and its
+            // handler validates that itself.
+            // SparkWitch 通灵师的通灵（G 键）与招魂（职业技能 2），SparkWitch #209：两个菜单请求及其两个付费确认，
+            // 与控场专家名单一致。死者投票包 submit_medium_vote 保持放行：只有本局死者可以发送，其处理器自行校验。
+            Identifier.of("sparkwitch", "use_medium_skill"),
+            Identifier.of("sparkwitch", "submit_medium_seance"),
+            Identifier.of("sparkwitch", "use_medium_second_skill"),
+            Identifier.of("sparkwitch", "submit_medium_haunt_target"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
