@@ -109,6 +109,8 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "use_apprentice_purify"),
             // SparkWitch Noa painting (SparkWitch #186). / SparkWitch 城崎诺亚作画（SparkWitch #186）。
             Identifier.of("sparkwitch", "use_noa_paint"),
+            // SparkWitch 远野汉娜 float (ability key, SparkWitch #212). / SparkWitch 远野汉娜浮游（技能键，SparkWitch #212）。
+            Identifier.of("sparkwitch", "use_hanna_float"),
             Identifier.of("sparkwitch", "magician_ability"),
             Identifier.of("sparkwitch", "ragpicker_search"),
             // SparkWitch Accountant passbook withdrawal (left-click item use, SparkWitch #195).
