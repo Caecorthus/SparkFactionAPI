@@ -141,6 +141,13 @@ public final class AntiFastRoundRules {
             // SparkWitch 卡戎宽恕（共享技能键）与摆渡（对遗体按第二技能键），SparkWitch #202。
             Identifier.of("sparkwitch", "ferryman_pardon"),
             Identifier.of("sparkwitch", "ferryman_ferry"),
+            // SparkWitch 橘雪莉 (Sherry) 推演 (shared ability key): the target panel request and its paid confirmation,
+            // both halves dropped like the Judge pair; and her 巨力魔法 (Role Skill 2) window, SparkWitch #206.
+            // SparkWitch 橘雪莉的推演（共享技能键）：目标面板请求及其付费确认，与法官的两个包一样两半都拦截；以及她的
+            // 巨力魔法（职业技能 2）窗口，SparkWitch #206。
+            Identifier.of("sparkwitch", "request_sherry_deduction"),
+            Identifier.of("sparkwitch", "confirm_sherry_deduction"),
+            Identifier.of("sparkwitch", "use_sherry_mighty_force"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
