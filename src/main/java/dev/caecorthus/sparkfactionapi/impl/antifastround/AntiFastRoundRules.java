@@ -141,6 +141,9 @@ public final class AntiFastRoundRules {
             // SparkWitch 卡戎宽恕（共享技能键）与摆渡（对遗体按第二技能键），SparkWitch #202。
             Identifier.of("sparkwitch", "ferryman_pardon"),
             Identifier.of("sparkwitch", "ferryman_ferry"),
+            // SparkWitch 二阶堂希罗 Nikaido Hiro's 死亡回归 (ability key, UseHiroSkillC2SPacket, an empty request).
+            // SparkWitch 二阶堂希罗的死亡回归（技能键，空请求）。
+            Identifier.of("sparkwitch", "use_hiro_skill"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
