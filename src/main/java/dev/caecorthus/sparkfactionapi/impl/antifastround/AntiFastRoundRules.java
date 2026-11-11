@@ -134,6 +134,11 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "submit_medium_seance"),
             Identifier.of("sparkwitch", "use_medium_second_skill"),
             Identifier.of("sparkwitch", "submit_medium_haunt_target"),
+            // SparkWitch Charon pardon (shared ability key, FerrymanPardonC2SPayload) and ferry (secondary key on a
+            // body, FerrymanFerryC2SPayload), SparkWitch #202.
+            // SparkWitch 卡戎宽恕（共享技能键）与摆渡（对遗体按第二技能键），SparkWitch #202。
+            Identifier.of("sparkwitch", "ferryman_pardon"),
+            Identifier.of("sparkwitch", "ferryman_ferry"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
