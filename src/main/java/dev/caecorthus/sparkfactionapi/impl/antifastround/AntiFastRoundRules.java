@@ -148,6 +148,10 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkwitch", "request_sherry_deduction"),
             Identifier.of("sparkwitch", "confirm_sherry_deduction"),
             Identifier.of("sparkwitch", "use_sherry_mighty_force"),
+            // SparkWitch 二阶堂希罗 Nikaido Hiro's 死亡回归 (ability key, UseHiroSkillC2SPacket, an empty request),
+            // SparkWitch #218.
+            // SparkWitch 二阶堂希罗的死亡回归（技能键，空请求），SparkWitch #218。
+            Identifier.of("sparkwitch", "use_hiro_skill"),
 
             Identifier.of("sparkstrength", "noisemaker_glow"),
             Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
