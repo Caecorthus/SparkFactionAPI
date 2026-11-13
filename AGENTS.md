@@ -13,8 +13,6 @@
 
 ### Architecture
 - Root architecture notes are local-only and must not be committed.
-- Do not delete, move, rename, split, merge, or substantially rewrite existing
-  modules without explicit owner approval.
 
 ### Cross-Repository Check
 - Inspect the owning repository and every direct consumer of the contract being
