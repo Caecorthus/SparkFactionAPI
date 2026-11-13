@@ -135,8 +135,8 @@ public final class ReplaySession {
         Map<UUID, Text> tooltips = new HashMap<>();
         Map<UUID, ReplayGenerator.PlayerInfo> playerInfo = new HashMap<>();
         Map<UUID, ScreenFacts> screenFacts = new HashMap<>();
-        var contributors = ReplayTooltipContributors.entries();
-        var badgeContributors = ReplayBadgeContributors.entries();
+        var contributors = ReplayContributors.TOOLTIPS.entries();
+        var badgeContributors = ReplayContributors.BADGES.entries();
         for (UUID uuid : timeline.players()) {
             String name = nameSources.resolve(uuid, true);
             names.put(uuid, name);
@@ -152,7 +152,7 @@ public final class ReplaySession {
             Text statusText = ReplayTooltipBuilder.status(status, startTick);
             statuses.put(uuid, statusText);
 
-            ReplayParticipantView view = new ReplayParticipantView(uuid, name, world, online, history);
+            ReplayParticipantView view = new ReplayParticipantView(uuid, world);
             Text faction = ReplayTooltipBuilder.faction(finalFaction(online, game, timeline.finalRole(uuid)));
             tooltips.put(uuid, ReplayTooltipBuilder.tooltip(
                     name,

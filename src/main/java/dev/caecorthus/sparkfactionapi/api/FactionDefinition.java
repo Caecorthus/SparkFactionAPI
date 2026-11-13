@@ -42,24 +42,6 @@ public record FactionDefinition(
         winCondition = winCondition == null ? FactionWinCondition.none() : winCondition;
     }
 
-    /**
-     * Pre-0.1.6.0 canonical constructor, kept for binary compatibility; both native flags are false.
-     * 0.1.6.0 之前的规范构造器，为二进制兼容保留；两个原生标记均为 false。
-     */
-    public FactionDefinition(
-            Identifier id,
-            int color,
-            String translationKeyPrefix,
-            FactionCapabilities capabilities,
-            FactionAssignmentPhase assignmentPhase,
-            int priority,
-            FactionAssignmentPolicy assignmentPolicy,
-            FactionWinCondition winCondition
-    ) {
-        this(id, color, translationKeyPrefix, capabilities, assignmentPhase, priority, assignmentPolicy, winCondition,
-                false, false);
-    }
-
     public static Builder builder(Identifier id) {
         return new Builder(id);
     }

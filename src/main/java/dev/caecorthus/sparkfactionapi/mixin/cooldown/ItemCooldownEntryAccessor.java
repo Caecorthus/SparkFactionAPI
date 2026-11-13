@@ -12,9 +12,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
  */
 @Mixin(targets = "net.minecraft.entity.player.ItemCooldownManager$Entry")
 public interface ItemCooldownEntryAccessor {
-    @Accessor("startTick")
-    int sparkfactionapi$getStartTick();
-
     @Accessor("endTick")
     int sparkfactionapi$getEndTick();
 

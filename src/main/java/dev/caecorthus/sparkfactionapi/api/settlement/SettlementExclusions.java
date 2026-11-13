@@ -2,9 +2,7 @@ package dev.caecorthus.sparkfactionapi.api.settlement;
 
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -65,26 +63,5 @@ public final class SettlementExclusions {
      */
     public static boolean isExcluded(@Nullable GameWorldComponent game, @Nullable UUID player) {
         return game != null && player != null && isExcludedRole(game.getRole(player));
-    }
-
-    /**
-     * Convenience overload reading the {@link GameWorldComponent} of the player's world; false for a null player, a
-     * missing world, or a world without the component.
-     * 读取玩家所在世界的 {@link GameWorldComponent} 的便捷重载；玩家为 null、没有世界或世界上没有该组件时返回 false。
-     */
-    public static boolean isExcluded(@Nullable PlayerEntity player) {
-        if (player == null) {
-            return false;
-        }
-        World world = player.getWorld();
-        return world != null && isExcluded(GameWorldComponent.KEY.getNullable(world), player.getUuid());
-    }
-
-    /**
-     * Immutable snapshot of the registered identifiers; later registrations do not change a returned set.
-     * 已注册标识符的不可变快照；之后的注册不会改变已返回的集合。
-     */
-    public static Set<Identifier> roleIds() {
-        return Set.copyOf(ROLE_IDS);
     }
 }

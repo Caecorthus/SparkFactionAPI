@@ -1,30 +1,21 @@
 package dev.caecorthus.sparkfactionapi.impl.blackout;
 
-import dev.caecorthus.sparkfactionapi.api.FactionBlackoutCooldownPolicy;
 import dev.caecorthus.sparkfactionapi.api.FactionCapabilities;
 import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
-import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 
 public final class FactionBlackoutRules {
     private FactionBlackoutRules() {
     }
 
     /**
-     * Keeps blackout night vision compatible with older killer-feature capability users.
-     * 让黑灯夜视兼容旧的杀手功能能力使用者。
-     */
-    public static boolean hasBlackoutImmunity(Role role) {
-        FactionCapabilities capabilities = FactionCapabilityLookup.capabilities(role);
-        return capabilities.hasBlackoutImmunity() || capabilities.canUseKillerFeatures();
-    }
-
-    /**
      * Resolves per-player blackout night vision without granting shop, economy, cohort, or instinct access.
-     * 按玩家解析黑灯夜视，不额外授予商店、经济、同伙或直觉能力。
+     * The canUseKillerFeatures fallback keeps blackout night vision compatible with older killer-feature capability
+     * users.
+     * 按玩家解析黑灯夜视，不额外授予商店、经济、同伙或直觉能力。canUseKillerFeatures 兜底让黑灯夜视兼容旧的杀手功能
+     * 能力使用者。
      */
     public static boolean hasBlackoutImmunity(PlayerEntity player, GameWorldComponent gameComponent) {
         if (player == null || gameComponent == null) {
@@ -32,14 +23,6 @@ public final class FactionBlackoutRules {
         }
         FactionCapabilities capabilities = FactionCapabilityLookup.capabilities(player, gameComponent);
         return capabilities.hasBlackoutImmunity() || capabilities.canUseKillerFeatures();
-    }
-
-    public static @Nullable Boolean blackoutCooldownOverride(
-            PlayerEntity purchaser,
-            PlayerEntity target,
-            GameWorldComponent gameComponent
-    ) {
-        return firstBlackoutCooldownPolicyResult(purchaser, target, gameComponent);
     }
 
     /**
@@ -55,19 +38,5 @@ public final class FactionBlackoutRules {
 
     private static boolean canUseKillerFeatureAccess(Identifier effectiveFaction) {
         return FactionCapabilityLookup.capabilitiesForFaction(effectiveFaction).canUseKillerFeatures();
-    }
-
-    private static @Nullable Boolean firstBlackoutCooldownPolicyResult(
-            PlayerEntity purchaser,
-            PlayerEntity target,
-            GameWorldComponent gameComponent
-    ) {
-        for (FactionBlackoutCooldownPolicy policy : FactionBlackoutCooldownPolicies.blackoutCooldownPolicies()) {
-            Boolean result = policy.shouldShareCooldown(purchaser, target, gameComponent);
-            if (result != null) {
-                return result;
-            }
-        }
-        return null;
     }
 }

@@ -1,6 +1,6 @@
 package dev.caecorthus.sparkfactionapi.mixin;
 
-import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionRoleCatalog;
 import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,7 +24,7 @@ public abstract class FactionMixin {
     ) {
         // Null-returning lookup avoids an Optional and a bound method ref on every fromRole call.
         // 返回 null 的查询避免每次 fromRole 调用都分配 Optional 与绑定方法引用。
-        Faction override = FactionRegistryImpl.nativeFactionOverrideOrNull(role);
+        Faction override = FactionRoleCatalog.nativeFactionOverrideOrNull(role);
         if (override != null) {
             cir.setReturnValue(override);
         }

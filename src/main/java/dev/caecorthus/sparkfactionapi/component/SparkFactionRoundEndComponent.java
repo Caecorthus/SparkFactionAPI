@@ -103,10 +103,6 @@ public final class SparkFactionRoundEndComponent implements AutoSyncedComponent 
         return winningFaction;
     }
 
-    public Set<UUID> getWinners() {
-        return Set.copyOf(winners);
-    }
-
     public boolean didWin(UUID uuid) {
         return winners.contains(uuid);
     }

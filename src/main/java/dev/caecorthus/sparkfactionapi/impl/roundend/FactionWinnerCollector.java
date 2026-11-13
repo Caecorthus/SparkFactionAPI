@@ -1,6 +1,7 @@
 package dev.caecorthus.sparkfactionapi.impl.roundend;
 
-import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
+import dev.caecorthus.sparkfactionapi.impl.registry.EffectiveFactionResolvers;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionRoleCatalog;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -27,9 +28,9 @@ public final class FactionWinnerCollector {
         return collectFactionWinners(gameComponent.getAllPlayers(), uuid -> {
             PlayerEntity player = world.getPlayerByUuid(uuid);
             if (player != null && gameComponent.hasAnyRole(player)) {
-                return FactionRegistryImpl.resolveEffectiveFaction(player, gameComponent);
+                return EffectiveFactionResolvers.resolve(player, gameComponent);
             }
-            return FactionRegistryImpl.resolveBaseFaction(gameComponent.getRole(uuid));
+            return FactionRoleCatalog.resolveBaseFaction(gameComponent.getRole(uuid));
         }, factionId);
     }
 

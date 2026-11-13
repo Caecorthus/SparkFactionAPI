@@ -1,5 +1,48 @@
 # Downstream Migration Notes
 
+## 2026-11-13 Slimming Pass (2.0.0)
+
+Source- and binary-incompatible for the removed members below; nothing else
+changes. None had a caller in SparkWitch, SparkTraits, SparkStrength or
+SparkAssist production code (Strength and Assist reflect only other names).
+Behavior, payloads, NBT keys, component ids, mixin targets and policy
+evaluation order are unchanged.
+
+- Removed from `SparkFactionApi`: `canTarget`, `registerTargetEligibility`,
+  `registerBlackoutCooldownPolicy` (the list was never populated),
+  `nativeWatheFaction(Identifier)`, both `hasBlackoutImmunity` overloads,
+  `getCustomFactions()` and `getRolesForFaction(Identifier)`. Map a constant to
+  its id with `factionIdOf(Faction)`; read capabilities with `capabilities(id)`.
+- Removed types `FactionTargetEligibility` and
+  `FactionBlackoutCooldownPolicy`; `FactionCapabilities` loses the
+  `targetTags` component (the canonical constructor drops its last argument),
+  `Builder.targetTag`/`targetTags` and `toBuilder()`.
+- Removed `FactionAssignmentPolicy.minimumPlayers`, the 8-argument
+  `FactionDefinition` constructor (use `FactionDefinition.builder`),
+  `ForcedCooldowns.registerItemNominal` and `isItemExempt` (nominal lookup is
+  now providers in registration order, then Wathe), `SettlementExclusions`
+  `isExcluded(PlayerEntity)` and `roleIds()`,
+  `SparkFactionRoundEndComponent.getWinners()` (use `didWin`), and
+  `ReplayPlayerView.name()`, `onlinePlayer()` and `roleHistory()` (the view
+  keeps `uuid()` and `world()`).
+- Internal: `impl/FactionRegistryImpl` is gone; `SparkFactionApi` forwards to
+  the owning registries, and each policy list now lives in its evaluator. The
+  unused `startTick` getter of the `ItemCooldownManager$Entry` accessor mixin is
+  gone too (its setter stays).
+- New shared client package `client/api/card` (`InventoryCardLayout`,
+  `InventoryCardPaint`, `InventoryInfoCard`, `GuideDecorBridge`): the owner
+  inventory info card that SparkWitch and SparkTraits each used to ship. Create
+  one `InventoryInfoCard` (and one `GuideDecorBridge`) per mod; never share an
+  instance between mods.
+
+中文摘要：本次精简删除了上述在四个下游模组的生产代码中均无调用者的公开成员（`SparkFactionApi` 的目标标签、熄灯冷却策略、
+`nativeWatheFaction`、`hasBlackoutImmunity`、`getCustomFactions`、`getRolesForFaction`，`FactionCapabilities` 的
+`targetTags`/`toBuilder`，`FactionAssignmentPolicy.minimumPlayers`，`FactionDefinition` 的 8 参数构造器，
+`ForcedCooldowns.registerItemNominal`/`isItemExempt`，`SettlementExclusions.isExcluded(PlayerEntity)`/`roleIds`，
+`SparkFactionRoundEndComponent.getWinners`，`ReplayPlayerView` 的 `name`/`onlinePlayer`/`roleHistory`）；行为、
+载荷、NBT 键、组件 id、mixin 目标与策略评估顺序均不变。新增共享客户端包 `client/api/card`（物品栏信息卡引擎）：
+每个模组各建一个 `InventoryInfoCard` 与 `GuideDecorBridge` 实例，不在模组之间共用。
+
 ## 2026-11-04 Native Wathe Factions (0.1.6.0, provisional)
 
 Additive and source/binary compatible. No migration is required for factions
@@ -30,15 +73,16 @@ that do not opt in.
   (`"WITCH"`). Map a record name with
   `SparkFactionApi.factionIdOf(Faction.valueOf(name))` and catch
   `IllegalArgumentException` for names this side does not declare.
-- New: `SparkFactionApi.nativeWatheFaction(Identifier)`,
+- New: `SparkFactionApi.nativeWatheFaction(Identifier)` (removed in 2.0.0),
   `factionIdOf(Faction)`, `bindRoleFaction(Identifier roleId, Identifier factionId)`,
   `isNeutralAligned(Role)`; `FactionDefinition.Builder.neutralAligned(boolean)`
   and `.dealtInWatheNeutralPool(boolean)` with matching record accessors. The
-  8-argument `FactionDefinition` constructor is kept.
+  8-argument `FactionDefinition` constructor was kept (removed in 2.0.0).
 - `bindRoleFaction` changes `resolveBaseFaction` for that role (and so its
   capabilities, letter faction text, `/listRoles` group and replay faction)
   to the bound faction; for a native faction also its Wathe faction.
-  `getRolesForFaction` now lists bound roles after registered ones.
+  `getRolesForFaction` now lists bound roles after registered ones (the public
+  `SparkFactionApi.getRolesForFaction` was removed in 2.0.0).
 - `resolveBaseFaction` no longer uses a `switch` and cannot throw for unknown
   constants; one SparkFactionAPI did not append resolves to `wathe:neutral`.
 - NoellesRoles needs nothing: on the client, SparkFactionAPI makes its two
@@ -169,7 +213,8 @@ Additive and source/binary compatible. No migration is required.
   as a living player for round settlement (killer win checks, Last Stand and
   Final Moment thresholds, neutral "last one alive" wins). Role owners call
   `registerRole(Identifier)` during initialization; settlement code skips a
-  player when `isExcluded(game, uuid)` / `isExcluded(player)` is true, on top
+  player when `isExcluded(game, uuid)` / `isExcluded(player)` (removed in
+  2.0.0) is true, on top
   of its own alive check. Lookups read the raw role (`getRole`), never
   `isRole`. Nothing is excluded by default, and SparkFactionAPI's own round-end
   paths are unchanged.

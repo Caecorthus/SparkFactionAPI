@@ -119,28 +119,6 @@ public final class NativeWatheFactions {
         Faction ignored = Faction.NONE;
     }
 
-    /** Built-in id → its constant, declared native id → its appended constant, otherwise null. */
-    public static @Nullable Faction constantOrNull(@Nullable Identifier factionId) {
-        if (factionId == null) {
-            return null;
-        }
-        ensureFactionInitialized();
-        if (FactionIds.NONE.equals(factionId)) {
-            return Faction.NONE;
-        }
-        if (FactionIds.CIVILIAN.equals(factionId)) {
-            return Faction.CIVILIAN;
-        }
-        if (FactionIds.KILLER.equals(factionId)) {
-            return Faction.KILLER;
-        }
-        if (FactionIds.NEUTRAL.equals(factionId)) {
-            return Faction.NEUTRAL;
-        }
-        Table current = table;
-        return current == null ? null : current.byId().get(factionId);
-    }
-
     /** Declared native custom id → its appended constant, otherwise null (built-ins return null). */
     public static @Nullable Faction customConstantOrNull(@Nullable Identifier factionId) {
         if (factionId == null) {
@@ -149,10 +127,6 @@ public final class NativeWatheFactions {
         ensureFactionInitialized();
         Table current = table;
         return current == null ? null : current.byId().get(factionId);
-    }
-
-    public static Optional<Faction> constant(@Nullable Identifier factionId) {
-        return Optional.ofNullable(constantOrNull(factionId));
     }
 
     /**
@@ -198,13 +172,6 @@ public final class NativeWatheFactions {
 
     public static boolean isNativeCustomFaction(@Nullable Identifier factionId) {
         return customConstantOrNull(factionId) != null;
-    }
-
-    /** Appended constants in ordinal order (empty before install or without declarations). 按序号排列的追加常量。 */
-    public static List<Faction> appendedConstants() {
-        ensureFactionInitialized();
-        Table current = table;
-        return current == null ? List.of() : List.of(current.constants());
     }
 
     private record Table(int base, Faction[] constants, Identifier[] ids, Map<Identifier, Faction> byId) {

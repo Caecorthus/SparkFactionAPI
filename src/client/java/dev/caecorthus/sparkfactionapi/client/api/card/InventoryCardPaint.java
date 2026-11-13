@@ -326,9 +326,9 @@ public final class InventoryCardPaint {
     }
 
     /**
-     * Per-channel ARGB lerp with rounding, identical to the mockup renderer and SparkAssist's ExpressPaint.mix
+     * Per-channel ARGB lerp with rounding, identical to the mockup renderer and SparkAssist's DecorPalette.mix
      * (ColorHelper floors instead); keep the rounding in step with Assist.
-     * 逐通道四舍五入插值，与模型渲染器及 SparkAssist 的 ExpressPaint.mix 取整一致（ColorHelper 为向下取整）。
+     * 逐通道四舍五入插值，与模型渲染器及 SparkAssist 的 DecorPalette.mix 取整一致（ColorHelper 为向下取整）。
      */
     public static int mix(int a, int b, double t) {
         int alpha = (int) Math.round((a >>> 24) * (1 - t) + (b >>> 24) * t);

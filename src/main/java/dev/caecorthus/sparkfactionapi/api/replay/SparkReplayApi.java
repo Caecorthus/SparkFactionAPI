@@ -1,7 +1,6 @@
 package dev.caecorthus.sparkfactionapi.api.replay;
 
-import dev.caecorthus.sparkfactionapi.impl.replay.ReplayBadgeContributors;
-import dev.caecorthus.sparkfactionapi.impl.replay.ReplayTooltipContributors;
+import dev.caecorthus.sparkfactionapi.impl.replay.ReplayContributors;
 import dev.caecorthus.sparkfactionapi.impl.replay.RoleChangeCauseScope;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -55,7 +54,7 @@ public final class SparkReplayApi {
      * 早于 Wathe 重置玩家，因此仍可读取本局状态。重复注册同一 id 会原位替换旧贡献者。
      */
     public static void registerPlayerTooltipContributor(Identifier id, ReplayTooltipContributor contributor) {
-        ReplayTooltipContributors.register(
+        ReplayContributors.TOOLTIPS.register(
                 Objects.requireNonNull(id, "id"),
                 Objects.requireNonNull(contributor, "contributor")
         );
@@ -68,7 +67,7 @@ public final class SparkReplayApi {
      * 重复注册同一 id 会原位替换。
      */
     public static void registerPlayerBadgeContributor(Identifier id, ReplayBadgeContributor contributor) {
-        ReplayBadgeContributors.register(
+        ReplayContributors.BADGES.register(
                 Objects.requireNonNull(id, "id"),
                 Objects.requireNonNull(contributor, "contributor")
         );

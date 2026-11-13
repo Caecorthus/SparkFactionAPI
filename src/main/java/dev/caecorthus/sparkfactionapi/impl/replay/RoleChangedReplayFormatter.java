@@ -3,7 +3,6 @@ package dev.caecorthus.sparkfactionapi.impl.replay;
 import dev.doctor4t.wathe.record.GameRecordEvent;
 import dev.doctor4t.wathe.record.GameRecordManager;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -53,13 +52,13 @@ public final class RoleChangedReplayFormatter {
         if (!data.containsUuid(ReplayRoleTimeline.KEY_PLAYER)) {
             return null;
         }
-        Identifier to = readId(data, ReplayRoleTimeline.KEY_TO);
+        Identifier to = ReplayRoleTimeline.readId(data, ReplayRoleTimeline.KEY_TO);
         if (to == null) {
             return null;
         }
         Identifier from = null;
         if (data.contains(ReplayRoleTimeline.KEY_FROM)) {
-            from = readId(data, ReplayRoleTimeline.KEY_FROM);
+            from = ReplayRoleTimeline.readId(data, ReplayRoleTimeline.KEY_FROM);
             if (from == null) {
                 return null;
             }
@@ -69,7 +68,7 @@ public final class RoleChangedReplayFormatter {
                 data.getUuid(ReplayRoleTimeline.KEY_PLAYER),
                 from,
                 to,
-                readId(data, ReplayRoleTimeline.KEY_CAUSE),
+                ReplayRoleTimeline.readId(data, ReplayRoleTimeline.KEY_CAUSE),
                 source
         );
     }
@@ -78,14 +77,6 @@ public final class RoleChangedReplayFormatter {
     static String causeTranslationKey(Identifier cause, boolean hasSource) {
         String key = CAUSE_KEY_PREFIX + "." + cause.getNamespace() + "." + cause.getPath().replace('/', '.');
         return hasSource ? key + ".by" : key;
-    }
-
-    private static @Nullable Identifier readId(NbtCompound data, String key) {
-        if (!data.contains(key, NbtElement.STRING_TYPE)) {
-            return null;
-        }
-        String raw = data.getString(key);
-        return raw.isEmpty() ? null : Identifier.tryParse(raw);
     }
 
     record Parsed(UUID player, @Nullable Identifier from, Identifier to, @Nullable Identifier cause, @Nullable UUID source) {

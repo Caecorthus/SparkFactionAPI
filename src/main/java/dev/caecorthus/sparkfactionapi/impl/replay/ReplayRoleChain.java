@@ -55,8 +55,9 @@ public final class ReplayRoleChain {
     }
 
     /**
-     * Role history for {@code ReplayPlayerView}; never empty, falling back to the final role and then {@code noRole}.
-     * 供 {@code ReplayPlayerView} 使用的身份历史；不为空，依次回退为最终身份与 {@code noRole}。
+     * Role history of a replay participant (its first entry is Wathe's opening role in {@code playerInfo}); never
+     * empty, falling back to the final role and then {@code noRole}.
+     * 回放参与者的身份历史（首项为 Wathe {@code playerInfo} 的开局身份）；不为空，依次回退为最终身份与 {@code noRole}。
      */
     public static List<Identifier> nonEmptyHistory(ReplayRoleTimeline timeline, UUID player, Identifier noRole) {
         List<Identifier> history = timeline.history(player);

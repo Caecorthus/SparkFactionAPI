@@ -43,7 +43,6 @@ import java.util.List;
 public final class NoellesScavengerBodyHideRewrite {
     public static final String NOELLES_MIXIN = "org.agmas.noellesroles.client.mixin.scavenger.ScavengerBodyHideMixin";
     public static final String HANDLER_NAME = "hideScavengerBodies";
-    public static final String TARGET_CLASS = "dev/doctor4t/wathe/client/render/entity/PlayerBodyEntityRenderer";
     public static final String RULES_OWNER = "dev/caecorthus/sparkfactionapi/impl/compat/noellesroles/NoellesNeutralPerkRules";
     public static final String RULE_NAME = "neutralPerkFactionOf";
 

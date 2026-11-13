@@ -17,7 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Owns role registration, role-to-faction bindings and Wathe native-bucket shielding.
@@ -140,14 +139,8 @@ public final class FactionRoleCatalog {
      * roles bound to one) as its constant.
      * 让默认 SparkFactionAPI 角色在 Wathe 侧显示为中立阵营而不是 NONE，原生阵营的角色（及绑定到原生阵营的角色）
      * 显示为其常量。
-     */
-    public static Optional<Faction> nativeFactionOverride(Role role) {
-        return Optional.ofNullable(nativeFactionOverrideOrNull(role));
-    }
-
-    /**
-     * Allocation-free form of {@link #nativeFactionOverride} for the hot Faction#fromRole mixin; null means no override.
-     * 供高频 Faction#fromRole mixin 使用的无分配版本 {@link #nativeFactionOverride}；null 表示不覆盖。
+     * Allocation-free for the hot Faction#fromRole mixin; null means no override.
+     * 供高频 Faction#fromRole mixin 使用，不分配对象；null 表示不覆盖。
      */
     public static @Nullable Faction nativeFactionOverrideOrNull(@Nullable Role role) {
         if (role == null) {
@@ -165,14 +158,10 @@ public final class FactionRoleCatalog {
         return roleId == null ? null : bound.get(roleId);
     }
 
-    public static Optional<Boolean> nativeNeutralOverride(Role role) {
-        return Optional.ofNullable(nativeNeutralOverrideOrNull(role));
-    }
-
     /**
-     * Allocation-free form of {@link #nativeNeutralOverride} for the hot Role#isNeutral mixin; null means no override.
+     * Allocation-free override for the hot Role#isNeutral mixin; null means no override.
      * NONE-shielded roles are neutral; roles shown as a native custom constant are not.
-     * 供高频 Role#isNeutral mixin 使用的无分配版本 {@link #nativeNeutralOverride}；null 表示不覆盖。
+     * 供高频 Role#isNeutral mixin 使用的无分配覆盖；null 表示不覆盖。
      * 受 NONE 保护的角色为中立；显示为原生自定义常量的角色不是中立。
      */
     public static @Nullable Boolean nativeNeutralOverrideOrNull(@Nullable Role role) {

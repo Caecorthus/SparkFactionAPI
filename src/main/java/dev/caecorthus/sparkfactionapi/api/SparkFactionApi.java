@@ -1,15 +1,22 @@
 package dev.caecorthus.sparkfactionapi.api;
 
-import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
-import dev.caecorthus.sparkfactionapi.impl.blackout.FactionBlackoutRules;
 import dev.caecorthus.sparkfactionapi.impl.collision.EntityCollisionExemptions;
+import dev.caecorthus.sparkfactionapi.impl.economy.FactionEconomyRules;
+import dev.caecorthus.sparkfactionapi.impl.gun.FactionGunPunishmentRules;
+import dev.caecorthus.sparkfactionapi.impl.nativefaction.NativeFactionRules;
+import dev.caecorthus.sparkfactionapi.impl.nativefaction.NativeWatheFactions;
+import dev.caecorthus.sparkfactionapi.impl.registry.EffectiveFactionResolvers;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionCatalog;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionRegistryBootstrap;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionRoleCatalog;
+import dev.caecorthus.sparkfactionapi.impl.target.PlayerAffectRules;
+import dev.caecorthus.sparkfactionapi.impl.vision.FactionInstinctRules;
 import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 
-import java.util.Collection;
 import java.util.Optional;
 
 public final class SparkFactionApi {
@@ -17,47 +24,35 @@ public final class SparkFactionApi {
     }
 
     public static void bootstrap() {
-        FactionRegistryImpl.bootstrap();
+        FactionRegistryBootstrap.bootstrap();
     }
 
     public static FactionDefinition registerFaction(FactionDefinition definition) {
-        return FactionRegistryImpl.registerFaction(definition);
+        return FactionCatalog.registerFaction(definition);
     }
 
     public static Role registerRole(FactionRoleDefinition definition) {
-        return FactionRegistryImpl.registerRole(definition);
+        return FactionRoleCatalog.registerRole(definition);
     }
 
     public static Identifier resolveBaseFaction(Role role) {
-        return FactionRegistryImpl.resolveBaseFaction(role);
+        return FactionRoleCatalog.resolveBaseFaction(role);
     }
 
     /**
-     * The Wathe {@code Faction} constant of a faction id: {@code wathe:none/civilian/killer/neutral} map to the
-     * built-ins, a native faction declared under {@code sparkfactionapi:native_wathe_factions} in a fabric.mod.json
-     * maps to its appended constant (registered or not), anything else is empty.
-     * 阵营 id 对应的 Wathe {@code Faction} 常量：{@code wathe:none/civilian/killer/neutral} 对应内置常量，
-     * 在 fabric.mod.json 的 {@code sparkfactionapi:native_wathe_factions} 中声明的原生阵营对应其追加常量
-     * （无论是否注册），其它返回空。
-     *
-     * @since 0.1.6.0
-     */
-    public static Optional<Faction> nativeWatheFaction(Identifier factionId) {
-        return FactionRegistryImpl.nativeWatheFaction(factionId);
-    }
-
-    /**
-     * Inverse of {@link #nativeWatheFaction}: built-ins give {@code wathe:*}, appended constants their declared id.
-     * Empty for null or for a constant SparkFactionAPI did not append. Match records carry {@code Faction.name()};
+     * Faction id of a Wathe {@code Faction} constant: built-ins give {@code wathe:*}, constants appended for a native
+     * faction declared under {@code sparkfactionapi:native_wathe_factions} in a fabric.mod.json give their declared
+     * id. Empty for null or for a constant SparkFactionAPI did not append. Match records carry {@code Faction.name()};
      * map them with {@code factionIdOf(Faction.valueOf(name))} (valueOf throws for a name this side lacks).
-     * {@link #nativeWatheFaction} 的反向：内置常量给出 {@code wathe:*}，追加常量给出声明的 id；null 或非
-     * SparkFactionAPI 追加的常量返回空。对局记录保存 {@code Faction.name()}，可用
-     * {@code factionIdOf(Faction.valueOf(name))} 映射（本端没有该名字时 valueOf 会抛出异常）。
+     * Wathe {@code Faction} 常量对应的阵营 id：内置常量给出 {@code wathe:*}，为 fabric.mod.json 中
+     * {@code sparkfactionapi:native_wathe_factions} 声明的原生阵营追加的常量给出声明的 id；null 或非 SparkFactionAPI
+     * 追加的常量返回空。对局记录保存 {@code Faction.name()}，可用 {@code factionIdOf(Faction.valueOf(name))} 映射
+     * （本端没有该名字时 valueOf 会抛出异常）。
      *
      * @since 0.1.6.0
      */
     public static Optional<Identifier> factionIdOf(Faction faction) {
-        return FactionRegistryImpl.factionIdOf(faction);
+        return NativeWatheFactions.factionId(faction);
     }
 
     /**
@@ -77,7 +72,7 @@ public final class SparkFactionApi {
      * @since 0.1.6.0
      */
     public static void bindRoleFaction(Identifier roleId, Identifier factionId) {
-        FactionRegistryImpl.bindRoleFaction(roleId, factionId);
+        FactionRoleCatalog.bindRoleFaction(roleId, factionId);
     }
 
     /**
@@ -90,11 +85,11 @@ public final class SparkFactionApi {
      * @since 0.1.6.0
      */
     public static boolean isNeutralAligned(Role role) {
-        return FactionRegistryImpl.isNeutralAligned(role);
+        return NativeFactionRules.isNeutralAligned(role);
     }
 
     public static Identifier resolveEffectiveFaction(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionRegistryImpl.resolveEffectiveFaction(player, gameComponent);
+        return EffectiveFactionResolvers.resolve(player, gameComponent);
     }
 
     /**
@@ -104,16 +99,7 @@ public final class SparkFactionApi {
      */
     @Deprecated(forRemoval = false)
     public static Identifier resolveEffectiveFaction(Role role) {
-        return FactionRegistryImpl.resolveBaseFaction(role);
-    }
-
-    public static boolean canTarget(
-            PlayerEntity viewer,
-            PlayerEntity target,
-            Identifier targetTag,
-            GameWorldComponent gameComponent
-    ) {
-        return FactionRegistryImpl.canTarget(viewer, target, targetTag, gameComponent);
+        return FactionRoleCatalog.resolveBaseFaction(role);
     }
 
     public static boolean canAffectPlayer(
@@ -122,59 +108,38 @@ public final class SparkFactionApi {
             Identifier actionId,
             GameWorldComponent gameComponent
     ) {
-        return FactionRegistryImpl.canAffectPlayer(actor, target, actionId, gameComponent);
-    }
-
-    public static boolean hasBlackoutImmunity(Role role) {
-        return FactionBlackoutRules.hasBlackoutImmunity(role);
-    }
-
-    public static boolean hasBlackoutImmunity(PlayerEntity player, GameWorldComponent gameComponent) {
-        return FactionBlackoutRules.hasBlackoutImmunity(player, gameComponent);
+        // Bootstraps the registry before any policy runs, as the retired FactionRegistryImpl facade did.
+        // 与已退役的 FactionRegistryImpl 门面一致：在执行任何策略之前先完成注册表初始化。
+        FactionRegistryBootstrap.bootstrap();
+        return PlayerAffectRules.canAffectPlayer(actor, target, actionId, gameComponent);
     }
 
     public static FactionCapabilities capabilities(Identifier factionId) {
-        return FactionRegistryImpl.capabilities(factionId);
+        return FactionCatalog.capabilities(factionId);
     }
 
     public static Optional<FactionDefinition> getFaction(Identifier factionId) {
-        return FactionRegistryImpl.getFaction(factionId);
-    }
-
-    public static Collection<FactionDefinition> getCustomFactions() {
-        return FactionRegistryImpl.getCustomFactions();
-    }
-
-    public static Collection<Role> getRolesForFaction(Identifier factionId) {
-        return FactionRegistryImpl.getRolesForFaction(factionId);
+        return FactionCatalog.getFaction(factionId);
     }
 
     public static void registerEffectiveFactionResolver(EffectiveFactionResolver resolver) {
-        FactionRegistryImpl.registerEffectiveFactionResolver(resolver);
-    }
-
-    public static void registerTargetEligibility(FactionTargetEligibility eligibility) {
-        FactionRegistryImpl.registerTargetEligibility(eligibility);
+        EffectiveFactionResolvers.register(resolver);
     }
 
     public static void registerPlayerAffectPolicy(PlayerAffectPolicy policy) {
-        FactionRegistryImpl.registerPlayerAffectPolicy(policy);
+        PlayerAffectRules.register(policy);
     }
 
     public static void registerEconomyPolicy(FactionEconomyPolicy policy) {
-        FactionRegistryImpl.registerEconomyPolicy(policy);
+        FactionEconomyRules.register(policy);
     }
 
     public static void registerGunPunishmentPolicy(FactionGunPunishmentPolicy policy) {
-        FactionRegistryImpl.registerGunPunishmentPolicy(policy);
-    }
-
-    public static void registerBlackoutCooldownPolicy(FactionBlackoutCooldownPolicy policy) {
-        FactionRegistryImpl.registerBlackoutCooldownPolicy(policy);
+        FactionGunPunishmentRules.register(policy);
     }
 
     public static void registerInstinctPolicy(FactionInstinctPolicy policy) {
-        FactionRegistryImpl.registerInstinctPolicy(policy);
+        FactionInstinctRules.register(policy);
     }
 
     /**
