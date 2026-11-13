@@ -3,12 +3,14 @@ package dev.caecorthus.sparkfactionapi.impl.collision;
 import dev.caecorthus.sparkfactionapi.api.EntityCollisionExemption;
 import net.minecraft.entity.Entity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class EntityCollisionExemptions {
-    private static final List<EntityCollisionExemption> EXEMPTIONS = new ArrayList<>();
+    // Copy-on-write: collision checks read this on the server and client threads; it is written only at registration.
+    // 写时复制：碰撞检查会在服务端与客户端线程读取，只在注册时写入。
+    private static final List<EntityCollisionExemption> EXEMPTIONS = new CopyOnWriteArrayList<>();
 
     private EntityCollisionExemptions() {
     }

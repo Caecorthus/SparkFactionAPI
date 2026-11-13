@@ -1,5 +1,7 @@
 package dev.caecorthus.sparkfactionapi.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.caecorthus.sparkfactionapi.impl.economy.FactionKillRewardAdapter;
 import dev.caecorthus.sparkfactionapi.impl.text.FactionLetterTextRules;
 import dev.doctor4t.wathe.api.Role;
@@ -8,10 +10,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -20,20 +20,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(GameFunctions.class)
 public abstract class GameFunctionsMixin {
-    @Shadow
-    private static void applyLetterLore(
-            ItemStack letter,
-            ServerPlayerEntity player,
-            Role role,
-            String roleName,
-            String factionName,
-            int letterColor,
-            int roleColor
-    ) {
-        throw new AssertionError();
-    }
-
-    @Redirect(
+    // Wraps the call and passes the rewritten faction name on to the original (or to the next wrapper), so other
+    // mods can adapt the same letter call. The former @Redirect owned the call site exclusively.
+    // 包裹该调用，并把改写后的阵营名交给原方法（或下一个包裹器），其他模组因此可以适配同一处信件调用。
+    // 原先的 @Redirect 独占该调用点。
+    @WrapOperation(
             method = "giveLettersToPlayers",
             at = @At(
                     value = "INVOKE",
@@ -47,9 +38,10 @@ public abstract class GameFunctionsMixin {
             String roleName,
             String factionName,
             int letterColor,
-            int roleColor
+            int roleColor,
+            Operation<Void> original
     ) {
-        applyLetterLore(
+        original.call(
                 letter,
                 player,
                 role,

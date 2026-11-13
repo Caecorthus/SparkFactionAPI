@@ -18,6 +18,7 @@
   "replay.sparkfactionapi.tooltip.status": "结局：%s",
   "replay.sparkfactionapi.hint.reopen": "[点击或输入 /replay 重新查看本局回放]",
   "commands.sparkfactionapi.replay.none": "暂无可查看的回放",
+  "commands.sparkfactionapi.replay.cooldown": "回放刚刚发送过，请稍后再试",
   "replay.sparkfactionapi.role.none": "无身份",
   "screen.sparkfactionapi.replay.title": "对局回放",
   "screen.sparkfactionapi.replay.subtitle": "%s · %s · 时长 %s",
