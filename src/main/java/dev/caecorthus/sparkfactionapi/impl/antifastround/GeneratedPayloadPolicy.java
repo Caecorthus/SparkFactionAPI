@@ -15,7 +15,7 @@ import java.util.Set;
  */
 final class GeneratedPayloadPolicy {
     /** SHA-256 of the canonical table this file was generated from. / 生成本文件所用规范表的 SHA-256。 */
-    static final String CONTRACT_SHA256 = "06e172356273dd4403002c0bd14b180531632866e3ccef27c6b52bde865c9646";
+    static final String CONTRACT_SHA256 = "52bdb38dab7c9297817f486f99743ce3317a60a24e61ea9835895fce50048f0e";
 
     /** Column SAFE_TIME: 96 ids. / SAFE_TIME 列：96 个 id。 */
     static final Set<Identifier> SAFE_TIME = Set.of(
@@ -53,7 +53,6 @@ final class GeneratedPayloadPolicy {
             Identifier.of("sparkstrength", "serial_pistol_shoot"),
             Identifier.of("sparkstrength", "spirit_possess"),
             Identifier.of("sparkstrength", "taotie_head_fire"),
-            Identifier.of("sparkstrength", "timekeeper_watch_mode"),
             Identifier.of("sparkstrength", "trigger_sabotage"),
             Identifier.of("sparkstrength", "vulture_super_curse"),
             Identifier.of("sparkwitch", "accountant_withdraw"),
@@ -64,6 +63,7 @@ final class GeneratedPayloadPolicy {
             Identifier.of("sparkwitch", "confirm_natsume_target"),
             Identifier.of("sparkwitch", "confirm_prophecy"),
             Identifier.of("sparkwitch", "confirm_sherry_deduction"),
+            Identifier.of("sparkwitch", "cross_sword_stab"),
             Identifier.of("sparkwitch", "emma_factor"),
             Identifier.of("sparkwitch", "ferryman_ferry"),
             Identifier.of("sparkwitch", "ferryman_pardon"),
