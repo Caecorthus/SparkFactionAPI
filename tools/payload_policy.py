@@ -12,8 +12,9 @@ hand-written rule classes alias those sets. Standard library only.
     check-all --factionapi <path> --witch <path> --strength <path>
 
 Table rules: UTF-8, tab-separated, LF, sorted by payload_id, one complete row per id (every profile cell exactly
-``allow`` or ``deny``), ``owner`` is the registering mod id, ``note`` is ``-`` or the reason for an intentional
-exception (a pinning test/comment, or ``migration-parity`` when the reason is unknown). VENDETTA_TARGET is not
+``allow`` or ``deny``), ``owner`` is the registering mod id, ``note`` (English) and ``note_zh`` (Chinese) are ``-`` or
+the facts and reasons behind the row (a pinning test/comment, or ``migration-parity`` / ``迁移保持原状（原因未记录）``
+when the reason is unknown); the notes are never used for generation. VENDETTA_TARGET is not
 emitted: VendettaTargetingPacketGuard keeps its typed adapters and the column records which payloads it judges.
 
 锁定玩家 C2S 数据包策略：一张规范表，按仓库生成 Java 集合。规范表为本工具旁的 ``config/payload-policy/actions.tsv``
@@ -40,7 +41,7 @@ PROFILES = (
     "SAFE_TIME", "STUN", "SEEKER", "RIFT", "FEAR", "FEAR_SILENT", "DUEL_PRIMARY", "DUEL_WEAPON",
     "HYPNOSIS_EXTRA", "HYPNOSIS_SILENT", "CARRY_EXTRA", "VENDETTA_TARGET", "DAZE",
 )
-HEADER = ("payload_id", "owner") + PROFILES + ("note",)
+HEADER = ("payload_id", "owner") + PROFILES + ("note", "note_zh")
 DECISIONS = ("allow", "deny")
 OWNERS = ("noellesroles", "sparkfactionapi", "sparkstrength", "sparkwitch", "wathe")
 ID_PATTERN = re.compile(r"[a-z0-9_.-]+:[a-z0-9_./-]+")
@@ -88,6 +89,7 @@ class Row:
     owner: str
     decisions: dict
     note: str
+    note_zh: str
 
 
 @dataclass(frozen=True)
@@ -153,10 +155,14 @@ def load_table(path: Path = TABLE_PATH) -> Table:
             if cell not in DECISIONS:
                 fail(number, payload_id, profile, f"decision must be exactly allow or deny, found {cell!r}")
             decisions[profile] = cell
-        note = cells[-1]
-        if not note or note != note.strip():
-            fail(number, payload_id, "note", "must be '-' or text without leading or trailing whitespace")
-        rows.append(Row(number, payload_id, owner, decisions, note))
+        note, note_zh = cells[-2], cells[-1]
+        for column, text in (("note", note), ("note_zh", note_zh)):
+            if not text or text != text.strip():
+                fail(number, payload_id, column, "must be '-' or text without leading or trailing whitespace")
+        if (note == "-") != (note_zh == "-"):
+            # Notes are bilingual: English and Chinese come together or not at all. / 注释中英文必须同时存在或同时为空。
+            fail(number, payload_id, "note_zh", "note and note_zh must both be '-' or both carry text")
+        rows.append(Row(number, payload_id, owner, decisions, note, note_zh))
 
     # The silent sets only mute the notice of an id the same lock already drops (see their Java comments).
     # 静默集合只会让同一锁已丢弃的 id 不再提示（见其 Java 注释）。
