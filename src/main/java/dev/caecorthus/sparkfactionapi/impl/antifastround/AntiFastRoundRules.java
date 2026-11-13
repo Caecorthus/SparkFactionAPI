@@ -175,7 +175,22 @@ public final class AntiFastRoundRules {
             Identifier.of("sparkstrength", "complete_breaker_repair"),
             // Serial Killer psycho-mode pistol: a gun shot, listed wherever wathe:gunshoot is.
             // 连环杀手狂暴模式手枪：属于开枪，凡列出 wathe:gunshoot 之处都应同时列出。
-            Identifier.of("sparkstrength", "serial_pistol_shoot")));
+            Identifier.of("sparkstrength", "serial_pistol_shoot"),
+            // Ids that both mirrored lists (Control Expert stun, Taotie daze) already block and this list had
+            // drifted away from. None of their handlers knows the safe time, so this list is their only guard:
+            // attack-key and payload-fired guns first, then role skills. sparkwitch:usec_attachment stays allowed on
+            // purpose: it only changes the rifle's loadout, like a shop or UI action.
+            // 两份被镜像的列表（控场专家眩晕、饕餮眩晕）早已拦截、而本列表漂移遗漏的 id。它们的处理器都不知道安全时间，
+            // 因此本列表是唯一的防线：先是攻击键与数据包触发的枪械，再是职业技能。sparkwitch:usec_attachment
+            // 有意保持放行：它只改变步枪配件，性质与商店或界面操作相同。
+            Identifier.of("sparkstrength", "bandit_revolver_shoot"),
+            Identifier.of("sparkwitch", "fire_usec_rifle"),
+            Identifier.of("sparkwitch", "fire_crimson_skull"),
+            Identifier.of("sparkwitch", "mini_wither_toggle"),
+            Identifier.of("sparkstrength", "spirit_possess"),
+            Identifier.of("sparkstrength", "partygoer_summon"),
+            Identifier.of("sparkstrength", "partygoer_swallow"),
+            Identifier.of("sparkstrength", "interrogate_detective_suspect")));
 
     private AntiFastRoundRules() {
     }
