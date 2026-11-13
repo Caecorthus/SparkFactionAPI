@@ -266,7 +266,12 @@ tasks.register("verifyModJarVersion") {
                     "dev/caecorthus/sparkfactionapi/mixin/mapreset/CommandManagerMapResetMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/mapreset/GameFunctionsMapResetMixin.class",
                     "dev/caecorthus/sparkfactionapi/mixin/mapreset/MapVotingComponentMapResetMixin.class",
-                    "dev/caecorthus/sparkfactionapi/client/mapreset/MapResetHud.class"
+                    "dev/caecorthus/sparkfactionapi/client/mapreset/MapResetHud.class",
+                    "dev/caecorthus/sparkfactionapi/client/api/card/InventoryCardLayout.class",
+                    "dev/caecorthus/sparkfactionapi/client/api/card/InventoryCardPaint.class",
+                    "dev/caecorthus/sparkfactionapi/client/api/card/InventoryInfoCard.class",
+                    "dev/caecorthus/sparkfactionapi/client/api/card/InventoryInfoCard\$Decor.class",
+                    "dev/caecorthus/sparkfactionapi/client/api/card/GuideDecorBridge.class"
             ].each { requiredEntry ->
                 // Runtime compatibility depends on these shipped adapter classes, not just successful compilation.
                 // 运行时兼容依赖这些随 jar 发布的适配类，而不只是编译成功。
@@ -395,6 +400,13 @@ tasks.withType(JavaCompile).configureEach {
     it.options.release.set(targetJavaVersion)
 }
 
+// The shared owner info card (client/api/card) is unit-tested from src/test, so tests see the client classes.
+// 共享的物品栏信息卡（client/api/card）在 src/test 中做单元测试，因此测试需要能看到客户端类。
+sourceSets.test {
+    compileClasspath += sourceSets.client.output
+    runtimeClasspath += sourceSets.client.output
+}
+
 tasks.test {
     useJUnitPlatform()
 }
@@ -413,6 +425,14 @@ def architectureContractFiles = [
         "src/main/java/dev/caecorthus/sparkfactionapi/net/replay/ReplaySnapshot.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/net/record/MatchRecordSnapshot.java",
         "src/client/java/dev/caecorthus/sparkfactionapi/client/api/SparkMatchRecordClient.java",
+        "src/client/java/dev/caecorthus/sparkfactionapi/client/api/card/InventoryCardLayout.java",
+        "src/client/java/dev/caecorthus/sparkfactionapi/client/api/card/InventoryCardPaint.java",
+        "src/client/java/dev/caecorthus/sparkfactionapi/client/api/card/InventoryInfoCard.java",
+        "src/client/java/dev/caecorthus/sparkfactionapi/client/api/card/GuideDecorBridge.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/client/api/card/InventoryCardLayoutTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/client/api/card/InventoryCardFallbackTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/client/api/card/InventoryCardMetricsTest.java",
+        "src/test/java/dev/caecorthus/sparkfactionapi/client/api/card/InventoryInfoCardContractTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/net/record/MatchRecordSnapshotTest.java",
         "src/test/java/dev/caecorthus/sparkfactionapi/api/PoliceRolesTest.java",
         "src/main/java/dev/caecorthus/sparkfactionapi/api/settlement/SettlementExclusions.java",
