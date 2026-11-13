@@ -21,15 +21,6 @@ public final class FactionWinRules {
     private FactionWinRules() {
     }
 
-    public static FactionWinResult customWinResult(
-            Collection<FactionDefinition> factions,
-            ServerWorld world,
-            GameWorldComponent gameComponent,
-            GameFunctions.WinStatus currentStatus
-    ) {
-        return customWinResultInPriorityOrder(priorityOrder(factions), world, gameComponent, currentStatus);
-    }
-
     /**
      * Highest priority first; the stable sort keeps registration order between equal priorities.
      * 优先级从高到低；稳定排序让同优先级保持注册顺序。
@@ -41,9 +32,9 @@ public final class FactionWinRules {
     }
 
     /**
-     * Same as {@link #customWinResult} for factions already in {@link #priorityOrder}; every win condition still
-     * runs before the results are aggregated.
-     * 与 customWinResult 相同，但输入必须已按 priorityOrder 排序；聚合前仍会执行每个胜利条件。
+     * Win result for factions already in {@link #priorityOrder}; every win condition still runs before the results
+     * are aggregated.
+     * 输入必须已按 priorityOrder 排序的胜利结果；聚合前仍会执行每个胜利条件。
      */
     static FactionWinResult customWinResultInPriorityOrder(
             List<FactionDefinition> prioritySortedFactions,

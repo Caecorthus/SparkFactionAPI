@@ -18,6 +18,7 @@
   "replay.sparkfactionapi.tooltip.status": "Result: %s",
   "replay.sparkfactionapi.hint.reopen": "[Click or type /replay to view this replay again]",
   "commands.sparkfactionapi.replay.none": "No replay is available yet",
+  "commands.sparkfactionapi.replay.cooldown": "The replay was just sent. Try again in a moment",
   "replay.sparkfactionapi.role.none": "No role",
   "screen.sparkfactionapi.replay.title": "Match Replay",
   "screen.sparkfactionapi.replay.subtitle": "%s · %s · %s long",

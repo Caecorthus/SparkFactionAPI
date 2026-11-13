@@ -76,9 +76,11 @@ public final class ReplayRoleTimeline {
 
     /**
      * Missing or empty strings read as null; {@code Identifier.tryParse("")} would yield {@code minecraft:}.
+     * Shared with {@link RoleChangedReplayFormatter}, which reads the same role-changed fields.
      * 缺失或空字符串读作 null；{@code Identifier.tryParse("")} 会得到 {@code minecraft:}。
+     * 与读取相同身份转化字段的 {@link RoleChangedReplayFormatter} 共用。
      */
-    private static @Nullable Identifier readId(NbtCompound data, String key) {
+    static @Nullable Identifier readId(NbtCompound data, String key) {
         if (!data.contains(key, NbtElement.STRING_TYPE)) {
             return null;
         }

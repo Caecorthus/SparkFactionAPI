@@ -7,8 +7,20 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 public final class FactionGunPunishmentRules {
+    // Owns gun punishment policy registration and ordering: registration order is evaluation order. Copy-on-write, so
+    // an evaluation iterates a snapshot and a policy registered mid-pass neither throws nor joins that pass.
+    // 持有枪罚策略的注册与顺序：注册顺序即评估顺序。写时复制，评估遍历快照，评估中途注册的策略既不抛异常也不加入本轮。
+    private static final List<FactionGunPunishmentPolicy> GUN_PUNISHMENT_POLICIES = new CopyOnWriteArrayList<>();
+
     private FactionGunPunishmentRules() {
+    }
+
+    public static void register(FactionGunPunishmentPolicy policy) {
+        GUN_PUNISHMENT_POLICIES.add(policy);
     }
 
     /**
@@ -98,7 +110,7 @@ public final class FactionGunPunishmentRules {
             FactionGunPunishmentPolicy.Subject subject,
             GameWorldComponent gameComponent
     ) {
-        for (FactionGunPunishmentPolicy policy : FactionGunPunishmentPolicies.gunPunishmentPolicies()) {
+        for (FactionGunPunishmentPolicy policy : GUN_PUNISHMENT_POLICIES) {
             Boolean result = policy.isPunishable(player, subject, gameComponent);
             if (result != null) {
                 return result;

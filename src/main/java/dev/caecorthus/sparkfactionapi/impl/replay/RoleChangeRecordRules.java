@@ -51,17 +51,6 @@ public final class RoleChangeRecordRules {
         return to != null && !Objects.equals(effective(from), effective(to));
     }
 
-    public static boolean shouldRecord(
-            boolean serverWorld,
-            boolean restoringFromNbt,
-            boolean activeMatch,
-            boolean gameRunning,
-            @Nullable Identifier from,
-            @Nullable Identifier to
-    ) {
-        return isRecordingContext(serverWorld, restoringFromNbt, activeMatch, gameRunning) && isRoleChange(from, to);
-    }
-
     /** The {@code from} value to persist; absent and NO_ROLE are omitted. 需写入的 from；无身份与 NO_ROLE 不写。 */
     public static @Nullable Identifier recordedFrom(@Nullable Identifier from) {
         return effective(from);

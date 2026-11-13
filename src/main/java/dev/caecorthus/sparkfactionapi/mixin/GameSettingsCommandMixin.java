@@ -32,7 +32,7 @@ public abstract class GameSettingsCommandMixin {
             CallbackInfoReturnable<Integer> cir
     ) {
         try {
-            LOGGER.info(
+            LOGGER.debug(
                     "SparkFactionAPI listRoles diagnostic start: world={}, totalRoles={}, specialRoles={}",
                     source.getWorld().getRegistryKey().getValue(),
                     WatheRoles.ROLES.size(),

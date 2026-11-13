@@ -123,11 +123,10 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   never calls `Faction.fromRole`, a SparkFactionAPI registry, `valueOf`,
   `EnumMap` or `EnumSet`, so `values()`, `valueOf`, `EnumMap` and switch maps
   see the extended set. One INFO line lists the appended constants.
-- `nativeWatheFaction(Identifier)` maps built-in ids to the built-ins and a
-  declared id to its constant (registered or not), otherwise empty;
-  `factionIdOf(Faction)` is its inverse (empty for null or a constant
-  SparkFactionAPI did not append). Wathe's `role_assigned` record uses
-  `Faction.name()`, so native roles show `WITCH`-style names there.
+- `factionIdOf(Faction)` maps the built-ins to `wathe:*` and an appended
+  constant to its declared id (empty for null or a constant SparkFactionAPI did
+  not append). Wathe's `role_assigned` record uses `Faction.name()`, so native
+  roles show `WITCH`-style names there.
 - Wathe faction of a role: an SFA role registered with a NONE bucket reads as
   its faction's constant when that faction is native (`isNeutral` false,
   `isInnocent` and `canUseKiller` false), otherwise as NEUTRAL (`isNeutral`
@@ -142,7 +141,8 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   `IllegalStateException`, the same pair again is a no-op; a bound id cannot be
   registered later. Resolved lazily by `Role#identifier()` on both sides, so
   Wathe registration order does not matter. Bound roles are listed after
-  registered ones by `getRolesForFaction` once Wathe knows them.
+  registered ones by the internal `FactionRoleCatalog.getRolesForFaction` once
+  Wathe knows them.
 - `resolveBaseFaction` never throws: registered faction, then bound faction,
   then a switch-free reverse lookup of `role.getFaction()`; a constant that
   SparkFactionAPI did not append resolves to `wathe:neutral`. No SparkFactionAPI
@@ -186,11 +186,11 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   NoellesRoles absent, registration remains inert and does not fail loading.
 - Settlement exclusions are identifier-only, idempotent and monotonic, with no
   defaults: `registerRole` (null throws, returns whether the id was new),
-  `containsRole`, `isExcludedRole`, `roleIds` (immutable snapshot). Player
-  lookups (`isExcluded(GameWorldComponent, UUID)`, `isExcluded(PlayerEntity)`)
-  read the raw role through `GameWorldComponent#getRole(UUID)`, never `isRole`,
-  so acting or disguise overlays cannot change them; they do not check liveness
-  and return false for null inputs, a missing world component or no role. Owners
+  `containsRole`, `isExcludedRole`. The player lookup
+  `isExcluded(GameWorldComponent, UUID)` reads the raw role through
+  `GameWorldComponent#getRole(UUID)`, never `isRole`, so acting or disguise
+  overlays cannot change it; it does not check liveness and returns false for
+  null inputs or no role. Owners
   register during mod initialization; reads run on the server thread during a
   round. Callers built against an older SparkFactionAPI must treat a missing
   class as "not excluded" (the previous behavior).
@@ -202,8 +202,8 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   `slots` order is role-skill stores in registration order (only when
   `appliesTo` and `mayForce` hold), then distinct non-exempt carried items in
   main inventory, offhand, armor order, including ready items. Item nominal
-  lookup is explicit value (last wins), providers in registration order (first
-  present wins), then Wathe `GameConstants.ITEM_COOLDOWNS`. Items whose registry
+  lookup is providers in registration order (first present wins), then Wathe
+  `GameConstants.ITEM_COOLDOWNS`. Items whose registry
   id is `noellesroles:timed_bomb` are exempt by default; registered exemptions
   only add to that. Writes re-check `appliesTo`/`mayForce`, exemption, and
   possession; a throwing store, provider, or exemption is logged and isolated
@@ -313,7 +313,11 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   Persisted keys `Enabled` (default false) and `Seconds` (default 10, clamped to
   1-600). The safe-time window is runtime-only: synced to clients so they can
   predict the lock, never saved. A new skill payload is blocked only once it is
-  classified in `AntiFastRoundRules.BLOCKED_PAYLOADS`.
+  classified as a row of `config/payload-policy/actions.tsv`, the one table of
+  locked-player payload decisions for SparkFactionAPI, SparkWitch and
+  SparkStrength; `tools/payload_policy.py generate` turns its SAFE_TIME column
+  into `GeneratedPayloadPolicy`, which `AntiFastRoundRules.BLOCKED_PAYLOADS`
+  aliases, and `check` fails on a stale generated file or an unlisted C2S id.
 - Lobby map reset component id: `sparkfactionapi:map_reset` (scoreboard,
   optional on clients, runtime-only: nothing is saved). Its synced progress is
   `-1` (nothing to show), `0`-`99` (a reset runs; capped at 99 until the copy
@@ -403,6 +407,13 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   by `GameSettingsCommandMixin`.
 - SparkTraits may integrate through optional public seams; it contributes
   replay trait tooltips and trait badges through `api/replay`.
+- `client/api/card` (`InventoryCardLayout`, `InventoryCardPaint`,
+  `InventoryInfoCard`, `GuideDecorBridge`) is the single shared owner
+  inventory info card engine: SparkTraits uses it now and SparkWitch is moving
+  to it. Each mod creates its own `InventoryInfoCard` (own caches, overflow
+  lang key, second-row rule, HUD and decoration hooks) and its own
+  `GuideDecorBridge`; instances are never shared between mods.
+  SparkAssist decoration is reached by name only.
 - `api/settlement/SettlementExclusions`: SparkWitch registers
   `sparkwitch:black_raven` by reflection (it compiles against an older
   SparkFactionAPI and fails closed); SparkTraits and SparkStrength read it,

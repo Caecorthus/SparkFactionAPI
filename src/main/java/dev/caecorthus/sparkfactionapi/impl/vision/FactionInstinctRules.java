@@ -3,18 +3,28 @@ package dev.caecorthus.sparkfactionapi.impl.vision;
 import dev.caecorthus.sparkfactionapi.api.FactionCapabilities;
 import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.api.FactionInstinctPolicy;
-import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
 import dev.caecorthus.sparkfactionapi.impl.capability.FactionCapabilityLookup;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionCatalog;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class FactionInstinctRules {
+    // Owns instinct policy registration and priority evaluation inputs. Copy-on-write, so an evaluation iterates a
+    // snapshot and a policy registered mid-pass neither throws nor joins that pass.
+    // 持有直觉策略的注册与优先级评估输入。写时复制，评估遍历快照，评估中途注册的策略既不抛异常也不加入本轮。
+    private static final List<FactionInstinctPolicy> INSTINCT_POLICIES = new CopyOnWriteArrayList<>();
+
     private FactionInstinctRules() {
+    }
+
+    public static void register(FactionInstinctPolicy policy) {
+        INSTINCT_POLICIES.add(policy);
     }
 
     /**
@@ -31,7 +41,7 @@ public final class FactionInstinctRules {
         if (capabilities.instinctColor() != -1) {
             return capabilities.instinctColor();
         }
-        return FactionRegistryImpl.getFaction(factionId)
+        return FactionCatalog.getFaction(factionId)
                 .map(FactionDefinition::color)
                 .orElse(-1);
     }
@@ -42,18 +52,9 @@ public final class FactionInstinctRules {
                 && FactionCapabilityLookup.capabilitiesForFaction(factionId).canUseInstinct();
     }
 
-    public static Optional<FactionInstinctPolicy.InstinctResult> policyResult(
-            PlayerEntity viewer,
-            Entity target,
-            GameWorldComponent gameComponent
-    ) {
-        return Optional.ofNullable(policyResultOrNull(viewer, target, gameComponent));
-    }
-
     /**
-     * Allocation-free form of {@link #policyResult} for Wathe's per-frame instinct highlight event; null means no
-     * policy answered.
-     * 供 wathe 每帧直觉高亮事件使用的无分配版本 {@link #policyResult}；返回 null 表示没有策略给出结果。
+     * Allocation-free policy lookup for Wathe's per-frame instinct highlight event; null means no policy answered.
+     * 供 wathe 每帧直觉高亮事件使用的无分配策略查询；返回 null 表示没有策略给出结果。
      */
     public static FactionInstinctPolicy.@Nullable InstinctResult policyResultOrNull(
             PlayerEntity viewer,
@@ -61,7 +62,7 @@ public final class FactionInstinctRules {
             GameWorldComponent gameComponent
     ) {
         FactionInstinctPolicy.InstinctResult bestResult = null;
-        for (FactionInstinctPolicy policy : FactionInstinctPolicies.instinctPolicies()) {
+        for (FactionInstinctPolicy policy : INSTINCT_POLICIES) {
             FactionInstinctPolicy.InstinctResult result = policy.getHighlight(viewer, target, gameComponent);
             if (result != null && (bestResult == null || result.priority() > bestResult.priority())) {
                 bestResult = result;

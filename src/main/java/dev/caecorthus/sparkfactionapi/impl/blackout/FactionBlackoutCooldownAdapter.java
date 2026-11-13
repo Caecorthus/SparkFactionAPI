@@ -28,26 +28,16 @@ public final class FactionBlackoutCooldownAdapter {
         GameWorldComponent gameComponent = GameWorldComponent.KEY.get(purchaser.getWorld());
         int cooldownTicks = GameConstants.getInTicks(5, 0);
         for (ServerPlayerEntity player : purchaser.getServerWorld().getPlayers()) {
-            Boolean cooldownOverride = FactionBlackoutRules.blackoutCooldownOverride(purchaser, player, gameComponent);
-            if (cooldownOverride != null) {
-                setBlackoutCooldown(player, cooldownOverride, cooldownTicks);
-                continue;
-            }
             if (FactionBlackoutRules.sharesCustomBlackoutCooldown(player, gameComponent)) {
-                setBlackoutCooldown(player, true, cooldownTicks);
+                setBlackoutCooldown(player, cooldownTicks);
             }
         }
     }
 
-    private static void setBlackoutCooldown(ServerPlayerEntity player, boolean enabled, int cooldownTicks) {
+    private static void setBlackoutCooldown(ServerPlayerEntity player, int cooldownTicks) {
         PlayerShopComponent shop = PlayerShopComponent.KEY.get(player);
-        if (enabled) {
-            ((PlayerShopComponentMixin) (Object) shop).sparkfactionapi$getCooldowns()
-                    .put(BLACKOUT_COOLDOWN_ID, cooldownTicks);
-        } else {
-            ((PlayerShopComponentMixin) (Object) shop).sparkfactionapi$getCooldowns()
-                    .remove(BLACKOUT_COOLDOWN_ID);
-        }
+        ((PlayerShopComponentMixin) (Object) shop).sparkfactionapi$getCooldowns()
+                .put(BLACKOUT_COOLDOWN_ID, cooldownTicks);
         shop.sync();
     }
 }

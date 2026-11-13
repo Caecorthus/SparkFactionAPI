@@ -2,7 +2,7 @@ package dev.caecorthus.sparkfactionapi.impl.roundend;
 
 import dev.caecorthus.sparkfactionapi.api.FactionWinResult;
 import dev.caecorthus.sparkfactionapi.component.SparkFactionRoundEndComponent;
-import dev.caecorthus.sparkfactionapi.impl.FactionRegistryImpl;
+import dev.caecorthus.sparkfactionapi.impl.registry.FactionCatalog;
 import dev.doctor4t.wathe.api.event.CheckWinCondition;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import dev.doctor4t.wathe.game.GameFunctions;
@@ -45,7 +45,7 @@ public final class FactionWinService {
         }
         SparkFactionRoundEndComponent roundEnd = SparkFactionRoundEndComponent.KEY.get(world.getScoreboard());
         FactionWinResult result = FactionWinRules.customWinResultInPriorityOrder(
-                FactionRegistryImpl.customFactionsByPriority(),
+                FactionCatalog.customFactionsByPriority(),
                 world,
                 gameComponent,
                 currentStatus

@@ -35,17 +35,12 @@ public final class ForcedCooldowns {
     }
 
     /**
-     * Registers a nominal-cooldown provider for items. Lookup order: explicit {@link #registerItemNominal} values,
-     * then providers in registration order, then Wathe's {@code GameConstants.ITEM_COOLDOWNS}.
-     * 注册物品标准冷却提供者。查找顺序：显式登记值、按注册顺序的提供者、Wathe 的 ITEM_COOLDOWNS。
+     * Registers a nominal-cooldown provider for items. Lookup order: providers in registration order, then Wathe's
+     * {@code GameConstants.ITEM_COOLDOWNS}.
+     * 注册物品标准冷却提供者。查找顺序：按注册顺序的提供者、Wathe 的 ITEM_COOLDOWNS。
      */
     public static void registerItemNominalProvider(ItemCooldownNominalProvider provider) {
         ForcedCooldownRegistry.registerItemNominalProvider(provider);
-    }
-
-    /** Registers one item's nominal cooldown; the last registration for an item wins. / 登记单个物品的标准冷却，后者覆盖前者。 */
-    public static void registerItemNominal(Item item, int ticks) {
-        ForcedCooldownRegistry.registerItemNominal(item, ticks);
     }
 
     /**
@@ -102,11 +97,6 @@ public final class ForcedCooldowns {
     /** Nominal cooldown of an item per the lookup order above. / 按上述顺序查得的物品标准冷却。 */
     public static OptionalInt itemNominalTicks(Item item) {
         return ForcedCooldownRegistry.itemNominalTicks(item);
-    }
-
-    /** True when the item is exempt from forced cooldowns. / 物品是否豁免强制冷却。 */
-    public static boolean isItemExempt(Item item) {
-        return ForcedCooldownRegistry.isItemExempt(item);
     }
 
     /** Remaining ticks of a vanilla item cooldown on this player. / 该玩家某物品原版冷却的剩余 tick。 */

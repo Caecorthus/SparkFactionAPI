@@ -61,10 +61,6 @@ public final class ForcedCooldownRegistry {
         ITEMS.registerProvider(provider::nominalTicks);
     }
 
-    public static void registerItemNominal(Item item, int ticks) {
-        ITEMS.registerNominal(item, ticks);
-    }
-
     public static void registerItemExemption(Predicate<Item> exemption) {
         ITEMS.registerExemption(exemption);
     }
@@ -100,10 +96,6 @@ public final class ForcedCooldownRegistry {
 
     public static OptionalInt itemNominalTicks(Item item) {
         return ITEMS.nominalTicks(item);
-    }
-
-    public static boolean isItemExempt(Item item) {
-        return ITEMS.isExempt(item);
     }
 
     public static int itemRemainingTicks(ServerPlayerEntity player, Item item) {

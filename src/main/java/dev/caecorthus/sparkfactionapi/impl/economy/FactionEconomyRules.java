@@ -7,8 +7,20 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 public final class FactionEconomyRules {
+    // Owns economy policy registration and ordering: registration order is evaluation order. Copy-on-write, so an
+    // evaluation iterates a snapshot and a policy registered mid-pass neither throws nor joins that pass.
+    // 持有经济策略的注册与顺序：注册顺序即评估顺序。写时复制，评估遍历快照，评估中途注册的策略既不抛异常也不加入本轮。
+    private static final List<FactionEconomyPolicy> ECONOMY_POLICIES = new CopyOnWriteArrayList<>();
+
     private FactionEconomyRules() {
+    }
+
+    public static void register(FactionEconomyPolicy policy) {
+        ECONOMY_POLICIES.add(policy);
     }
 
     /**
@@ -74,7 +86,7 @@ public final class FactionEconomyRules {
             FactionEconomyPolicy.RewardKind rewardKind,
             GameWorldComponent gameComponent
     ) {
-        for (FactionEconomyPolicy policy : FactionEconomyPolicies.economyPolicies()) {
+        for (FactionEconomyPolicy policy : ECONOMY_POLICIES) {
             Boolean result = policy.shouldReceiveReward(player, rewardKind, gameComponent);
             if (result != null) {
                 return result;

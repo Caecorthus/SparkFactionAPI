@@ -3,7 +3,6 @@ package dev.caecorthus.sparkfactionapi.impl.antifastround;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -25,157 +24,21 @@ public final class AntiFastRoundRules {
 
     /**
      * Stable contract: C2S payloads dropped on the server while the sender is inside the safe time. Plain ids only,
-     * so no optional mod class is ever loaded. Mirrors SparkStrength's {@code TaotieHeadRules.DAZE_BLOCKED_PAYLOADS}
-     * (itself SparkWitch's Control Expert stun list without {@code wathe:storebuy}): payload-fired item uses (knife,
-     * gun, add-on weapons) and every known role skill. The shop, movement, exits and UI-only payloads stay allowed.
-     * An unregistered id never matches. A new skill payload must be classified here deliberately.
-     * 稳定契约：发送者处于安全时间内时在服务端丢弃的 C2S 数据包。只保存纯 id，从不加载可选模组的类。与 SparkStrength
-     * 的 {@code TaotieHeadRules.DAZE_BLOCKED_PAYLOADS} 一致（即 SparkWitch 控场专家眩晕列表去掉 {@code wathe:storebuy}）：
-     * 通过数据包触发的物品使用（刀、枪、附属武器）以及所有已知职业技能。商店、移动、退出与仅界面用途的数据包仍然放行。
-     * 未注册的 id 永远不会命中。新增技能包必须在此有意识地归类。
+     * so no optional mod class is ever loaded: payload-fired item uses (knife, gun, add-on weapons) and every known
+     * role skill. The shop, movement, exits and UI-only payloads stay allowed. It is close to SparkStrength's
+     * {@code TaotieHeadRules.DAZE_BLOCKED_PAYLOADS} but not equal: the safe time also allows Black Raven crow flight
+     * and USEC attachment changes, and also drops the Fisher's swordfish stab. An unregistered id never matches. A new
+     * skill payload must be classified deliberately, as a complete row of the canonical table.
+     * 稳定契约：发送者处于安全时间内时在服务端丢弃的 C2S 数据包。只保存纯 id，从不加载可选模组的类：通过数据包触发的
+     * 物品使用（刀、枪、附属武器）以及所有已知职业技能。商店、移动、退出与仅界面用途的数据包仍然放行。它与
+     * SparkStrength 的 {@code TaotieHeadRules.DAZE_BLOCKED_PAYLOADS} 相近但并不相同：安全时间还放行黑羽鸦乌鸦飞行与
+     * USEC 配件更换，并额外拦截钓鱼佬的剑鱼刺击。未注册的 id 永远不会命中。新增技能包必须作为规范表中完整的一行有意识地归类。
      */
-    public static final Set<Identifier> BLOCKED_PAYLOADS = Set.copyOf(List.of(
-            Identifier.of("wathe", "knifestab"),
-            Identifier.of("wathe", "gunshoot"),
-
-            Identifier.of("noellesroles", "ability"),
-            Identifier.of("noellesroles", "assassin_guess_role"),
-            Identifier.of("noellesroles", "detective_investigate"),
-            Identifier.of("noellesroles", "morph"),
-            Identifier.of("noellesroles", "morph_corpse_toggle"),
-            Identifier.of("noellesroles", "party_animal_buzz"),
-            Identifier.of("noellesroles", "reporter_mark"),
-            Identifier.of("noellesroles", "silencer_silence"),
-            Identifier.of("noellesroles", "spirit_project"),
-            Identifier.of("noellesroles", "swapper"),
-            Identifier.of("noellesroles", "taotie_swallow"),
-            Identifier.of("noellesroles", "vulture"),
-            Identifier.of("noellesroles", "demon_hunter_shoot"),
-            Identifier.of("noellesroles", "shadow_ally_request"),
-
-            Identifier.of("sparkwitch", "use_skill"),
-            Identifier.of("sparkwitch", "emma_factor"),
-            Identifier.of("sparkwitch", "fire_death_ray"),
-            Identifier.of("sparkwitch", "fire_potion_launcher"),
-            // SparkWitch BEAR M32A1 fire (smoke rounds), a held-item shot like the launcher's.
-            // SparkWitch BEAR M32A1 开火（烟雾榴弹），与炮筒同类的手持射击。
-            Identifier.of("sparkwitch", "fire_m32a1"),
-            // SparkWitch Savior pistol shot (SaviorPistolShootC2SPayload, SparkWitch #200), a gun shot like
-            // wathe:gunshoot. The lightsaber swing/ignite sound intents (savior_lightsaber_swing,
-            // savior_lightsaber_ignite) are presentation only and stay allowed.
-            // SparkWitch 救世主手枪射击（SparkWitch #200），与 wathe:gunshoot 同类的枪击。光剑挥动/点火音效意图
-            // （savior_lightsaber_swing、savior_lightsaber_ignite）仅为表现，保持放行。
-            Identifier.of("sparkwitch", "savior_pistol_shoot"),
-            Identifier.of("sparkwitch", "use_curser_ability"),
-            Identifier.of("sparkwitch", "use_orthopedist_skill"),
-            Identifier.of("sparkwitch", "use_saboteur_skill"),
-            Identifier.of("sparkwitch", "throw_kidnapper_body"),
-            Identifier.of("sparkwitch", "guardian"),
-            Identifier.of("sparkwitch", "vendetta_knife_stab"),
-            Identifier.of("sparkwitch", "swordfish_stab"),
-            Identifier.of("sparkwitch", "open_judge_selection"),
-            Identifier.of("sparkwitch", "confirm_judge_selection"),
-            // SparkWitch Knight duel target pick (SparkWitch #169). / SparkWitch 骑士决斗目标选择（SparkWitch #169）。
-            Identifier.of("sparkwitch", "knight_duel_target"),
-            Identifier.of("sparkwitch", "request_prophecy"),
-            Identifier.of("sparkwitch", "confirm_prophecy"),
-            Identifier.of("sparkwitch", "submit_tarot_divination_selection"),
-            Identifier.of("sparkwitch", "seeker_remote_open"),
-            Identifier.of("sparkwitch", "seeker_car_swallow"),
-            Identifier.of("sparkwitch", "seeker_car_recall"),
-            Identifier.of("sparkwitch", "seeker_car_use"),
-            Identifier.of("sparkwitch", "select_black_raven_disguise"),
-            // Black Raven crow form: start/stop, the crow's door/button right-click (like seeker_car_use) and the
-            // one-shot return feather drop. Per-tick flight (black_raven_crow_move) stays allowed like seeker_car_move.
-            // No crow session can exist inside the window (it opens only at round start and the toggle is refused), so
-            // refusing the toggle never traps a player.
-            // 黑羽鸦化鸦：开始/结束、乌鸦右键门/按钮（同 seeker_car_use）与一次性丢出归羽。每 tick 的飞行包
-            // （black_raven_crow_move）与 seeker_car_move 一样放行。窗口只在开局开启且切换包被拒绝，窗口内不可能存在化鸦会话，
-            // 因此拒绝切换包不会把玩家卡住。
-            Identifier.of("sparkwitch", "black_raven_crow_toggle"),
-            Identifier.of("sparkwitch", "black_raven_crow_use"),
-            Identifier.of("sparkwitch", "black_raven_crow_drop_feather"),
-            Identifier.of("sparkwitch", "use_blind_attune"),
-            Identifier.of("sparkwitch", "rift_hop"),
-            Identifier.of("sparkwitch", "rift_gate_close"),
-            Identifier.of("sparkwitch", "use_fiend_dash"),
-            // SparkWitch Athlete dash (SparkWitch #191). / SparkWitch 运动员冲刺（SparkWitch #191）。
-            Identifier.of("sparkwitch", "use_athlete_dash"),
-            // SparkWitch Dominator mark/release (G key, SparkWitch #192). / SparkWitch 支配者标记/释放（G 键，SparkWitch #192）。
-            Identifier.of("sparkwitch", "use_dominator_skill"),
-            // SparkWitch Savior domain (UseSaviorSkillC2SPacket, G key, SparkWitch #200).
-            // SparkWitch 救世主领域（G 键，SparkWitch #200）。
-            Identifier.of("sparkwitch", "use_savior_skill"),
-            Identifier.of("sparkwitch", "use_apprentice_purify"),
-            // SparkWitch Noa painting (SparkWitch #186). / SparkWitch 城崎诺亚作画（SparkWitch #186）。
-            Identifier.of("sparkwitch", "use_noa_paint"),
-            // SparkWitch 远野汉娜 float (ability key, SparkWitch #212). / SparkWitch 远野汉娜浮游（技能键，SparkWitch #212）。
-            Identifier.of("sparkwitch", "use_hanna_float"),
-            Identifier.of("sparkwitch", "magician_ability"),
-            Identifier.of("sparkwitch", "ragpicker_search"),
-            // SparkWitch Accountant passbook withdrawal (left-click item use, SparkWitch #195).
-            // SparkWitch 会计存折取款（左键物品使用，SparkWitch #195）。
-            Identifier.of("sparkwitch", "accountant_withdraw"),
-            // SparkWitch 夏目安安 hypnosis menu request and target confirm (SparkWitch #194); both halves are dropped,
-            // like the Judge pair. / SparkWitch 夏目安安催眠菜单请求与目标确认（SparkWitch #194）；与法官的两个包一样两半都拦截。
-            Identifier.of("sparkwitch", "request_natsume_menu"),
-            Identifier.of("sparkwitch", "confirm_natsume_target"),
-            // SparkWitch Specter mark/shriek (G, UseSpecterSkillC2SPacket) and Otherworld (Role Skill 2,
-            // UseSpecterSecondSkillC2SPacket), SparkWitch #207, mirrored from the Control Expert list.
-            // SparkWitch 幽魂标记/尖啸（G 键）与里世界（职业技能 2），SparkWitch #207，与控场专家名单一致。
-            Identifier.of("sparkwitch", "use_specter_skill"),
-            Identifier.of("sparkwitch", "use_specter_second_skill"),
-            // SparkWitch Medium Séance (G) and Haunt (Role Skill 2), SparkWitch #209: the two menu requests
-            // (UseMediumSkillC2SPacket, UseMediumSecondSkillC2SPacket) and their two paid confirmations
-            // (SubmitMediumSeanceC2SPacket, SubmitMediumHauntTargetC2SPacket), mirrored from the Control Expert list.
-            // The dead voter's submit_medium_vote stays allowed: only a dead round member may send it and its
-            // handler validates that itself.
-            // SparkWitch 通灵师的通灵（G 键）与招魂（职业技能 2），SparkWitch #209：两个菜单请求及其两个付费确认，
-            // 与控场专家名单一致。死者投票包 submit_medium_vote 保持放行：只有本局死者可以发送，其处理器自行校验。
-            Identifier.of("sparkwitch", "use_medium_skill"),
-            Identifier.of("sparkwitch", "submit_medium_seance"),
-            Identifier.of("sparkwitch", "use_medium_second_skill"),
-            Identifier.of("sparkwitch", "submit_medium_haunt_target"),
-            // SparkWitch Charon pardon (shared ability key, FerrymanPardonC2SPayload) and ferry (secondary key on a
-            // body, FerrymanFerryC2SPayload), SparkWitch #202.
-            // SparkWitch 卡戎宽恕（共享技能键）与摆渡（对遗体按第二技能键），SparkWitch #202。
-            Identifier.of("sparkwitch", "ferryman_pardon"),
-            Identifier.of("sparkwitch", "ferryman_ferry"),
-            // SparkWitch 橘雪莉 (Sherry) 推演 (shared ability key): the target panel request and its paid confirmation,
-            // both halves dropped like the Judge pair; and her 巨力魔法 (Role Skill 2) window, SparkWitch #206.
-            // SparkWitch 橘雪莉的推演（共享技能键）：目标面板请求及其付费确认，与法官的两个包一样两半都拦截；以及她的
-            // 巨力魔法（职业技能 2）窗口，SparkWitch #206。
-            Identifier.of("sparkwitch", "request_sherry_deduction"),
-            Identifier.of("sparkwitch", "confirm_sherry_deduction"),
-            Identifier.of("sparkwitch", "use_sherry_mighty_force"),
-            // SparkWitch 二阶堂希罗 Nikaido Hiro's 死亡回归 (ability key, UseHiroSkillC2SPacket, an empty request),
-            // SparkWitch #218.
-            // SparkWitch 二阶堂希罗的死亡回归（技能键，空请求），SparkWitch #218。
-            Identifier.of("sparkwitch", "use_hiro_skill"),
-
-            Identifier.of("sparkstrength", "noisemaker_glow"),
-            Identifier.of("sparkstrength", "phantom_backpack_invisibility"),
-            Identifier.of("sparkstrength", "coroner_morph"),
-            Identifier.of("sparkstrength", "professor_remote_feed"),
-            Identifier.of("sparkstrength", "demon_hunter_sniff"),
-            Identifier.of("sparkstrength", "vulture_super_curse"),
-            Identifier.of("sparkstrength", "call_tablet_meeting"),
-            Identifier.of("sparkstrength", "cast_tablet_vote"),
-            Identifier.of("sparkstrength", "confirm_tablet_vote"),
-            Identifier.of("sparkstrength", "approve_suspect_removal"),
-            Identifier.of("sparkstrength", "select_criminologist_target"),
-            Identifier.of("sparkstrength", "reporter_communication"),
-            Identifier.of("sparkstrength", "timekeeper_watch_mode"),
-            Identifier.of("sparkstrength", "drone_pilot_start"),
-            Identifier.of("sparkstrength", "drone_pilot_action"),
-            Identifier.of("sparkstrength", "taotie_head_fire"),
-            // SparkStrength sabotage: tablet trigger and breaker repair completion; their cancels stay allowed.
-            // SparkStrength 破坏系统：平板触发与电闸维修完成；对应的取消包放行。
-            Identifier.of("sparkstrength", "trigger_sabotage"),
-            Identifier.of("sparkstrength", "complete_breaker_repair"),
-            // Serial Killer psycho-mode pistol: a gun shot, listed wherever wathe:gunshoot is.
-            // 连环杀手狂暴模式手枪：属于开枪，凡列出 wathe:gunshoot 之处都应同时列出。
-            Identifier.of("sparkstrength", "serial_pistol_shoot")));
+    // Generated SAFE_TIME column of config/payload-policy/actions.tsv: edit that table and rerun
+    // tools/payload_policy.py, never list ids here; per-id reasons are in its note column.
+    // 生成的 SAFE_TIME 列（config/payload-policy/actions.tsv）：请修改该表并重新运行
+    // tools/payload_policy.py，不要在此列出 id；各 id 的理由见其 note 列。
+    public static final Set<Identifier> BLOCKED_PAYLOADS = GeneratedPayloadPolicy.SAFE_TIME;
 
     private AntiFastRoundRules() {
     }

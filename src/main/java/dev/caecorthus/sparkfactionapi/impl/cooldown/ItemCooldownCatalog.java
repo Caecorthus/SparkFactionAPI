@@ -3,21 +3,19 @@ package dev.caecorthus.sparkfactionapi.impl.cooldown;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
  * Item nominal-cooldown lookup and exemptions, generic over the item type so the ordering is testable without a
- * Minecraft bootstrap. Lookup order: explicit values (last wins), then providers in registration order (first
- * present wins), then the host fallback (Wathe {@code GameConstants.ITEM_COOLDOWNS}). Negative values are "unknown".
- * 物品标准冷却查找与豁免；对物品类型泛型化，使顺序无需 Minecraft 引导即可测试。查找顺序：显式值（后者覆盖）、
- * 按注册顺序的提供者（首个有值者胜出）、宿主兜底（Wathe 的 ITEM_COOLDOWNS）。负值视为未知。
+ * Minecraft bootstrap. Lookup order: providers in registration order (first present wins), then the host fallback
+ * (Wathe {@code GameConstants.ITEM_COOLDOWNS}). Negative values are "unknown".
+ * 物品标准冷却查找与豁免；对物品类型泛型化，使顺序无需 Minecraft 引导即可测试。查找顺序：按注册顺序的提供者
+ * （首个有值者胜出）、宿主兜底（Wathe 的 ITEM_COOLDOWNS）。负值视为未知。
  */
 final class ItemCooldownCatalog<I> {
     /**
@@ -31,7 +29,6 @@ final class ItemCooldownCatalog<I> {
     private final Function<? super I, Identifier> idOf;
     private final Function<? super I, Integer> hostNominal;
     private final IsolatedFailures failures;
-    private final Map<I, Integer> explicitNominals = new ConcurrentHashMap<>();
     private final List<Function<? super I, OptionalInt>> providers = new CopyOnWriteArrayList<>();
     private final List<Predicate<? super I>> exemptions = new CopyOnWriteArrayList<>();
 
@@ -45,14 +42,6 @@ final class ItemCooldownCatalog<I> {
         this.failures = Objects.requireNonNull(failures, "failures");
     }
 
-    void registerNominal(I item, int ticks) {
-        Objects.requireNonNull(item, "item");
-        if (ticks < 0) {
-            throw new IllegalArgumentException("Nominal cooldown must not be negative: " + ticks);
-        }
-        explicitNominals.put(item, ticks);
-    }
-
     void registerProvider(Function<? super I, OptionalInt> provider) {
         providers.add(Objects.requireNonNull(provider, "provider"));
     }
@@ -64,10 +53,6 @@ final class ItemCooldownCatalog<I> {
     OptionalInt nominalTicks(I item) {
         if (item == null) {
             return OptionalInt.empty();
-        }
-        Integer explicit = explicitNominals.get(item);
-        if (explicit != null) {
-            return OptionalInt.of(explicit);
         }
         for (int index = 0; index < providers.size(); index++) {
             try {
