@@ -68,5 +68,6 @@
   "hud.sparkfactionapi.map_reset.progress": "Resetting map %s%%",
   "hud.sparkfactionapi.map_reset.complete": "Map reset complete",
   "message.sparkfactionapi.map_reset.start_blocked": "The map is resetting (%s%%). The game starts as soon as it finishes.",
-  "message.sparkfactionapi.map_reset.command_blocked": "The map is resetting (%s%%). Map commands are unavailable until it finishes."
+  "message.sparkfactionapi.map_reset.command_blocked": "The map is resetting (%s%%). Map commands are unavailable until it finishes.",
+  "tips.note": "I should write something first"
 }

@@ -68,5 +68,6 @@
   "hud.sparkfactionapi.map_reset.progress": "地图重置中 %s%%",
   "hud.sparkfactionapi.map_reset.complete": "地图重置完成",
   "message.sparkfactionapi.map_reset.start_blocked": "地图正在重置（%s%%），完成后自动开局",
-  "message.sparkfactionapi.map_reset.command_blocked": "地图正在重置（%s%%），完成前不能用指令更改地图"
+  "message.sparkfactionapi.map_reset.command_blocked": "地图正在重置（%s%%），完成前不能用指令更改地图",
+  "tips.note": "我应该先写点什么"
 }

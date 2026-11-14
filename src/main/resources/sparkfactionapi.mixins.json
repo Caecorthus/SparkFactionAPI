@@ -53,6 +53,7 @@
     "ServerPlayerEntityAffectMixin",
     "team.GameFunctionsLetterNameMixin",
     "team.PlayerEntityTeamTagMixin",
+    "text.GameFunctionsLetterRoleNameMixin",
     "WaxedSignRecolorMixin",
     "WorldProjectileAffectMixin",
     "WorldBlackoutComponentMixin"
