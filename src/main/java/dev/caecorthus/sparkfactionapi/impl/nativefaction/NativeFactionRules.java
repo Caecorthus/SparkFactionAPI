@@ -2,6 +2,7 @@ package dev.caecorthus.sparkfactionapi.impl.nativefaction;
 
 import dev.caecorthus.sparkfactionapi.api.FactionDefinition;
 import dev.caecorthus.sparkfactionapi.impl.registry.FactionCatalog;
+import dev.caecorthus.sparkfactionapi.impl.thirdfaction.ThirdFactionDraw;
 import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
 import net.minecraft.util.Identifier;
@@ -44,12 +45,18 @@ public final class NativeFactionRules {
 
     /**
      * What Wathe's neutral pass sees: NEUTRAL for a native constant whose definition is
-     * {@code dealtInWatheNeutralPool}, the given faction otherwise.
-     * Wathe 中立分配看到的阵营：定义了 {@code dealtInWatheNeutralPool} 的原生常量视为 NEUTRAL，其余原样返回。
+     * {@code dealtInWatheNeutralPool}, the given faction otherwise. Such a faction is a third faction too, so after the
+     * third-faction draw of the same assignment it stays NEUTRAL only while no other third faction is present
+     * ({@link ThirdFactionDraw#neutralPoolOpenFor}); outside a draw nothing changes.
+     * Wathe 中立分配看到的阵营：定义了 {@code dealtInWatheNeutralPool} 的原生常量视为 NEUTRAL，其余原样返回。这类阵营同样
+     * 是第三方阵营，因此在同一次分配的第三方阵营抽取之后，只有在没有其它第三方阵营在场时才保持 NEUTRAL
+     * （{@link ThirdFactionDraw#neutralPoolOpenFor}）；抽取之外行为不变。
      */
     public static Faction neutralPoolView(Faction faction) {
         FactionDefinition definition = nativeDefinitionOrNull(faction);
-        return definition != null && definition.dealtInWatheNeutralPool() ? Faction.NEUTRAL : faction;
+        return definition != null && definition.dealtInWatheNeutralPool() && ThirdFactionDraw.neutralPoolOpenFor(faction)
+                ? Faction.NEUTRAL
+                : faction;
     }
 
     /**

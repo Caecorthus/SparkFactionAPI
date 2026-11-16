@@ -1,5 +1,6 @@
 package dev.caecorthus.sparkfactionapi.api;
 
+import dev.caecorthus.sparkfactionapi.component.SparkFactionThirdFactionComponent;
 import dev.caecorthus.sparkfactionapi.impl.collision.EntityCollisionExemptions;
 import dev.caecorthus.sparkfactionapi.impl.economy.FactionEconomyRules;
 import dev.caecorthus.sparkfactionapi.impl.gun.FactionGunPunishmentRules;
@@ -10,13 +11,19 @@ import dev.caecorthus.sparkfactionapi.impl.registry.FactionCatalog;
 import dev.caecorthus.sparkfactionapi.impl.registry.FactionRegistryBootstrap;
 import dev.caecorthus.sparkfactionapi.impl.registry.FactionRoleCatalog;
 import dev.caecorthus.sparkfactionapi.impl.target.PlayerAffectRules;
+import dev.caecorthus.sparkfactionapi.impl.thirdfaction.ThirdFactionDraw;
+import dev.caecorthus.sparkfactionapi.impl.thirdfaction.ThirdFactionDrawRules;
+import dev.caecorthus.sparkfactionapi.impl.thirdfaction.ThirdFactionLineups;
 import dev.caecorthus.sparkfactionapi.impl.vision.FactionInstinctRules;
 import dev.doctor4t.wathe.api.Faction;
 import dev.doctor4t.wathe.api.Role;
 import dev.doctor4t.wathe.cca.GameWorldComponent;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 
 public final class SparkFactionApi {
@@ -86,6 +93,124 @@ public final class SparkFactionApi {
      */
     public static boolean isNeutralAligned(Role role) {
         return NativeFactionRules.isNeutralAligned(role);
+    }
+
+    /**
+     * Category of a Wathe {@code Faction} constant: null and NONE give {@link FactionCategory#NONE}, CIVILIAN, NEUTRAL
+     * and KILLER map one to one, and any other constant (the appended native factions) is
+     * {@link FactionCategory#THIRD_FACTION}.
+     * Wathe {@code Faction} 常量的分类：null 与 NONE 为 {@link FactionCategory#NONE}，CIVILIAN、NEUTRAL、KILLER 一一对应，
+     * 其它任何常量（追加的原生阵营）为 {@link FactionCategory#THIRD_FACTION}。
+     *
+     * @since 2.0.0
+     */
+    public static FactionCategory factionCategory(@Nullable Faction faction) {
+        return ThirdFactionDrawRules.categoryOf(faction);
+    }
+
+    /**
+     * Category of the role's real Wathe faction ({@code role.getFaction()}, never the neutral-pool view that
+     * {@code dealtInWatheNeutralPool} gives inside Wathe's neutral pass). A role of a non-native custom faction in a
+     * Wathe bucket takes that bucket's category. Null gives {@link FactionCategory#NONE}.
+     * 角色真实 Wathe 阵营（{@code role.getFaction()}，绝不是 {@code dealtInWatheNeutralPool} 在 Wathe 中立分配内给出的中立池
+     * 视图）的分类。位于 Wathe 原生桶中的非原生自定义阵营角色取该桶的分类。null 返回 {@link FactionCategory#NONE}。
+     *
+     * @since 2.0.0
+     */
+    public static FactionCategory factionCategory(@Nullable Role role) {
+        return ThirdFactionDraw.categoryOf(role);
+    }
+
+    /**
+     * True for a declared native custom faction id (a {@code sparkfactionapi:native_wathe_factions} entry), whether
+     * or not it is registered or has a lineup; false for null, the {@code wathe:*} built-ins and non-native factions.
+     * 对已声明的原生自定义阵营 id（{@code sparkfactionapi:native_wathe_factions} 条目）返回 true，无论是否已注册或有阵容；
+     * null、{@code wathe:*} 内置阵营与非原生阵营返回 false。
+     *
+     * @since 2.0.0
+     */
+    public static boolean isThirdFaction(@Nullable Identifier factionId) {
+        return NativeWatheFactions.isNativeCustomFaction(factionId);
+    }
+
+    /**
+     * Declared native custom faction ids in {@code Faction} ordinal order; unmodifiable, empty when none is declared.
+     * 按 {@code Faction} 序号排列的已声明原生自定义阵营 id；不可修改，未声明时为空。
+     *
+     * @since 2.0.0
+     */
+    public static List<Identifier> thirdFactionIds() {
+        return NativeWatheFactions.customFactionIds();
+    }
+
+    /**
+     * Registers the lineup SparkFactionAPI's third-faction draw deals when this faction is the round's third faction.
+     * Call it during common mod initialization, after {@link #registerFaction}. At most one third faction is drawn per
+     * Wathe murder round, before Wathe's neutral pass, with a member cap of
+     * {@code floor(players / thirdFactionDividend)} and only from {@link #thirdFactionMinPlayers} players on: an
+     * admin-forced member makes its faction the round's faction (forced members count toward the cap), two forced
+     * factions stop the draw, otherwise one drawable lineup is picked uniformly at random.
+     * 注册第三方阵营抽取在本阵营成为本局第三方阵营时发放的阵容。应在通用模组初始化期间、{@link #registerFaction} 之后调用。
+     * 每局 Wathe 谋杀模式最多抽出一个第三方阵营，在 Wathe 中立分配之前进行，成员上限为
+     * {@code floor(总人数 / 第三方阵营除数)}，且只在人数达到 {@link #thirdFactionMinPlayers} 时进行：管理员强制的成员使其
+     * 阵营成为本局阵营（强制成员计入上限），两个强制阵营会停止抽取，否则从可抽取的阵容中均匀随机抽取一个。
+     *
+     * @throws IllegalArgumentException the faction is not a registered, declared native faction, or its definition has
+     *                                  {@code dealtInWatheNeutralPool(true)} or an {@code assignmentPolicy} (a third
+     *                                  faction has exactly one natural draw path) 阵营不是已注册的已声明原生阵营，或其
+     *                                  定义启用了 {@code dealtInWatheNeutralPool(true)} 或设置了 {@code assignmentPolicy}
+     *                                  （第三方阵营只有一条自然抽取途径）
+     * @throws IllegalStateException    a lineup is already registered for this faction 该阵营已注册过阵容
+     * @since 2.0.0
+     */
+    public static void registerThirdFactionLineup(Identifier factionId, ThirdFactionLineup lineup) {
+        ThirdFactionLineups.register(factionId, lineup);
+    }
+
+    /**
+     * Server-wide minimum player count for the third-faction draw (default 18; 0 = no minimum). Saved with the
+     * server scoreboard; read at each round start. SparkWitch's {@code /sparkwitch:thirdFactionMinRequirement} writes it.
+     * 全服第三方阵营抽取的最低人数（默认 18；0 = 无最低人数）。随服务器计分板保存，每局开始时读取。由 SparkWitch 的
+     * {@code /sparkwitch:thirdFactionMinRequirement} 写入。
+     *
+     * @since 2.0.0
+     */
+    public static int thirdFactionMinPlayers(MinecraftServer server) {
+        return SparkFactionThirdFactionComponent.of(server).settings().minPlayers();
+    }
+
+    /**
+     * Sets {@link #thirdFactionMinPlayers}; applies from the next round. Call it on the server thread.
+     * 设置 {@link #thirdFactionMinPlayers}；从下一局生效。请在服务端线程调用。
+     *
+     * @throws IllegalArgumentException {@code players < 0}
+     * @since 2.0.0
+     */
+    public static void setThirdFactionMinPlayers(MinecraftServer server, int players) {
+        SparkFactionThirdFactionComponent.of(server).setMinPlayers(players);
+    }
+
+    /**
+     * Server-wide third-faction dividend (default 10): member cap = {@code floor(players / dividend)}. Also set with
+     * {@code /wathe:gameSettings set roleDividend third_faction <dividend>}.
+     * 全服第三方阵营除数（默认 10）：成员上限 = {@code floor(总人数 / 除数)}。也可用
+     * {@code /wathe:gameSettings set roleDividend third_faction <dividend>} 设置。
+     *
+     * @since 2.0.0
+     */
+    public static int thirdFactionDividend(MinecraftServer server) {
+        return SparkFactionThirdFactionComponent.of(server).settings().dividend();
+    }
+
+    /**
+     * Sets {@link #thirdFactionDividend}; applies from the next round. Call it on the server thread.
+     * 设置 {@link #thirdFactionDividend}；从下一局生效。请在服务端线程调用。
+     *
+     * @throws IllegalArgumentException {@code dividend < 3}
+     * @since 2.0.0
+     */
+    public static void setThirdFactionDividend(MinecraftServer server, int dividend) {
+        SparkFactionThirdFactionComponent.of(server).setDividend(dividend);
     }
 
     public static Identifier resolveEffectiveFaction(PlayerEntity player, GameWorldComponent gameComponent) {

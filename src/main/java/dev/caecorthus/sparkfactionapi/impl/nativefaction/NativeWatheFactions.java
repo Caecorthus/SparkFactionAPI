@@ -98,7 +98,7 @@ public final class NativeWatheFactions {
         if (table != null) {
             throw new IllegalStateException("Native Wathe factions were already installed");
         }
-        table = new Table(original.length, created.clone(), ids, Collections.unmodifiableMap(byId));
+        table = new Table(original.length, created.clone(), ids, Collections.unmodifiableMap(byId), List.of(ids));
         if (created.length == 0) {
             LOGGER.info("SparkFactionAPI native Wathe factions: none declared; Faction keeps its {} constants. "
                     + "未声明原生 Wathe 阵营。", original.length);
@@ -174,6 +174,22 @@ public final class NativeWatheFactions {
         return customConstantOrNull(factionId) != null;
     }
 
-    private record Table(int base, Faction[] constants, Identifier[] ids, Map<Identifier, Faction> byId) {
+    /**
+     * Declared native custom faction ids in ordinal order (unmodifiable; empty when none is declared).
+     * 按序号排列的已声明原生自定义阵营 id（不可修改；未声明时为空）。
+     */
+    public static List<Identifier> customFactionIds() {
+        ensureFactionInitialized();
+        Table current = table;
+        return current == null ? List.of() : current.idList();
+    }
+
+    private record Table(
+            int base,
+            Faction[] constants,
+            Identifier[] ids,
+            Map<Identifier, Faction> byId,
+            List<Identifier> idList
+    ) {
     }
 }
