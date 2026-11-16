@@ -1,5 +1,66 @@
 # Downstream Migration Notes
 
+## 2026-11-16 Third-Faction Draw (2.0.0)
+
+Additive and source/binary compatible; no existing signature changes. With no
+lineup registered no role is added and no random number is drawn, so role
+assignment is unchanged except for the neutral-pool claim below.
+
+- New `FactionCategory` (`NONE`, `CIVILIAN`, `NEUTRAL`, `KILLER`,
+  `THIRD_FACTION`, `id()`), `SparkFactionApi.factionCategory(Faction)` and
+  `factionCategory(Role)` (the role's real `getFaction()`), `isThirdFaction(Identifier)`
+  and `thirdFactionIds()` (declared native ids, ordinal order). Pass a typed
+  null (`(Faction) null`) if you ever call `factionCategory(null)`.
+- New `registerThirdFactionLineup(Identifier, ThirdFactionLineup)` with
+  `ThirdFactionLineup.rolesToDeal(ThirdFactionDrawContext)` and the record
+  `ThirdFactionDrawContext(world, gameComponent, players, totalPlayers,
+  memberCap, factionId, presentMembers)` / `remainingSlots()`. Call it during
+  common init after `registerFaction`. It throws `IllegalArgumentException`
+  when the faction is not a registered declared native faction, or its
+  definition has `dealtInWatheNeutralPool(true)` or an `assignmentPolicy`, and
+  `IllegalStateException` for a second lineup of the same faction.
+- The draw runs once per murder round right before Wathe's neutral pass: at
+  most one third faction, member cap `floor(players / dividend)`, nothing below
+  the minimum players, uniform pick among lineups that answer non-empty,
+  present (forced) members fill toward the cap, two present third factions
+  stop it. See CONTEXT.md for the full contract.
+- New settings on `SparkFactionApi`: `thirdFactionDividend(MinecraftServer)` /
+  `setThirdFactionDividend(MinecraftServer, int)` (default 10, IAE below 3) and
+  `thirdFactionMinPlayers(MinecraftServer)` / `setThirdFactionMinPlayers(
+  MinecraftServer, int)` (default 18, 0 = none, IAE below 0), saved in the new
+  scoreboard component `sparkfactionapi:third_faction_draw` (keys `Dividend`,
+  `MinPlayers`). New command `/wathe:gameSettings set roleDividend
+  third_faction <dividend>`; the minimum-players command is SparkWitch's
+  (`/sparkwitch:thirdFactionMinRequirement`).
+- Behavior change for `dealtInWatheNeutralPool` factions (none after the paired
+  SparkWitch change, which moves Team Jiahao to a lineup): inside the
+  murder-mode assignment, Wathe's neutral pass reads such a faction as NEUTRAL
+  only while no other third faction is present after the draw. Example: a
+  third faction present from the draw or a force keeps a pool-dealt faction's
+  roles out of the neutral pass.
+- SparkWitch migration checklist:
+  - Deal witch roles through the WITCH lineup and remove the old
+    after-neutrals witch dealing (`WitchRoleAssignmentService`), or both paths
+    deal; the draw never sees roles dealt after Wathe's neutral pass.
+  - Team Jiahao moves to a lineup too, so it drops `dealtInWatheNeutralPool(true)`
+    (registration rejects the combination); the Corrupt Cop then leaves Wathe's
+    neutral pool (owner 2026-11-16).
+  - The cap is 1 for 18-29 players with the default dividend; a lineup longer
+    than `remainingSlots()` is cut in deal order.
+  - A lineup that checks `Role#shouldAppear` keeps any role appearance
+    condition (e.g. a `minPlayers(18)` condition) on top of SFA's minimum.
+  - There is no "round's third faction" getter; scan players with
+    `factionCategory(Role)` after assignment if you need it.
+
+中文摘要：新增第三方阵营契约：`FactionCategory`、`factionCategory(Faction/Role)`、`isThirdFaction`、`thirdFactionIds`、
+`registerThirdFactionLineup` 与 `ThirdFactionLineup`/`ThirdFactionDrawContext`。每局在 Wathe 中立分配之前最多抽出一个第三方
+阵营：人数上限为 `floor(总人数 / 除数)`（默认除数 10，`/wathe:gameSettings set roleDividend third_faction <除数>`），
+低于最低人数（默认 18，由 SparkWitch 的 `/sparkwitch:thirdFactionMinRequirement` 通过 `setThirdFactionMinPlayers` 设置）
+不抽；强制角色保留并计入上限，两个强制第三方阵营时不再发放，否则在可抽取的阵容中均匀随机。设置保存在计分板组件
+`sparkfactionapi:third_faction_draw`（`Dividend`、`MinPlayers`）。行为变化：`dealtInWatheNeutralPool` 阵营（配套的 SparkWitch 改动把嘉豪迁入阵容后已无此类阵营）
+在已有其它第三方阵营在场时不再进入中立池。SparkWitch 需要把魔女与嘉豪发放迁入 WITCH / JIAHAO 阵容，移除旧的中立后发放路径，
+并去掉嘉豪的 `dealtInWatheNeutralPool(true)`（黑警因此不再进入中立池）。
+
 ## 2026-11-16 Conditional Settlement Exclusions (2.0.0)
 
 Additive and source/binary compatible. No migration is required: every existing

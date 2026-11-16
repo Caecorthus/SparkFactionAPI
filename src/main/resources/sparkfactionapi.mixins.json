@@ -55,6 +55,7 @@
     "team.GameFunctionsLetterNameMixin",
     "team.PlayerEntityTeamTagMixin",
     "text.GameFunctionsLetterRoleNameMixin",
+    "thirdfaction.GameSettingsCommandThirdFactionMixin",
     "WaxedSignRecolorMixin",
     "WorldProjectileAffectMixin",
     "WorldBlackoutComponentMixin"

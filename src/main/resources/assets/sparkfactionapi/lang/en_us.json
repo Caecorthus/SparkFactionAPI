@@ -62,6 +62,7 @@
   "commands.sparkfactionapi.antifastround.enabled": "Anti-fast-round enabled: %s s of safe time from the next round start",
   "commands.sparkfactionapi.antifastround.disabled": "Anti-fast-round disabled (safe time setting: %s s)",
   "commands.sparkfactionapi.antifastround.disabled.window_ended": "Anti-fast-round disabled (safe time setting: %s s); the running safe time ended immediately",
+  "commands.sparkfactionapi.thirdfaction.dividend.set": "Third-faction dividend set to %s (member cap = players / %s)",
   "message.sparkfactionapi.anti_fast_round.start": "Safe time: items and skills are locked for %s s, hits deal no knockback",
   "message.sparkfactionapi.anti_fast_round.end": "Safe time is over: items and skills are unlocked",
   "message.sparkfactionapi.anti_fast_round.blocked": "Safe time: items and skills are locked (%s s left)",

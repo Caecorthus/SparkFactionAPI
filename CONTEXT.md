@@ -15,6 +15,16 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   `sparkfactionapi:native_wathe_factions` declaration in some mod's
   `fabric.mod.json`. The built-ins (`wathe:none/civilian/killer/neutral`) are
   not native custom factions.
+- **Third faction**: a faction whose Wathe `Faction` constant is not one of the
+  built-ins NONE, CIVILIAN, KILLER or NEUTRAL (`FactionCategory.THIRD_FACTION`).
+  Today that is exactly the native Wathe factions. A non-native custom faction
+  whose roles sit in a Wathe bucket (SparkWitch's Murderous Witch, NEUTRAL) takes
+  that bucket's category and is not a third faction.
+- **Third-faction draw**: SparkFactionAPI's per-round pass that deals at most one
+  third faction's lineup (`ThirdFactionLineup`), right before Wathe's neutral
+  pass. **Present members** are the roles of a third faction that players
+  already hold when the draw runs (admin-forced roles and anything an earlier
+  pass dealt).
 - **Bound role**: a role that SparkFactionAPI did not register (for example a
   NoellesRoles role) attached by role id to a registered custom faction with
   `SparkFactionApi.bindRoleFaction`.
@@ -155,12 +165,79 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   `ScoreboardRoleSelectorComponent.assignNeutrals` (already-assigned neutral
   count, candidate filter) return NEUTRAL for that native faction's roles, so
   they are drawn with Wathe's neutral odds and take a neutral slot; nothing else
-  sees it (`@WrapOperation`, require = allow = 2). Registering it on a faction
-  that is not declared native throws `IllegalArgumentException`.
+  sees it (`@WrapOperation`, require = allow = 2). Since the third-faction draw
+  (2.0.0), inside the murder-mode assignment both reads stay NEUTRAL only while
+  no other third faction is present after the draw (see the third-faction
+  draw); with no third faction present, and outside that assignment, nothing
+  changed. Registering it on a faction that is not declared native throws
+  `IllegalArgumentException`.
   `neutralAligned` feeds `isNeutralAligned`; on a non-native faction it is
   logged as a warning and has no effect. Roles of a native faction without
   `dealtInWatheNeutralPool` are drawn by no Wathe pass and do not consume a
   neutral slot.
+- Faction categories (2.0.0): `SparkFactionApi.factionCategory(Faction)` maps
+  null/NONE to NONE, CIVILIAN, NEUTRAL and KILLER one to one, and every other
+  constant to THIRD_FACTION (switch-free). `factionCategory(Role)` reads
+  `role.getFaction()` (outside Wathe's neutral pass, so bound and registered
+  native roles read their appended constant; never the neutral-pool view).
+  `FactionCategory.id()` is `none`, `civilian`, `neutral`, `killer`,
+  `third_faction`. `isThirdFaction(Identifier)` is true for a declared native id
+  (registered or not); `thirdFactionIds()` lists the declared native ids in
+  ordinal order (unmodifiable).
+- Third-faction lineups: `registerThirdFactionLineup(factionId, lineup)` during
+  common init, after `registerFaction`. The faction must be a registered,
+  declared native faction whose definition has neither
+  `dealtInWatheNeutralPool(true)` nor an `assignmentPolicy`
+  (`IllegalArgumentException`: a third faction has exactly one natural draw
+  path); a second lineup for the same faction throws `IllegalStateException`;
+  nulls throw `NullPointerException`. Lineups are kept in declared (ordinal)
+  order, not registration order.
+- Third-faction draw (owner rules 2026-11-16): `MurderGameModeMixin` runs it in
+  the AFTER_VIGILANTES handler, right after that SFA phase and right before
+  Wathe's `assignNeutrals`, so forced roles (`assignForcedRoles` runs first and
+  skips every check) and the killer/vigilante passes are already dealt.
+  `N = players.size()`; below the minimum players nothing is drawn; the member
+  cap is `floor(N / dividend)` and below 1 nothing is drawn. Present members are
+  grouped by their faction constant: two or more present third factions → deal
+  nothing more; exactly one → it is the round's faction and its lineup (if any)
+  fills up to the cap, present members included; none → every lineup is probed
+  with no present members, those answering non-empty are candidates and one is
+  picked uniformly with `world.getRandom()` (50/50 for two); the probe answer is
+  dealt. The dealt list skips null and `NO_ROLE`, is cut to
+  `cap − present members` and to the unassigned seats (role null or `NO_ROLE`),
+  and each role goes to a distinct seat of a world-random shuffle through
+  `GameWorldComponent#addRole`. Every dealt role takes one slot whatever its own
+  faction. A throwing lineup (`RuntimeException` or `LinkageError`) deals
+  nothing; any other failure of the draw is logged and deals nothing more, so
+  the round still starts. One DEBUG line logs N, cap, outcome, faction and the
+  dealt count. Forced roles are never removed. With no lineup registered no
+  role is added and no random number is drawn.
+- Neutral-pool claims: the draw records the third factions present after it
+  (present plus the drawn one when it dealt), and the handler before Wathe's
+  `assignCivilians` clears them first (before the AFTER_NEUTRALS phase). While set, a
+  `dealtInWatheNeutralPool` faction reads NEUTRAL in `assignNeutrals` only when
+  no third faction is present or it is the only one present; otherwise both
+  reads return its real constant, so its roles are not drawn and its present
+  roles take no neutral slot. Not covered: two pool-dealt factions in a round
+  with no other third faction present (none exists since SparkWitch moved Team
+  Jiahao to a lineup on 2026-11-16), and native
+  factions dealt by an SFA `FactionAssignmentPolicy` in AFTER_NEUTRALS or
+  BEFORE_CIVILIANS (none today; a lineup faction cannot have one).
+- Third-faction settings component id: `sparkfactionapi:third_faction_draw`
+  (scoreboard, server-only: not synced). Persisted keys `Dividend` (default 10,
+  at least 3) and `MinPlayers` (default 18, at least 0 = no minimum); a missing
+  key reads as its default and a stored value below the floor is raised to it.
+  Read once per round. Written by `SparkFactionApi.setThirdFactionDividend` /
+  `setThirdFactionMinPlayers` (`IllegalArgumentException` below 3 / below 0) and
+  by `/wathe:gameSettings set roleDividend third_faction <dividend>`
+  (`IntegerArgumentType.integer(3)`, like Wathe's vigilante/neutral options),
+  which a `@Inject` at TAIL of Wathe's `GameSettingsCommand.register` grafts onto
+  Wathe's own `wathe:gameSettings` → `set` → `roleDividend` node, so Wathe's
+  permission requirement on the root still applies; a missing node logs one WARN
+  and adds nothing. Its feedback key is
+  `commands.sparkfactionapi.thirdfaction.dividend.set` (with an English
+  fallback). The minimum-players command belongs to SparkWitch
+  (`/sparkwitch:thirdFactionMinRequirement`), which writes through the API.
 - NoellesRoles Scavenger hidden bodies (D3, client only, pinned to
   noellesroles-1.7.6-h1.5.6-spark, sha256 fcb0da69...): NoellesRoles' two
   `KILLER || NEUTRAL` faction gates, the only ones in that jar, read
@@ -416,10 +493,13 @@ This glossary describes the runtime contract vocabulary used by code and tests.
 - NoellesRoles is an optional compatibility target, never a hard dependency.
 - SparkWitch is the direct public-API consumer, including replay role-change
   causes. It declares the native Wathe factions (`sparkwitch:witch`,
-  `sparkwitch:jiahao`) and binds `noellesroles:corrupt_cop` by id.
+  `sparkwitch:jiahao`), binds `noellesroles:corrupt_cop` by id, and is the
+  intended caller of `registerThirdFactionLineup` and of the third-faction
+  minimum-players setter (its own command).
 - Wathe `Faction` is extended in place; Wathe itself is not edited. Its only
   switch over `Faction` (`GameSettingsCommand.listRoles`) is cancelled at HEAD
-  by `GameSettingsCommandMixin`.
+  by `GameSettingsCommandMixin`. `GameSettingsCommandThirdFactionMixin` adds the
+  `roleDividend third_faction` option at TAIL of `GameSettingsCommand.register`.
 - SparkTraits may integrate through optional public seams; it contributes
   replay trait tooltips and trait badges through `api/replay`.
 - `client/api/card` (`InventoryCardLayout`, `InventoryCardPaint`,

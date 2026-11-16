@@ -62,6 +62,7 @@
   "commands.sparkfactionapi.antifastround.enabled": "防速通局已开启：从下一局开始，开局安全时间为 %s 秒",
   "commands.sparkfactionapi.antifastround.disabled": "防速通局已关闭（安全时间设置：%s 秒）",
   "commands.sparkfactionapi.antifastround.disabled.window_ended": "防速通局已关闭（安全时间设置：%s 秒），正在进行的安全时间已立即结束",
+  "commands.sparkfactionapi.thirdfaction.dividend.set": "第三方阵营除数已设为 %s（人数上限 = 总人数 / %s）",
   "message.sparkfactionapi.anti_fast_round.start": "开局安全时间：%s 秒内无法使用物品和技能，攻击没有击退",
   "message.sparkfactionapi.anti_fast_round.end": "安全时间结束，现在可以使用物品和技能了",
   "message.sparkfactionapi.anti_fast_round.blocked": "安全时间中，暂时无法使用物品和技能（剩余 %s 秒）",
