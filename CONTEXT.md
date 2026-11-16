@@ -67,7 +67,10 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   player for round settlement in any mod (killer win checks, SparkTraits Last
   Stand and Final Moment thresholds, neutral "last one alive" wins). It is a
   classification read by each settlement point; it changes no win rule, event or
-  alive state by itself.
+  alive state by itself. A **conditional settlement exclusion** is the same
+  classification for a role whose holders are excluded only while the owner's
+  per-player condition holds (SparkWitch's Charon without a running Soul
+  Moment).
 - **Forced cooldown**: a cooldown imposed on a player by another feature (penalty,
   aura, debuff) through `api/cooldown/ForcedCooldowns`, covering both
   registered role-skill stores (`RoleSkillCooldownStore`) and vanilla item
@@ -194,6 +197,18 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   register during mod initialization; reads run on the server thread during a
   round. Callers built against an older SparkFactionAPI must treat a missing
   class as "not excluded" (the previous behavior).
+- Conditional settlement exclusions (`registerConditionalRole(Identifier,
+  Predicate<PlayerEntity>)`) are keyed by role id as well: the first condition
+  for an id wins, nulls throw, there is no removal. Only
+  `isExcluded(GameWorldComponent, UUID)` consults them, after the unconditional
+  answer and only for a holder of exactly that raw role, so no other role's
+  players ever reach a condition; `containsRole` and `isExcludedRole` stay
+  unconditional-only. The player is resolved from the component's own world
+  (`mixin/settlement/GameWorldComponentWorldAccessor`) and only on a
+  `ServerWorld`; a client world, an offline holder and a throwing condition
+  (`RuntimeException` or `LinkageError`, logged once per role) all answer "not
+  excluded". With no conditional role registered the query is exactly the old
+  one.
 - Forced cooldowns are monotonic and exact. `raise` writes only when the new
   remaining value exceeds the current one; `extend` adds to the remaining value
   (saturating, ready slots restart) and ignores non-positive amounts. Item
@@ -415,9 +430,12 @@ This glossary describes the runtime contract vocabulary used by code and tests.
   `GuideDecorBridge`; instances are never shared between mods.
   SparkAssist decoration is reached by name only.
 - `api/settlement/SettlementExclusions`: SparkWitch registers
-  `sparkwitch:black_raven` by reflection (it compiles against an older
-  SparkFactionAPI and fails closed); SparkTraits and SparkStrength read it,
-  optionally, at their own settlement points.
+  `sparkwitch:black_raven`, `sparkwitch:stowaway` and
+  `sparkwitch:schrodingers_cat` unconditionally and `sparkwitch:charon` as a
+  conditional role (excluded while he owns no running Soul Moment with a
+  soul); SparkTraits (direct call) and SparkStrength (reflection, fails closed)
+  read `isExcluded(GameWorldComponent, UUID)` at their own settlement points
+  and need no change for a conditional role.
 - SparkStrength and SparkAssist are not current Java API consumers.
   SparkStrength reaches `api/cooldown` (store registration,
   `clearItemKeepingForced`) only by reflection and falls back when it is

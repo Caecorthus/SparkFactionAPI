@@ -51,6 +51,7 @@
     "ReplayGeneratorMixin",
     "RoleMixin",
     "ServerPlayerEntityAffectMixin",
+    "settlement.GameWorldComponentWorldAccessor",
     "team.GameFunctionsLetterNameMixin",
     "team.PlayerEntityTeamTagMixin",
     "text.GameFunctionsLetterRoleNameMixin",

@@ -1,5 +1,33 @@
 # Downstream Migration Notes
 
+## 2026-11-16 Conditional Settlement Exclusions (2.0.0)
+
+Additive and source/binary compatible. No migration is required: every existing
+`SettlementExclusions` member keeps its signature, and with no conditional role
+registered every answer is unchanged.
+
+- New `SettlementExclusions.registerConditionalRole(Identifier roleId,
+  Predicate<PlayerEntity> excludedWhile)`: holders of that raw role are
+  excluded only while the predicate is true for them. The first condition for
+  an id wins (returns false afterwards), nulls throw, there is no removal.
+- `isExcluded(GameWorldComponent, UUID)` now answers true for an unconditional
+  role OR for a holder of a conditional role whose condition holds. Consumers
+  that already pass `(game, uuid)` (SparkTraits directly, SparkStrength by
+  reflection) pick this up without a code change.
+- `containsRole(Identifier)` and `isExcludedRole(Role)` do not see conditional
+  roles: a role alone carries no player state.
+- Conditions run on the querying (server) thread with the online server-side
+  player and must be cheap, side-effect-free reads. Fail closed: a client
+  world, an offline holder, or a predicate that throws (logged once per role)
+  means "not excluded".
+- New read-only accessor mixin `mixin/settlement/GameWorldComponentWorldAccessor`
+  on Wathe's private `GameWorldComponent.world`.
+
+中文摘要：新增 `SettlementExclusions.registerConditionalRole(身份 id, 玩家谓词)`，用于“仅在条件成立时才被结算排除”的身份
+（SparkWitch 卡戎：没有自己正在进行且至少有一名灵魂的亡魂时刻时不算存活）。`isExcluded(GameWorldComponent, UUID)`
+在无条件结果之后，仅对原始身份恰为该 id 的玩家询问条件；`containsRole`/`isExcludedRole` 不包含带条件身份。客户端世界、
+玩家不在线或谓词抛出异常时一律视为“不排除”（异常每个身份只记录一次）。纯新增，现有成员签名与行为不变，下游无需迁移。
+
 ## 2026-11-13 Slimming Pass (2.0.0)
 
 Source- and binary-incompatible for the removed members below; nothing else
