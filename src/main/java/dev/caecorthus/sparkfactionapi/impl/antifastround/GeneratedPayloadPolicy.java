@@ -15,9 +15,9 @@ import java.util.Set;
  */
 final class GeneratedPayloadPolicy {
     /** SHA-256 of the canonical table this file was generated from. / 生成本文件所用规范表的 SHA-256。 */
-    static final String CONTRACT_SHA256 = "4af0774e7216850d6fa216a6c7cca5a631361166e83ed92dccb2c493eb821147";
+    static final String CONTRACT_SHA256 = "5f0c4d708669eca5bde5afa4f4fb887365b9e3b48ff06be48aad84105e05c170";
 
-    /** Column SAFE_TIME: 98 ids. / SAFE_TIME 列：98 个 id。 */
+    /** Column SAFE_TIME: 101 ids. / SAFE_TIME 列：101 个 id。 */
     static final Set<Identifier> SAFE_TIME = Set.of(
             Identifier.of("noellesroles", "ability"),
             Identifier.of("noellesroles", "assassin_guess_role"),
@@ -59,10 +59,12 @@ final class GeneratedPayloadPolicy {
             Identifier.of("sparkwitch", "black_raven_crow_drop_feather"),
             Identifier.of("sparkwitch", "black_raven_crow_toggle"),
             Identifier.of("sparkwitch", "black_raven_crow_use"),
+            Identifier.of("sparkwitch", "confirm_criminal_reasoner"),
             Identifier.of("sparkwitch", "confirm_judge_selection"),
             Identifier.of("sparkwitch", "confirm_natsume_target"),
             Identifier.of("sparkwitch", "confirm_prophecy"),
             Identifier.of("sparkwitch", "confirm_sherry_deduction"),
+            Identifier.of("sparkwitch", "criminal_reasoner_invisibility"),
             Identifier.of("sparkwitch", "cross_sword_stab"),
             Identifier.of("sparkwitch", "emma_factor"),
             Identifier.of("sparkwitch", "ferryman_ferry"),
@@ -78,6 +80,7 @@ final class GeneratedPayloadPolicy {
             Identifier.of("sparkwitch", "mini_wither_toggle"),
             Identifier.of("sparkwitch", "open_judge_selection"),
             Identifier.of("sparkwitch", "ragpicker_search"),
+            Identifier.of("sparkwitch", "request_criminal_reasoner"),
             Identifier.of("sparkwitch", "request_natsume_menu"),
             Identifier.of("sparkwitch", "request_prophecy"),
             Identifier.of("sparkwitch", "request_sherry_deduction"),
