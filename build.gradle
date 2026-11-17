@@ -492,14 +492,25 @@ def architectureContractFiles = [
         "src/test/java/dev/caecorthus/sparkfactionapi/command/settings/ThirdFactionDividendCommandTest.java"
 ]
 
+// docs/ and src/test/ are gitignored and local-only, so the contract files under them are required only in a
+// checkout that has the local test tree; a fresh clone (CI) skips them.
+// docs/ 与 src/test/ 已被 gitignore 且仅存于本地，因此只在拥有本地测试树的检出中要求其下的契约文件；全新克隆（CI）会跳过。
+def localTestTree = file("src/test")
+def isLocalOnlyContractFile = { String path -> path.startsWith("docs/") || path.startsWith("src/test/") }
+
 tasks.register("verifyArchitecture") {
     group = "verification"
     description = "Verifies public compatibility and representative contract tests."
-    inputs.files(contractFiles.collect { file(it) })
-    inputs.files(architectureContractFiles.collect { file(it) })
+    def allContractFiles = contractFiles + architectureContractFiles
+    def requiredContractFiles = allContractFiles.findAll { localTestTree.isDirectory() || !isLocalOnlyContractFile(it) }
+    inputs.files(requiredContractFiles.collect { file(it) })
 
     doLast {
-        (contractFiles + architectureContractFiles).each { requiredPath ->
+        if (requiredContractFiles.size() < allContractFiles.size()) {
+            logger.lifecycle("No local src/test tree: skipped "
+                    + "${allContractFiles.size() - requiredContractFiles.size()} local-only architecture contract files.")
+        }
+        requiredContractFiles.each { requiredPath ->
             if (!file(requiredPath).isFile()) {
                 throw new GradleException("Missing architecture contract file: ${requiredPath}")
             }
